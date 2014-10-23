@@ -1,0 +1,182 @@
+/* 
+ * Copyright (C) 2014 FoxLabs
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.foxlabs.peg4j.grammar;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import org.foxlabs.peg4j.grammar.Problem.Kind;
+
+import org.foxlabs.util.Location;
+
+public class GrammarProblems extends RuntimeException {
+    private static final long serialVersionUID = 2936597885158820284L;
+    
+    private List<Problem> problems = new ArrayList<Problem>();
+    private List<Problem> fatals = new ArrayList<Problem>();
+    private List<Problem> errors = new ArrayList<Problem>();
+    private List<Problem> warnings = new ArrayList<Problem>();
+    private List<Problem> hints = new ArrayList<Problem>();
+    
+    GrammarProblems() {}
+    
+    public boolean isEmpty() {
+        return problems.isEmpty();
+    }
+    
+    public List<Problem> getProblemList() {
+        return Collections.unmodifiableList(problems);
+    }
+    
+    void addProblem(int code, Location start, Location end) {
+        addProblem(new Problem(code, start, end));
+    }
+    
+    void addProblem(int code, Location start, Location end, String... attributes) {
+        addProblem(new Problem(code, start, end, attributes));
+    }
+    
+    void addProblem(int code, Rule source) {
+        addProblem(new Problem(code, source));
+    }
+    
+    void addProblem(int code, Rule source, String... attributes) {
+        addProblem(new Problem(code, source, attributes));
+    }
+    
+    void addProblem(Problem problem) {
+        problems.add(problem);
+        switch (problem.getKind()) {
+            case FATAL:
+                fatals.add(problem);
+                break;
+            case ERROR:
+                errors.add(problem);
+                break;
+            case WARNING:
+                warnings.add(problem);
+                break;
+            case HINT:
+                hints.add(problem);
+                break;
+        }
+    }
+    
+    void addProblems(Problem[] problems) {
+        for (Problem problem : problems)
+            addProblem(problem);
+    }
+    
+    void addProblems(GrammarProblems other) {
+        problems.addAll(other.problems);
+        fatals.addAll(other.fatals);
+        errors.addAll(other.errors);
+        warnings.addAll(other.warnings);
+        hints.addAll(other.hints);
+    }
+    
+    public boolean hasFatals() {
+        return fatals.size() > 0;
+    }
+    
+    public List<Problem> getFatals() {
+        return Collections.unmodifiableList(fatals);
+    }
+    
+    public boolean hasErrors() {
+        return errors.size() > 0;
+    }
+    
+    public List<Problem> getErrors() {
+        return Collections.unmodifiableList(errors);
+    }
+    
+    public boolean hasWarnings() {
+        return warnings.size() > 0;
+    }
+    
+    public List<Problem> getWarnings() {
+        return Collections.unmodifiableList(warnings);
+    }
+    
+    public boolean hasHints() {
+        return hints.size() > 0;
+    }
+    
+    public List<Problem> getHints() {
+        return Collections.unmodifiableList(hints);
+    }
+    
+    void sort() {
+        Collections.sort(problems);
+        Collections.sort(fatals);
+        Collections.sort(errors);
+        Collections.sort(warnings);
+        Collections.sort(hints);
+    }
+    
+    void clear() {
+        for (Problem problem : problems)
+            if (problem.source != null)
+                problem.source.problems = null;
+        
+        problems.clear();
+        fatals.clear();
+        errors.clear();
+        warnings.clear();
+        hints.clear();
+    }
+    
+    public String getMessage() {
+        StringBuilder buf = new StringBuilder();
+        toString(buf);
+        return buf.toString();
+    }
+    
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        toString(buf);
+        return buf.toString();
+    }
+    
+    public void toString(StringBuilder buf) {
+        if (problems.size() > 0) {
+            for (Problem problem : problems) {
+                problem.toString(buf);
+                buf.append("\n");
+            }
+            
+            toCountString(buf, Kind.FATAL, fatals.size());
+            toCountString(buf, Kind.ERROR, errors.size());
+            toCountString(buf, Kind.WARNING, warnings.size());
+            toCountString(buf, Kind.HINT, hints.size());
+        }
+    }
+    
+    static void toCountString(StringBuilder buf, Kind kind, int count) {
+        if (count > 0) {
+            buf.append(count)
+               .append(" ")
+               .append(kind.name().toLowerCase());
+            if (count > 1)
+                buf.append("s");
+            buf.append("\n");
+        }
+    }
+    
+}

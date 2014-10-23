@@ -1,0 +1,155 @@
+Grammar
+    :   $source((@Production / Spacing $startError(Garbage) (!@Production Garbage)* $endError())* Spacing $eof(!.))
+    ;
+    
+Production
+    :   Spacing
+        $startProduction(Identifier (':' / '=' / '<-' / '::='))
+        Spacing
+        $endProduction((@Expression ';') / (($invalidExpression((!(@Expression / @Comment / @Space) ~';')+) / @Expression / @Comment / @Space)* (';' / $missingSemi())))
+    ;
+    
+Expression
+    :   AlternationExpression
+    ;
+    
+AlternationExpression
+    :   $ruleChoice(ConcatenationExpression (['/', '|'] Spacing ConcatenationExpression)*)
+    ;
+    
+ConcatenationExpression
+    :   $ruleConcat(RepetitionExpression+)
+    ;
+    
+RepetitionExpression
+    :   $ruleRepeat(ExclusionExpression (($symbol(['?', '*', '+']) / ('{' Spacing Integer (',' Spacing (Integer / $unlimited()))? '}')) Spacing)?)
+    ;
+    
+ExclusionExpression
+    :   $ruleExcept(($symbol(['!', '&']) Spacing)? OperandExpression)
+    ;
+    
+OperandExpression
+    :   TerminalExpression
+    /   ReferenceExpression
+    /   GroupingExpression
+    /   ActionExpression
+    ;
+    
+ReferenceExpression
+    :   $ruleReference($symbol(['@', '^'])? Identifier)
+    ;
+    
+GroupingExpression
+    :   ('(' Spacing Expression (')' / $missingClosingParenthesize())) Spacing
+    ;
+    
+ActionExpression
+    :   $ruleAction('$' Identifier '(' Spacing Expression? (')' / $missingClosingParenthesize())) Spacing
+    ;
+    
+TerminalExpression
+    :   IntervalExpression
+    /   TokenExpression
+    /   SetExpression
+    /   ClassExpression
+    /   AnyExpression
+    ;
+    
+IntervalExpression
+    :   $terminalInterval(IntervalElement)
+    ;
+    
+TokenExpression
+    :   $terminalTokenCS('\'' $decode(Character+) ('\'' / (('\n' / !.) $unterminatedString()))) Spacing
+    /   $terminalTokenIC('\"' $decode(Character+) ('\"' / (('\n' / !.) $unterminatedString()))) Spacing
+    ;
+    
+SetExpression
+    :   $terminalSet(SetElement)
+    ;
+    
+ClassExpression
+    :   $terminalClass('<' Spacing Identifier '>') Spacing
+    ;
+    
+AnyExpression
+    :   $terminalAny('.') Spacing
+    ;
+    
+SetElement
+    :   $setInverse(InverseSetElement)
+    /   $setInterval(IntervalElement)
+    /   $setElement(CharacterElement)
+    /   $setUnion(NestedSetElement)
+    ;
+    
+InverseSetElement
+    :   '~' Spacing SetElement
+    ;
+    
+IntervalElement
+    :   (CharacterElement '-' Spacing CharacterElement)
+    ;
+    
+CharacterElement
+    :   ('\'' $decode(Character) '\'') Spacing
+    ;
+    
+NestedSetElement
+    :   '[' Spacing (SetElement (',' Spacing SetElement)*)? ']' Spacing
+    ;
+    
+Integer
+    :   $int('0'-'9'+) Spacing
+    ;
+    
+String
+    :   ('\'' Character* ('\'' / (('\n' / !.) $unterminatedString())))
+    /   ('\"' Character* ('\"' / (('\n' / !.) $unterminatedString())))
+    ;
+    
+Character
+    :   EscapeSequence / ~['\\', '\'', '\"', '\n']
+    ;
+    
+EscapeSequence
+    :   '\\' ((['\\', '\'', '\"', 'n', 'r', 't', 'f', 'b'] / UnicodeCharacter) / $invalidEscapeSequence(.))
+    ;
+    
+UnicodeCharacter
+    :   'u' (HexDigit{4} / $invalidUnicodeCharacter(HexDigit{0, 4}))
+    ;
+    
+HexDigit
+    :   ['0'-'9', 'a'-'f', 'A'-'F']
+    ;
+    
+Identifier
+    :   $symbol((<ALPHA> / '_') (<ALNUM> / '_')*) Spacing
+    ;
+    
+Comment
+    :   LineComment / BlockComment
+    ;
+    
+LineComment
+    :   '//' (~'\n')*
+    ;
+    
+BlockComment
+    :   '/*' (!'*/' .)* ('*/' / $unterminatedBlockComment())
+    ;
+    
+Space
+    :   [' ', '\t', '\n']+
+    ;
+    
+Spacing
+    :   (Space / Comment)*
+    ;
+    
+Garbage
+    :   Spacing (String+ / .)
+    ;
+    
