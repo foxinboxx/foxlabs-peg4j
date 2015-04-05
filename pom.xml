@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
     <name>Parsing Expression Grammars for Java</name>
     <description>PEG grammar parser and builder.</description>
-    <url>http://foxlabs.org/p/peg4j/1.0/</url>
+    <url>http://foxlabs.org/p/peg4j/1.0</url>
     <inceptionYear>2010</inceptionYear>
     <organization>
         <name>FoxLabs</name>
@@ -38,13 +38,13 @@
     </developers>
     
     <scm>
-        <url>https://bitbucket.org/foxinbox/foxlabs-peg4j/</url>
-        <connection>scm:git:https://bitbucket.org/foxinbox/foxlabs-peg4j.git</connection>
+        <url>https://github.com/foxinboxx/foxlabs-peg4j</url>
+        <connection>scm:git:https://github.com/foxinboxx/foxlabs-peg4j.git</connection>
     </scm>
     
     <issueManagement>
-        <system>Bitbucket</system>
-        <url>https://bitbucket.org/foxinbox/foxlabs-peg4j/issues</url>
+        <system>GitHub</system>
+        <url>https://github.com/foxinboxx/foxlabs-peg4j/issues</url>
     </issueManagement>
     
     <properties>
