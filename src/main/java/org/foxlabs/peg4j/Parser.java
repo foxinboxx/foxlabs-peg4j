@@ -131,15 +131,17 @@ public abstract class Parser<T> {
     
     public final T parse(BacktrackingReader stream) throws IOException, RecognitionException {
         boolean success = false;
-        Context context = memoable ? new MemoContext(stream) : new Context(stream);
-        context.tracer.open(stream);
+        ErrorTracer tracer = ErrorTracer.newTracer(getTracer());
+        Context context = isMemoable() ? new MemoContext(stream, tracer) : new Context(stream, tracer);
+        tracer.open(stream);
         try {
             success = getGrammar().getStart().reduce(context);
-            if (!success)
-                throw context.tracer.newSyntaxException();
+            if (!success) {
+                throw tracer.newSyntaxException();
+            }
             return buildResult();
         } finally {
-            context.tracer.close(success);
+            tracer.close(success);
         }
     }
     
@@ -152,10 +154,12 @@ public abstract class Parser<T> {
         
         final LinkedList<Transaction> txStack = new LinkedList<Transaction>();
         
-        private Context(BacktrackingReader stream) {
+        private Context(BacktrackingReader stream, ErrorTracer tracer) {
             this.stream = stream;
-            this.tracer = ErrorTracer.newTracer(Parser.this.tracer);
+            this.tracer = tracer;
         }
+        
+        // ParseContext
         
         @Override
         public BacktrackingReader getStream() {
@@ -179,7 +183,7 @@ public abstract class Parser<T> {
         
         @Override
         public void storeTransaction(Production target) throws IOException {
-            // noop
+            // nop
         }
         
         @Override
@@ -188,7 +192,7 @@ public abstract class Parser<T> {
         }
         
         @Override
-        public boolean executeAction(Action action) throws ActionException {
+        public boolean handleAction(Action action) throws ActionException {
             try {
                 return Types.<ActionHandler<Parser<T>>>cast(action.getHandler()).handle(Parser.this, this);
             } catch (Throwable e) {
@@ -237,50 +241,34 @@ public abstract class Parser<T> {
     
     private class MemoContext extends Context {
         
-        private final HashMap<Long, Memo> txCache = new HashMap<Long, Memo>();
+        private final HashMap<Long, Transaction> txCache = new HashMap<Long, Transaction>();
         
-        private MemoContext(BacktrackingReader stream) {
-            super(stream);
+        private MemoContext(BacktrackingReader stream, ErrorTracer tracer) {
+            super(stream, tracer);
         }
         
         @Override
-        public void storeTransaction(Production target) throws IOException {
+        public void storeTransaction(Production prod) throws IOException {
             Transaction tx = txStack.peek();
             int offset = stream.getStartOffset();
-            Memo memo = new Memo(tx, stream.getEndOffset() - offset);
-            txCache.put(keyFor(target.getIndex(), offset), memo);
-            tx.store();
+            tx.store(stream.getEndOffset() - offset);
+            txCache.put(getCacheKey(prod, offset), tx);
         }
         
         @Override
-        public boolean restoreTransaction(Production target) throws IOException {
-            Memo memo = txCache.get(keyFor(target.getIndex(), stream.getEndOffset()));
-            if (memo == null)
-                return false;
-            stream.skip(memo.count);
-            memo.tx.restore();
-            return true;
+        public boolean restoreTransaction(Production prod) throws IOException {
+            Transaction tx = txCache.get(getCacheKey(prod, stream.getEndOffset()));
+            if (tx != null) {
+                stream.skip(tx.restore());
+                return true;
+            }
+            return false;
         }
         
-    }
-    
-    // Memo
-    
-    private static final class Memo {
-        
-        final Transaction tx;
-        final int count;
-        
-        private Memo(Transaction tx, int count) {
-            this.tx = tx;
-            this.count = count;
+        private long getCacheKey(Production prod, long offset) {
+            return (prod.getIndex() << 32) | offset;
         }
         
-        
-    }
-    
-    private static long keyFor(long column, long offset) {
-        return (column << 32) | offset;
     }
     
 }

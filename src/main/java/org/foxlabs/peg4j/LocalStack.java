@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.foxlabs.peg4j.util;
+package org.foxlabs.peg4j;
 
 import java.util.Arrays;
 

@@ -21,8 +21,7 @@ import java.util.HashMap;
 import java.util.Arrays;
 
 import org.foxlabs.peg4j.ActionHandler;
-import org.foxlabs.peg4j.util.LocalStack;
-
+import org.foxlabs.peg4j.LocalStack;
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 
@@ -116,8 +115,9 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     }
     
     private void checkProductionInitiated(boolean init) {
-        if (currentProduction == null == init)
+        if (currentProduction == null == init) {
             throw new IllegalStateException();
+        }
     }
     
     public GrammarBuilder pushAny() {
@@ -209,9 +209,6 @@ public final class GrammarBuilder extends LocalStack<Expression> {
                 case MEMO:
                     push(new Reference.Memo(currentProduction, target));
                     break;
-                case SKIP:
-                    push(new Reference.Skip(currentProduction, target));
-                    break;
             }
         }
         return this;
@@ -219,15 +216,17 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     
     public GrammarBuilder concat() {
         checkProductionInitiated(true);
-        if (size() > 1)
+        if (size() > 1) {
             push(new Concatenation(currentProduction, popAll()));
+        }
         return this;
     }
     
     public GrammarBuilder choice() {
         checkProductionInitiated(true);
-        if (size() > 1)
+        if (size() > 1) {
             push(new Alternation(currentProduction, popAll()));
+        }
         return this;
     }
     
@@ -237,16 +236,17 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     
     public GrammarBuilder repeat(int min, int max) {
         checkProductionInitiated(true);
-        if (max < min || min < 0 || max == 0)
+        if (max < min || min < 0 || max == 0) {
             throw new IllegalArgumentException();
+        }
         if (min == 0) {
-            if (max == 1)
+            if (max == 1) {
                 return repeat(Quantifier.ONCEORNONE);
-            if (max == Integer.MAX_VALUE)
+            } else  if (max == Integer.MAX_VALUE) {
                 return repeat(Quantifier.ZEROORMORE);
-        } else if (min == 1) {
-            if (max == Integer.MAX_VALUE)
-                return repeat(Quantifier.ONCEORMORE);
+            }
+        } else if (min == 1 && max == Integer.MAX_VALUE) {
+            return repeat(Quantifier.ONCEORMORE);
         }
         push(new Repetition(currentProduction, pop(), min, max));
         return this;
@@ -287,8 +287,9 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     
     public GrammarBuilder action(String name, ActionHandler<?> handler) {
         checkProductionInitiated(true);
-        if (isEmpty())
+        if (isEmpty()) {
             push(Terminal.nil(currentProduction));
+        }
         push(new Action(currentProduction, pop(), name, handler));
         return this;
     }
@@ -325,9 +326,7 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     
     public void clear() {
         super.clear();
-        for (int i = 0; i < productionCount; i++) {
-            productions[i] = null;
-        }
+        Arrays.fill(productions, null);
         productionMap.clear();
         currentProduction = null;
         productionCount = productionIndex = 0;

@@ -66,7 +66,7 @@ public final class Action extends Expression.Unary {
         context.getStream().mark();
         context.startTransaction();
         if (child.reduce(context)) {
-            if (context.executeAction(this)) {
+            if (context.handleAction(this)) {
                 context.commitTransaction();
                 context.getStream().release();
                 context.backtraceRule(this, true);

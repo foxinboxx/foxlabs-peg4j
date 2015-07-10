@@ -103,36 +103,4 @@ public class Reference extends Expression {
         
     }
     
-    // Skip
-    
-    public static final class Skip extends Reference {
-        
-        Skip(Production owner, Production target) {
-            super(owner, target);
-        }
-        
-        public Modifier getModifier() {
-            return Modifier.SKIP;
-        }
-        
-        protected boolean match(ParseContext context) throws IOException, RecognitionException {
-            context.traceRule(this);
-            context.getStream().mark();
-            if (target.reduce(context)) {
-                context.getStream().release();
-                context.getStream().consume();
-                context.backtraceRule(this, false);
-                return true;
-            }
-            context.getStream().reset();
-            context.backtraceRule(this, false);
-            return false;
-        }
-        
-        public void toString(StringBuilder buf, boolean debug) {
-            buf.append(getModifier()).append(target.getName());
-        }
-        
-    }
-    
 }

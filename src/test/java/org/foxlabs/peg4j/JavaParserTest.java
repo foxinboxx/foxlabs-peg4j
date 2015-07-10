@@ -38,7 +38,7 @@ public class JavaParserTest extends DefaultParser<Object> {
     
     @Override
     protected Transaction startTransaction() {
-        return Transaction.NONE;
+        return new Transaction.Default();
     }
     
     @Override

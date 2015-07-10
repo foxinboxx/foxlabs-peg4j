@@ -18,8 +18,7 @@ package org.foxlabs.peg4j.grammar;
 
 public enum Modifier {
     
-    MEMO("@"),
-    SKIP("^");
+    MEMO("@");
     
     private final String symbol;
     
@@ -32,11 +31,11 @@ public enum Modifier {
     }
     
     public static Modifier modifierOf(String symbol) {
-        if (MEMO.symbol.equals(symbol))
+        if (MEMO.symbol.equals(symbol)) {
             return MEMO;
-        if (SKIP.symbol.equals(symbol))
-            return SKIP;
-        return null;
+        } else {
+            return null;
+        }
     }
     
 }

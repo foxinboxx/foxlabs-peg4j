@@ -105,15 +105,17 @@ public abstract class DefaultParser<T> extends Parser<T> {
         BacktrackingReader stream = null;
         try {
             stream = getGrammarStream();
-            if (stream == null)
+            if (stream == null) {
                 throw new Peg4jException("Can't find grammar for parser " +
                         getClass().getName());
+            }
             
             GrammarParser parser = new GrammarParser(getActionBindings());
             Grammar grammar = parser.parse(stream);
-            if (grammar.hasErrors())
+            if (grammar.hasErrors()) {
                 throw new Peg4jException("Error compiling grammar for parser " +
                         getClass().getName() + ":\n" + grammar.getProblems());
+            }
             
             return grammar;
         } catch (IOException e) {
@@ -126,7 +128,9 @@ public abstract class DefaultParser<T> extends Parser<T> {
             if (stream != null) {
                 try {
                     stream.close();
-                } catch (IOException e) {} // ignore it
+                } catch (IOException e) {
+                    // Ignore it   
+                }
             }
         }
     }
@@ -149,31 +153,35 @@ public abstract class DefaultParser<T> extends Parser<T> {
         final ClassLoader cl = ResourceHelper.getClassLoader();
         
         for (Class<?> c = getClass(); c != DefaultParser.class; c = c.getSuperclass()) {
-            // lookup for annotation
+            // Lookup for annotation
             GrammarDecl decl = c.getAnnotation(GrammarDecl.class);
             if (decl != null) {
-                if (decl.value().length() > 0)
+                if (decl.value().length() > 0) {
                     return new BacktrackingReader(new StringReader(decl.value()), c.getName());
+                }
                 
                 InputStream stream = decl.ref().toLowerCase().startsWith("classpath:")
                     ? cl.getResourceAsStream(decl.ref().substring(10))
                     : new URL(decl.ref()).openStream();
-                if (stream == null)
+                if (stream == null) {
                     throw new IOException("Can't find grammar declaration: " +
                             decl.ref());
+                }
+                
                 return new BacktrackingReader(new InputStreamReader(stream,
                         decl.encoding()), decl.ref());
             }
             
-            // lookup for classpath resource
+            // Lookup for classpath resource
             String file = ResourceHelper.getResourcePath(c) + "/" +
                     c.getSimpleName() + ".peg4j";
             InputStream stream = cl.getResourceAsStream(file);
-            if (stream != null)
+            if (stream != null) {
                 return new BacktrackingReader(new InputStreamReader(stream), file);
+            }
         }
         
-        // found nothing
+        // Found nothing
         return null;
     }
     
@@ -214,19 +222,22 @@ public abstract class DefaultParser<T> extends Parser<T> {
      *         <code>false</code> otherwise.
      */
     protected boolean isActionMethod(Method m) {
-        // check modifiers
-        if ((m.getModifiers() & (Modifier.ABSTRACT | Modifier.STATIC)) != 0)
+        // Check modifiers
+        if ((m.getModifiers() & (Modifier.ABSTRACT | Modifier.STATIC)) != 0) {
             return false;
+        }
         
-        // check return type
+        // Check return type
         Class<?> type = m.getReturnType();
-        if (!(type == Void.TYPE || type == Boolean.TYPE))
+        if (!(type == Void.TYPE || type == Boolean.TYPE)) {
             return false;
+        }
         
-        // check argument types
+        // Check argument types
         Class<?>[] argtypes = m.getParameterTypes();
-        if (!(argtypes.length == 1 && argtypes[0] == ActionContext.class))
+        if (!(argtypes.length == 1 && argtypes[0] == ActionContext.class)) {
             return false;
+        }
         
         return true;
     }

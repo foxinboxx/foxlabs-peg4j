@@ -18,12 +18,11 @@ package org.foxlabs.peg4j.grammar;
 
 import java.util.Map;
 
+import org.foxlabs.peg4j.LocalStack;
 import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.ActionContext;
 import org.foxlabs.peg4j.Transaction;
-import org.foxlabs.peg4j.util.LocalStack;
-
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 
@@ -98,7 +97,7 @@ public final class GrammarParser extends Parser<Grammar> {
     
     // Transaction
 
-    private final class Tx implements Transaction {
+    private final class Tx extends Transaction.Default {
         
         private Expression[] rules;
         private String[] symbols;
@@ -133,7 +132,8 @@ public final class GrammarParser extends Parser<Grammar> {
         }
         
         @Override
-        public void store() {
+        public void store(int length) {
+            super.store(length);
             rules = builder.getAll();
             symbols = symbolStack.getAll();
             ints = intStack.getAll();
@@ -142,12 +142,13 @@ public final class GrammarParser extends Parser<Grammar> {
         }
         
         @Override
-        public void restore() {
+        public int restore() {
             builder.pushAll(rules);
             symbolStack.pushAll(symbols);
             intStack.pushAll(ints);
             usetStack.pushAll(usets);
             problemStack.pushAll(problems);
+            return super.restore();
         }
         
     }
@@ -605,7 +606,6 @@ public final class GrammarParser extends Parser<Grammar> {
             .mark()
             .mark()
             .pushTokenCS(Modifier.MEMO.toString())
-            .pushTokenCS(Modifier.SKIP.toString())
             .choice().release()
             .action("symbol", new ActionHandler<GrammarParser>() {
                 public boolean handle(GrammarParser parser, ActionContext context) {

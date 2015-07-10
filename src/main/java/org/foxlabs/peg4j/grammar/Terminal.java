@@ -46,7 +46,7 @@ public abstract class Terminal extends Expression {
     /**
      * Determines whether or not this terminal can match only one concrete
      * character. Only the <code>Terminal.Token</code> can match more than one
-     * character. 
+     * character.
      * 
      * @return <code>true</code> if this terminal can match only one concrete
      *         character; <code>false</code> otherwise.
@@ -112,7 +112,9 @@ public abstract class Terminal extends Expression {
             return true;
         }
         
-        public void toString(StringBuilder buf, boolean debug) {}
+        public void toString(StringBuilder buf, boolean debug) {
+            // Empty
+        }
         
     }
     
@@ -182,11 +184,12 @@ public abstract class Terminal extends Expression {
         public boolean equals(Object obj) {
             if (obj instanceof Token) {
                 Token other = (Token) obj;
-                if (isCaseSensitive()) {
-                    if (other.isCaseSensitive())
+                if (isCaseSensitive() == other.isCaseSensitive()) {
+                    if (isCaseSensitive()) {
                         return image.equals(other.image);
-                } else if (!other.isCaseSensitive()) {
-                    return image.equalsIgnoreCase(other.image);
+                    } else {
+                        return image.equalsIgnoreCase(other.image);
+                    }
                 }
             }
             return false;
@@ -283,8 +286,9 @@ public abstract class Terminal extends Expression {
         private SequenceCS(Production owner, String image) {
             super(owner, image);
             value = new int[image.length()];
-            for (int i = 0; i < value.length; i++)
+            for (int i = 0; i < value.length; i++) {
                 value[i] = image.charAt(i);
+            }
         }
         
         public boolean isDetermined() {
@@ -292,9 +296,11 @@ public abstract class Terminal extends Expression {
         }
         
         protected boolean match(BacktrackingReader stream) throws IOException {
-            for (int i = 0; i < value.length; i++)
-                if (stream.read() != value[i])
+            for (int i = 0; i < value.length; i++) {
+                if (stream.read() != value[i]) {
                     return false;
+                }
+            }
             return true;
         }
         
@@ -307,8 +313,9 @@ public abstract class Terminal extends Expression {
         private SequenceIC(Production owner, String image) {
             super(owner, image);
             value = new int[image.length()];
-            for (int i = 0; i < value.length; i++)
+            for (int i = 0; i < value.length; i++) {
                 value[i] = Character.toUpperCase(image.charAt(i));
+            }
         }
         
         public boolean isDetermined() {
@@ -316,31 +323,31 @@ public abstract class Terminal extends Expression {
         }
         
         protected boolean match(BacktrackingReader stream) throws IOException {
-            for (int i = 0; i < value.length; i++)
-                if (Character.toUpperCase(stream.read()) != value[i])
+            for (int i = 0; i < value.length; i++) {
+                if (Character.toUpperCase(stream.read()) != value[i]) {
                     return false;
+                }
+            }
             return true;
         }
         
     }
     
     static Token tokenOf(Production owner, char value, boolean cs) {
-        return cs
-            ? new AtomCS(owner, value)
-            : new AtomIC(owner, value);
+        return cs ? new AtomCS(owner, value) : new AtomIC(owner, value);
     }
     
     static Token tokenOf(Production owner, String value, boolean cs) {
         int length = value.length();
-        if (length == 0)
-            return new SequenceCS(owner, value); // empty sequence
+        if (length == 0) {
+            return new SequenceCS(owner, value); // Empty sequence
+        }
         
-        if (length == 1)
+        if (length == 1) {
             return tokenOf(owner, value.charAt(0), cs);
+        }
         
-        return cs
-            ? new SequenceCS(owner, value)
-            : new SequenceIC(owner, value);
+        return cs ? new SequenceCS(owner, value) : new SequenceIC(owner, value);
     }
     
     // Interval
@@ -373,7 +380,7 @@ public abstract class Terminal extends Expression {
         }
         
         public boolean isInefficient() {
-            return min == max; // can be replaced by Token
+            return min == max; // Can be replaced by Token
         }
         
         protected boolean match(BacktrackingReader stream) throws IOException {
@@ -406,9 +413,7 @@ public abstract class Terminal extends Expression {
     }
     
     static Interval intervalOf(Production owner, char min, char max) {
-        return min < max
-            ? new Interval(owner, min, max)
-            : new Interval(owner, max, min);
+        return min < max ? new Interval(owner, min, max) : new Interval(owner, max, min);
     }
     
     // Set
@@ -435,9 +440,9 @@ public abstract class Terminal extends Expression {
         }
         
         public boolean isInefficient() {
-            return uset == UnicodeSet.WHOLE // can be replaced by Any
-                || uset.getMin() == uset.getMax() // can be replaced by Token
-                || uset.size() == 1; // can be replaced by Interval
+            return uset == UnicodeSet.WHOLE // Can be replaced by Any
+                || uset.getMin() == uset.getMax() // Can be replaced by Token
+                || uset.size() == 1; // Can be replaced by Interval
         }
         
         protected boolean match(BacktrackingReader stream) throws IOException {
@@ -471,8 +476,9 @@ public abstract class Terminal extends Expression {
     }
     
     static Set setOf(Production owner, UnicodeSet uset) {
-        if (uset == null)
-            throw new NullPointerException();
+        if (uset == null) {
+            throw new IllegalArgumentException();
+        }
         return new Set(owner, uset);
     }
     
@@ -634,7 +640,7 @@ public abstract class Terminal extends Expression {
         
     }
     
-    private static final Class[] classes = new Class[]{
+    private static final Class[] CLASSES = new Class[]{
         new Lower(null, "LOWER"),
         new Upper(null, "UPPER"),
         new Title(null, "TITLE"),
@@ -650,19 +656,21 @@ public abstract class Terminal extends Expression {
      * @return Array of the supported character class names.
      */
     public static String[] getClassNames() {
-        String[] names = new String[classes.length];
-        for (int i = 0; i < classes.length; i++)
-            names[i] = classes[i].getName();
+        String[] names = new String[CLASSES.length];
+        for (int i = 0; i < CLASSES.length; i++) {
+            names[i] = CLASSES[i].getName();
+        }
         return names;
     }
     
     static Class classOf(Production owner, String name) {
-        for (int i = 0; i < classes.length; i++)
-            if (name.equalsIgnoreCase(classes[i].getName())) {
-                Class c = classes[i].clone();
+        for (int i = 0; i < CLASSES.length; i++) {
+            if (name.equalsIgnoreCase(CLASSES[i].getName())) {
+                Class c = CLASSES[i].clone();
                 c.owner = owner;
                 return c;
             }
+        }
         return new Class(owner, name);
     }
     

@@ -39,11 +39,11 @@ public interface ParseContext {
     
     void rollbackTransaction();
     
-    void storeTransaction(Production target) throws IOException;
+    void storeTransaction(Production prod) throws IOException;
     
-    boolean restoreTransaction(Production target) throws IOException;
+    boolean restoreTransaction(Production prod) throws IOException;
     
-    boolean executeAction(Action action) throws ActionException;
+    boolean handleAction(Action action) throws ActionException;
     
     // Trace operations
     

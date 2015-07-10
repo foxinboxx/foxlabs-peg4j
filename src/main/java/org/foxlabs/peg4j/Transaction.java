@@ -26,32 +26,36 @@ public interface Transaction {
     
     void rollback();
     
-    void store();
+    void store(int length);
     
-    void restore();
+    int restore();
     
-    Transaction NONE = new Transaction() {
+    // Default
+    
+    class Default implements Transaction {
+        
+        private int length;
         
         @Override
         public void commit() {
-            // noop
+            // nop
         }
         
         @Override
         public void rollback() {
-            // noop
+            // nop
         }
         
         @Override
-        public void store() {
-            // noop
+        public void store(int length) {
+            this.length = length;
         }
         
         @Override
-        public void restore() {
-            // noop
+        public int restore() {
+            return length;
         }
         
-    };
+    }
     
 }

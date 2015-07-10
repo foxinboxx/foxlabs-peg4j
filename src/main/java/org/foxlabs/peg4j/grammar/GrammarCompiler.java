@@ -18,8 +18,6 @@ package org.foxlabs.peg4j.grammar;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Arrays;
 
 import static org.foxlabs.peg4j.grammar.Problem.*;
@@ -57,7 +55,6 @@ public final class GrammarCompiler {
                 
                 new LocalAnalyzer(grammar).findProblems(sw, sh);
                 new RecursionFinder(grammar).findProblems();
-                new SkipFinder(grammar).findProblems(ms);
                 
                 grammar.getProblems().sort();
             }
@@ -283,133 +280,6 @@ public final class GrammarCompiler {
             consuming = false;
             recursion = false;
             referencePath.clear();
-        }
-        
-    }
-    
-    // ===== SkipFinder =======================================================
-    
-    static final class SkipFinder extends RuleVisitor.Adapter<RuntimeException> {
-        
-        final Grammar grammar;
-        final Set<Reference> foundRefs;
-        final Set<Reference> unsafeRefs;
-        final boolean[] untestedFlags;
-        
-        int backtracking = 0;
-        int skipping = 0;
-        
-        SkipFinder(Grammar grammar) {
-            this.grammar = grammar;
-            this.foundRefs = new HashSet<Reference>();
-            this.unsafeRefs = new HashSet<Reference>();
-            this.untestedFlags = new boolean[grammar.getProductionCount()];
-        }
-        
-        public void findProblems(boolean suggestions) {
-            int count = grammar.getProductionCount();
-            Production start = grammar.getStart();
-            Arrays.fill(this.untestedFlags, true);
-            
-            // Initially all references are valid SKIP references
-            for (int i = 0; i < count; i++) {
-                Production source = grammar.getProduction(i);
-                if (!source.isStandalone() || source == start) {
-                    for (Reference rule : source.references) {
-                        foundRefs.add(rule);
-                    }
-                }
-            }
-            
-            // Find valid SKIP references
-            start.accept(this);
-            
-            // Remove native SKIP references
-            Iterator<Reference> i = foundRefs.iterator();
-            while (i.hasNext()) {
-                Reference rule = i.next();
-                if (rule instanceof Reference.Skip)
-                    i.remove();
-            }
-            
-            // Add problems
-            for (Reference rule : unsafeRefs)
-                grammar.getProblems().addProblem(errorUnsafeSkipReference,
-                        rule, rule.getTargetName());
-            if (suggestions)
-                for (Reference rule : foundRefs)
-                    grammar.getProblems().addProblem(hintPossibleSkipReference,
-                            rule, rule.getTargetName());
-        }
-        
-        private void excludeRefs(Reference root) {
-            if (foundRefs.remove(root)) {
-                if (root instanceof Reference.Skip)
-                    unsafeRefs.add(root);
-                for (Reference rule : root.target.references)
-                    excludeRefs(rule);
-            }
-        }
-        
-        public void visit(Production rule) {
-            int index = rule.getIndex();
-            if (untestedFlags[index]) {
-                untestedFlags[index] = false;
-                rule.expression.accept(this);
-            }
-        }
-        
-        public void visit(Reference rule) {
-            if (skipping > 0 || rule instanceof Reference.Memo) {
-                excludeRefs(rule);
-            } else if (foundRefs.contains(rule)) {
-                rule.target.accept(this);
-            }
-        }
-        
-        public void visit(Action rule) {
-            if (rule.isUndo()) {
-                rule.child.accept(this);
-            } else {
-                skipping++;
-                rule.child.accept(this);
-                skipping--;
-            }
-        }
-        
-        public void visit(Concatenation rule) {
-            int length = rule.children.length;
-            if (skipping > 0 || backtracking == 0) {
-                for (int i = 0; i < length; i++)
-                    rule.children[i].accept(this);
-            } else {
-                skipping++;
-                int lastIndex = length - 1;
-                for (int i = 0; i < lastIndex; i++)
-                    rule.children[i].accept(this);
-                skipping--;
-                rule.children[lastIndex].accept(this);
-            }
-        }
-        
-        public void visit(Alternation rule) {
-            backtracking++;
-            int length = rule.children.length;
-            for (int i = 0; i < length; i++)
-                rule.children[i].accept(this);
-            backtracking--;
-        }
-        
-        public void visit(Repetition rule) {
-            backtracking++;
-            rule.child.accept(this);
-            backtracking--;
-        }
-        
-        public void visit(Exclusion rule) {
-            skipping++;
-            rule.child.accept(this);
-            skipping--;
         }
         
     }

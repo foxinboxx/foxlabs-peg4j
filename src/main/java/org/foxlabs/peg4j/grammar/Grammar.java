@@ -68,8 +68,9 @@ public final class Grammar {
     }
     
     public boolean hasSource() {
-        if (source == null)
+        if (source == null) {
             return false;
+        }
         
         if (offsets == null) {
             int count = 0;
@@ -78,8 +79,9 @@ public final class Grammar {
             int length = source.length();
             for (int i = 0; i < length; i++) {
                 if (source.charAt(i) == '\n') {
-                    if (count == offsets.length)
+                    if (count == offsets.length) {
                         offsets = Arrays.copyOf(offsets, offsets.length * 2);
+                    }
                     offsets[count++] = i + 1;
                 }
             }
@@ -96,8 +98,9 @@ public final class Grammar {
     public int getLineSize(int line) {
         checkSource();
         
-        if (line < 1 || line > offsets.length)
+        if (line < 1 || line > offsets.length) {
             throw new IndexOutOfBoundsException();
+        }
         
         return offsets[line] - offsets[line - 1];
     }
@@ -109,8 +112,9 @@ public final class Grammar {
     public String getSource(int line) {
         checkSource();
         
-        if (line < 1 || line > offsets.length)
+        if (line < 1 || line > offsets.length) {
             throw new IndexOutOfBoundsException();
+        }
         
         return source.substring(offsets[line - 1], offsets[line]);
     }
@@ -119,12 +123,14 @@ public final class Grammar {
         checkSource();
         
         int startLineSize = getLineSize(startLine);
-        if (startColumn < 1 || startColumn > startLineSize)
+        if (startColumn < 1 || startColumn > startLineSize) {
             throw new IndexOutOfBoundsException();
+        }
         
         int endLineSize = getLineSize(startLine);
-        if (endColumn < 1 || endColumn > endLineSize)
+        if (endColumn < 1 || endColumn > endLineSize) {
             throw new IndexOutOfBoundsException();
+        }
         
         int startIndex = offsets[startLine - 1] + startColumn - 1;
         int endIndex = offsets[endLine - 1] + endColumn - 1;
@@ -132,15 +138,17 @@ public final class Grammar {
     }
     
     public String getSource(Location start, Location end) {
-        if (start == Location.UNKNOWN || end == Location.UNKNOWN)
+        if (start == Location.UNKNOWN || end == Location.UNKNOWN) {
             throw new IllegalArgumentException();
+        }
         
         return getSource(start.line, start.column, end.line, end.column);
     }
     
     private void checkSource() {
-        if (!hasSource())
+        if (!hasSource()) {
             throw new IllegalStateException();
+        }
     }
     
     public String toString() {
@@ -150,11 +158,12 @@ public final class Grammar {
     public String toString(boolean debug) {
         StringBuilder buf = new StringBuilder();
         
-        for (Production rule : productions)
+        for (Production rule : productions) {
             if (!(rule.getExpression() instanceof Terminal.Nil)) {
                 rule.toString(buf, debug);
                 buf.append(";\n");
             }
+        }
         
         if (hasProblems()) {
             buf.append("\n\n");
