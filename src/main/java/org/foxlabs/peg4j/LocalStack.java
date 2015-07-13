@@ -22,29 +22,18 @@ import org.foxlabs.util.reflect.Types;
 
 public class LocalStack<E> {
     
-    private static final int DEFAULT_CAPACITY = 20;
+    private Object[] elements;
+    private int size = 0;
     
-    protected E[] queue;
-    protected int size = 0;
+    private int[] marks = new int[32];
+    private int marker = 0;
     
-    protected int[] marks = new int[50];
-    protected int marker = 0;
-    
-    protected LocalStack() {
-        this(DEFAULT_CAPACITY);
+    public LocalStack() {
+        this(16);
     }
     
-    protected LocalStack(int initialCapacity) {
-        this.queue = Types.newArray(Types.parameterTypeOf(getClass(), LocalStack.class, 0),
-                initialCapacity);
-    }
-    
-    public LocalStack(Class<E> elementType) {
-        this(elementType, DEFAULT_CAPACITY);
-    }
-    
-    public LocalStack(Class<E> elementType, int initialCapacity) {
-        this.queue = Types.newArray(elementType, initialCapacity);
+    public LocalStack(int initialCapacity) {
+        this.elements = new Object[initialCapacity];
     }
     
     public boolean isEmpty() {
@@ -52,117 +41,92 @@ public class LocalStack<E> {
     }
     
     public int size() {
-        return marker > 0 ? size - marks[marker - 1] : size;
+        return marker > 0 ? size - marks[marker - 1] : 0;
     }
     
     public LocalStack<E> mark() {
-        if (marker == marks.length)
-            marks = Arrays.copyOf(marks, marks.length * 2);
-        
+        if (marker == marks.length) {
+            int[] copy = new int[marks.length * 2];
+            System.arraycopy(marks, 0, copy, 0, marks.length);
+            marks = copy;
+        }
         marks[marker++] = size;
         return this;
     }
     
     public LocalStack<E> reset() {
-        if (marker == 0)
+        if (marker == 0) {
             throw new IllegalStateException();
-        
-        for (int i = marks[--marker]; i < size; i++)
-            queue[i] = null;
-        
-        size = marks[marker];
-        return this;
+        } else {
+            Arrays.fill(elements, marks[--marker], size, null);
+            size = marks[marker];
+            return this;
+        }
     }
     
     public LocalStack<E> release() {
-        if (marker == 0)
+        if (marker == 0) {
             throw new IllegalStateException();
-        
-        marker--;
-        return this;
-    }
-    
-    private void ensureCapacity(int count) {
-        if (size + count > queue.length)
-            queue = Arrays.copyOf(queue, queue.length * 3 / 2 + count);
-    }
-    
-    public E get(int index) {
-        if (index < 0)
-            throw new IndexOutOfBoundsException();
-        
-        if (marker > 0) {
-            int offset = marks[marker - 1] + index;
-            if (offset >= size)
-                throw new IndexOutOfBoundsException();
-            return queue[offset];
+        } else {
+            marker--;
+            return this;
         }
-        
-        if (index >= size)
-            throw new IndexOutOfBoundsException();
-        
-        return queue[index];
-    }
-    
-    public E[] getAll() {
-        int endIndex = size;
-        int beginIndex = (marker > 0 ? marks[marker - 1] : 0);
-        
-        return Arrays.copyOfRange(queue, beginIndex, endIndex);
-    }
-    
-    public E getFirst() {
-        return get(0);
-    }
-    
-    public E getLast() {
-        if (size > 0)
-            if (marker > 0)
-                if (marks[marker - 1] == size)
-                    throw new IndexOutOfBoundsException();
-        
-        return queue[size - 1];
     }
     
     public void push(E element) {
         ensureCapacity(1);
-        queue[size++] = element;
+        elements[size++] = element;
     }
     
     public void pushAll(E... elements) {
         ensureCapacity(elements.length);
-        for (int i = 0; i < elements.length; i++)
-            queue[size++] = elements[i];
+        System.arraycopy(elements, 0, this.elements, size, elements.length);
+        size += elements.length;
     }
     
     public E pop() {
-        if (size == 0 || marker > 0 && marks[marker - 1] == size)
+        if (isEmpty()) {
             throw new IllegalStateException();
-        
-        E element = queue[--size];
-        queue[size] = null;
-        
-        return element;
+        } else {
+            E element = Types.cast(elements[--size]);
+            elements[size] = null;
+            return element;
+        }
     }
     
-    public E[] popAll() {
-        int endIndex = size;
-        int beginIndex = size = (marker > 0 ? marks[marker - 1] : 0);
-        
-        E[] elements = Types.newArray(queue.getClass().getComponentType(), endIndex - beginIndex);
-        for (int i = beginIndex, j = 0; i < endIndex; i++, j++) {
-            elements[j] = queue[i];
-            queue[i] = null;
+    public E[] popAll(E[] array) {
+        if (marker == 0) {
+            throw new IllegalStateException();
+        } else {
+            int length = Math.min(size - marks[marker - 1], array.length);
+            System.arraycopy(elements, size - length, array, 0, length);
+            Arrays.fill(elements, size - length, size, null);
+            size -= length;
+            return array;
         }
-        
-        return elements;
+    }
+    
+    public E peek() {
+        if (isEmpty()) {
+            throw new IllegalStateException();
+        } else {
+            return Types.cast(elements[size - 1]);
+        }
+    }
+    
+    public E[] peekAll(E[] array) {
+        if (marker == 0) {
+            throw new IllegalStateException();
+        } else {
+            int length = Math.min(size - marks[marker - 1], array.length);
+            System.arraycopy(elements, size - length, array, 0, length);
+            return array;
+        }
     }
     
     public void clear() {
-        for (int i = 0; i < size; i++)
-            queue[i] = null;
-        size = 0;
-        marker = 0;
+        Arrays.fill(elements, 0, size, null);
+        size = marker = 0;
     }
     
     public String toString() {
@@ -170,14 +134,22 @@ public class LocalStack<E> {
         buf.append('[');
         int start = marker == 0 ? 0 : marks[marker - 1];
         if (start < size) {
-            buf.append(queue[start]);
+            buf.append(elements[start]);
             for (int i = start + 1; i < size; i++) {
                 buf.append(',');
-                buf.append(queue[i]);
+                buf.append(elements[i]);
             }
         }
         buf.append(']');
         return buf.toString();
+    }
+    
+    private void ensureCapacity(int delta) {
+        if (size + delta > elements.length) {
+            Object[] copy = new Object[elements.length * 3 / 2 + delta];
+            System.arraycopy(elements, 0, copy, 0, size);
+            elements = copy;
+        }
     }
     
 }

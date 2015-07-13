@@ -241,7 +241,7 @@ public abstract class Parser<T> {
     
     private class MemoContext extends Context {
         
-        private final HashMap<Long, Transaction> txCache = new HashMap<Long, Transaction>();
+        final HashMap<Long, Transaction> txCache = new HashMap<Long, Transaction>();
         
         private MemoContext(BacktrackingReader stream, ErrorTracer tracer) {
             super(stream, tracer);

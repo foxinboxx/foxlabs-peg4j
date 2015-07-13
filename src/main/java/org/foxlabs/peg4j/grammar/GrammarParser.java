@@ -32,10 +32,10 @@ public final class GrammarParser extends Parser<Grammar> {
     
     private final GrammarBuilder builder;
     
-    private final LocalStack<String> symbolStack = new LocalStack<String>(String.class);
-    private final LocalStack<Integer> intStack = new LocalStack<Integer>(Integer.class);
-    private final LocalStack<UnicodeSet> usetStack = new LocalStack<UnicodeSet>(UnicodeSet.class);
-    private final LocalStack<Problem> problemStack = new LocalStack<Problem>(Problem.class);
+    private final LocalStack<String> symbolStack = new LocalStack<String>();
+    private final LocalStack<Integer> intStack = new LocalStack<Integer>();
+    private final LocalStack<UnicodeSet> usetStack = new LocalStack<UnicodeSet>();
+    private final LocalStack<Problem> problemStack = new LocalStack<Problem>();
     
     private String source = null;
     private Location errorLocation = null;
@@ -72,7 +72,7 @@ public final class GrammarParser extends Parser<Grammar> {
     @Override
     protected Grammar buildResult() {
         GrammarProblems problems = new GrammarProblems();
-        problems.addProblems(problemStack.popAll());
+        problems.addProblems(problemStack.popAll(new Problem[problemStack.size()]));
         Grammar grammar = builder.buildGrammar(problems, source);
         GrammarCompiler.compile(grammar, compilationFlags);
         
@@ -134,11 +134,11 @@ public final class GrammarParser extends Parser<Grammar> {
         @Override
         public void store(int length) {
             super.store(length);
-            rules = builder.getAll();
-            symbols = symbolStack.getAll();
-            ints = intStack.getAll();
-            usets = usetStack.getAll();
-            problems = problemStack.getAll();
+            rules = builder.peekAll(new Expression[builder.size()]);
+            symbols = symbolStack.peekAll(new String[symbolStack.size()]);
+            ints = intStack.peekAll(new Integer[intStack.size()]);
+            usets = usetStack.peekAll(new UnicodeSet[usetStack.size()]);
+            problems = problemStack.peekAll(new Problem[problemStack.size()]);
         }
         
         @Override
@@ -197,109 +197,79 @@ public final class GrammarParser extends Parser<Grammar> {
     }
     
     private boolean handleRuleChoice(ActionContext context) {
-        builder.choice()
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.choice().setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleRuleConcat(ActionContext context) {
-        builder.concat()
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.concat().setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleRuleRepeat(ActionContext context) {
-        Location start = context.start();
-        Location end = context.end();
         if (symbolStack.size() > 0) {
-            builder.repeat(Quantifier.quantifierOf(symbolStack.pop()))
-                   .setStart(start)
-                   .setEnd(end);
+            Quantifier quant = Quantifier.quantifierOf(symbolStack.pop());
+            builder.repeat(quant).setStart(context.start()).setEnd(context.end());
         } else if (intStack.size() == 1) {
-            builder.repeat(intStack.pop())
-                   .setStart(start)
-                   .setEnd(end);
+            builder.repeat(intStack.pop()).setStart(context.start()).setEnd(context.end());
         } else if (intStack.size() == 2) {
             int max = intStack.pop();
             int min = intStack.pop();
-            builder.repeat(min, max)
-                   .setStart(start)
-                   .setEnd(end);
+            builder.repeat(min, max).setStart(context.start()).setEnd(context.end());
         }
         return true;
     }
     
     private boolean handleRuleExcept(ActionContext context) {
-        if (symbolStack.size() > 0)
-            builder.except(Predicate.predicateOf(symbolStack.pop()))
-                   .setStart(context.start())
-                   .setEnd(context.end());
+        if (symbolStack.size() > 0) {
+            Predicate pred = Predicate.predicateOf(symbolStack.pop());
+            builder.except(pred).setStart(context.start()).setEnd(context.end());
+        }
         return true;
     }
     
     private boolean handleRuleReference(ActionContext context) {
         String name = symbolStack.pop();
-        Modifier mod = null;
-        if (symbolStack.size() > 0)
-            mod = Modifier.modifierOf(symbolStack.pop());
-        builder.pushReference(name, mod)
-               .setStart(context.start())
-               .setEnd(context.end());
+        Modifier mod = symbolStack.size() > 0 ? Modifier.modifierOf(symbolStack.pop()) : null;
+        builder.pushReference(name, mod).setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleRuleAction(ActionContext context) {
         String name = symbolStack.pop();
-        //ActionHandler<?> handler = actionResolver.resolveAction(name);
-        builder.action(name)
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.action(name).setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleTerminalInterval(ActionContext context) {
         char max = symbolStack.pop().charAt(0);
         char min = symbolStack.pop().charAt(0);
-        builder.pushInterval(min, max)
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.pushInterval(min, max).setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleTerminalTokenCS(ActionContext context) {
-        builder.pushToken(symbolStack.pop(), true)
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.pushToken(symbolStack.pop(), true).setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleTerminalTokenIC(ActionContext context) {
-        builder.pushToken(symbolStack.pop(), false)
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.pushToken(symbolStack.pop(), false).setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleTerminalSet(ActionContext context) {
-        builder.pushSet(usetStack.pop())
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.pushSet(usetStack.pop()).setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleTerminalClass(ActionContext context) {
-        builder.pushClass(symbolStack.pop())
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.pushClass(symbolStack.pop()).setStart(context.start()).setEnd(context.end());
         return true;
     }
     
     private boolean handleTerminalAny(ActionContext context) {
-        builder.pushAny()
-               .setStart(context.start())
-               .setEnd(context.end());
+        builder.pushAny().setStart(context.start()).setEnd(context.end());
         return true;
     }
     
@@ -322,7 +292,7 @@ public final class GrammarParser extends Parser<Grammar> {
     }
     
     private boolean handleSetUnion() {
-        usetStack.push(UnicodeSet.unionAll(usetStack.popAll()));
+        usetStack.push(UnicodeSet.unionAll(usetStack.popAll(new UnicodeSet[usetStack.size()])));
         return true;
     }
     

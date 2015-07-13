@@ -40,7 +40,6 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     }
     
     public GrammarBuilder(Map<String, ActionHandler<?>> handlers) {
-        super(Expression.class, 16);
         this.defaultHandlers = handlers;
     }
     
@@ -216,16 +215,18 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     
     public GrammarBuilder concat() {
         checkProductionInitiated(true);
-        if (size() > 1) {
-            push(new Concatenation(currentProduction, popAll()));
+        int size = size();
+        if (size > 1) {
+            push(new Concatenation(currentProduction, popAll(new Expression[size])));
         }
         return this;
     }
     
     public GrammarBuilder choice() {
         checkProductionInitiated(true);
-        if (size() > 1) {
-            push(new Alternation(currentProduction, popAll()));
+        int size = size();
+        if (size > 1) {
+            push(new Alternation(currentProduction, popAll(new Expression[size])));
         }
         return this;
     }
@@ -238,8 +239,7 @@ public final class GrammarBuilder extends LocalStack<Expression> {
         checkProductionInitiated(true);
         if (max < min || min < 0 || max == 0) {
             throw new IllegalArgumentException();
-        }
-        if (min == 0) {
+        } else if (min == 0) {
             if (max == 1) {
                 return repeat(Quantifier.ONCEORNONE);
             } else  if (max == Integer.MAX_VALUE) {
@@ -295,12 +295,12 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     }
     
     public GrammarBuilder setStart(Location start) {
-        getLast().start = start;
+        peek().start = start;
         return this;
     }
     
     public GrammarBuilder setEnd(Location end) {
-        getLast().end = end;
+        peek().end = end;
         return this;
     }
     
@@ -314,13 +314,11 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     
     public Grammar buildGrammar(GrammarProblems problems, String source) {
         checkProductionInitiated(false);
-        
         Arrays.sort(productions, 0, productionCount);
         Production[] copy = new Production[productionCount];
         System.arraycopy(productions, 0, copy, 0, productionCount);
         Grammar grammar = new Grammar(copy, problems, source);
         GrammarCompiler.makeUndoInjections(grammar);
-        
         return grammar;
     }
     
