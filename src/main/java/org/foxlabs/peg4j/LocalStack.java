@@ -74,14 +74,22 @@ public class LocalStack<E> {
     }
     
     public void push(E element) {
-        ensureCapacity(1);
-        elements[size++] = element;
+        if (marker == 0) {
+            throw new IllegalStateException();
+        } else {
+            ensureCapacity(1);
+            elements[size++] = element;
+        }
     }
     
     public void pushAll(E... elements) {
-        ensureCapacity(elements.length);
-        System.arraycopy(elements, 0, this.elements, size, elements.length);
-        size += elements.length;
+        if (marker == 0) {
+            throw new IllegalStateException();
+        } else {
+            ensureCapacity(elements.length);
+            System.arraycopy(elements, 0, this.elements, size, elements.length);
+            size += elements.length;
+        }
     }
     
     public E pop() {
