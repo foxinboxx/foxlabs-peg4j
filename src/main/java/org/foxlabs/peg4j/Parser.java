@@ -17,10 +17,7 @@
 package org.foxlabs.peg4j;
 
 import java.net.URL;
-
-import java.util.LinkedList;
 import java.util.HashMap;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Reader;
@@ -29,14 +26,11 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.IOException;
 
-import org.foxlabs.peg4j.grammar.Rule;
-import org.foxlabs.peg4j.grammar.Action;
-import org.foxlabs.peg4j.grammar.Production;
 import org.foxlabs.peg4j.grammar.Grammar;
+import org.foxlabs.peg4j.grammar.Production;
 import org.foxlabs.peg4j.grammar.ParseContext;
 import org.foxlabs.peg4j.debug.RuleTracer;
 import org.foxlabs.peg4j.debug.ErrorTracer;
-
 import org.foxlabs.util.Location;
 import org.foxlabs.util.reflect.Types;
 
@@ -49,7 +43,7 @@ public abstract class Parser<T> {
     
     protected abstract Grammar getGrammar();
     
-    protected abstract Transaction startTransaction();
+    protected abstract Transaction getTransaction();
     
     protected abstract T buildResult();
     
@@ -132,7 +126,7 @@ public abstract class Parser<T> {
     public final T parse(BacktrackingReader stream) throws IOException, RecognitionException {
         boolean success = false;
         ErrorTracer tracer = ErrorTracer.newTracer(getTracer());
-        Context context = isMemoable() ? new MemoContext(stream, tracer) : new Context(stream, tracer);
+        Context<?> context = isMemoable() ? new MemoContext<Parser<?>>(stream, tracer) : new Context<Parser<?>>(stream, tracer);
         tracer.open(stream);
         try {
             success = getGrammar().getStart().reduce(context);
@@ -147,12 +141,10 @@ public abstract class Parser<T> {
     
     // Context
     
-    private class Context implements ParseContext, ActionContext {
+    private class Context<P extends Parser<?>> implements ParseContext<P>, Transaction {
         
         final BacktrackingReader stream;
         final ErrorTracer tracer;
-        
-        final LinkedList<Transaction> txStack = new LinkedList<Transaction>();
         
         private Context(BacktrackingReader stream, ErrorTracer tracer) {
             this.stream = stream;
@@ -162,52 +154,23 @@ public abstract class Parser<T> {
         // ParseContext
         
         @Override
-        public BacktrackingReader getStream() {
+        public P parser() {
+            return Types.cast(Parser.this);
+        }
+        
+        @Override
+        public BacktrackingReader stream() {
             return stream;
         }
         
         @Override
-        public void startTransaction() {
-            txStack.push(Parser.this.startTransaction());
+        public RuleTracer tracer() {
+            return tracer;
         }
         
         @Override
-        public void commitTransaction() {
-            txStack.pop().commit();
-        }
-        
-        @Override
-        public void rollbackTransaction() {
-            txStack.pop().rollback();
-        }
-        
-        @Override
-        public void storeTransaction(Production target) throws IOException {
-            // nop
-        }
-        
-        @Override
-        public boolean restoreTransaction(Production target) throws IOException {
-            return false;
-        }
-        
-        @Override
-        public boolean handleAction(Action action) throws ActionException {
-            try {
-                return Types.<ActionHandler<Parser<T>>>cast(action.getHandler()).handle(Parser.this, this);
-            } catch (Throwable e) {
-                throw new ActionException(action, e, stream.getEnd());
-            }
-        }
-        
-        @Override
-        public void traceRule(Rule rule) throws IOException {
-            tracer.trace(rule);
-        }
-        
-        @Override
-        public void backtraceRule(Rule rule, boolean success) throws IOException {
-            tracer.backtrace(rule, success);
+        public Transaction transaction() {
+            return this;
         }
         
         // ActionContext
@@ -237,36 +200,82 @@ public abstract class Parser<T> {
             return stream.getEnd();
         }
         
+        // Transaction
+        
+        @Override
+        public void begin() {
+            getTransaction().begin();
+        }
+        
+        @Override
+        public void commit() {
+            getTransaction().commit();
+        }
+        
+        @Override
+        public void rollback() {
+            getTransaction().rollback();
+        }
+        
+        @Override
+        public boolean load() throws IOException {
+            return false;
+        }
+        
+        @Override
+        public boolean save() throws IOException {
+            return false;
+        }
+        
     }
     
-    private class MemoContext extends Context {
+    private class MemoContext<P extends Parser<?>> extends Context<P> {
         
-        final HashMap<Long, Transaction> txCache = new HashMap<Long, Transaction>();
+        final HashMap<Long, TxData> txCache = new HashMap<Long, TxData>();
         
         private MemoContext(BacktrackingReader stream, ErrorTracer tracer) {
             super(stream, tracer);
         }
         
         @Override
-        public void storeTransaction(Production prod) throws IOException {
-            Transaction tx = txStack.peek();
-            int offset = stream.getStartOffset();
-            tx.store(stream.getEndOffset() - offset);
-            txCache.put(getCacheKey(prod, offset), tx);
-        }
-        
-        @Override
-        public boolean restoreTransaction(Production prod) throws IOException {
-            Transaction tx = txCache.get(getCacheKey(prod, stream.getEndOffset()));
-            if (tx != null) {
-                stream.skip(tx.restore());
+        public boolean load() throws IOException {
+            Production prod = tracer.getCurrentReference();
+            long offset = stream.getEndOffset();
+            TxData data = txCache.get(TxData.keyFor(prod, offset));
+            if (data != null && data.transaction.load()) {
+                stream.skip(data.length);
                 return true;
             }
             return false;
         }
         
-        private long getCacheKey(Production prod, long offset) {
-            return (prod.getIndex() << 32) | offset;
+        @Override
+        public boolean save() throws IOException {
+            Transaction tx = getTransaction();
+            if (tx.save()) {
+                Production prod = tracer.getCurrentReference();
+                long offset = stream.getStartOffset();
+                TxData data = new TxData(tx, stream.getLength());
+                txCache.put(TxData.keyFor(prod, offset), data);
+                return true;
+            }
+            return false;
+        }
+        
+    }
+    
+    private static final class TxData {
+        
+        final Transaction transaction;
+        final int length;
+        
+        private TxData(Transaction transaction, int length) {
+            this.transaction = transaction;
+            this.length = length;
+        }
+        
+        private static Long keyFor(Production prod, long offset) {
+            return Long.valueOf(((long) prod.getIndex() << 32) | offset);
         }
         
     }

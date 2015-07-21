@@ -16,25 +16,30 @@
 
 package org.foxlabs.peg4j;
 
+import java.io.IOException;
+
 /**
  * 
  * @author Fox Mulder
  */
 public interface Transaction {
     
+    void begin();
+    
     void commit();
     
     void rollback();
     
-    void store(int length);
+    boolean load() throws IOException;
     
-    int restore();
+    boolean save() throws IOException;
     
-    // Default
-    
-    class Default implements Transaction {
+    Transaction NONE = new Transaction() {
         
-        private int length;
+        @Override
+        public void begin() {
+            // nop
+        }
         
         @Override
         public void commit() {
@@ -47,15 +52,15 @@ public interface Transaction {
         }
         
         @Override
-        public void store(int length) {
-            this.length = length;
+        public boolean load() {
+            return false;
         }
         
         @Override
-        public int restore() {
-            return length;
+        public boolean save() {
+            return false;
         }
         
-    }
+    };
     
 }

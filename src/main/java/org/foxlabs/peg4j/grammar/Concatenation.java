@@ -18,6 +18,7 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public final class Concatenation extends Expression.Nary implements Operator {
@@ -26,25 +27,29 @@ public final class Concatenation extends Expression.Nary implements Operator {
         super(owner, children);
     }
     
-    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.getStream().mark();
-        context.traceRule(this);
+    @Override
+    public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+            throws IOException, RecognitionException {
+        context.stream().mark();
+        context.tracer().trace(this);
         for (int i = 0; i < children.length; i++) {
             if (!children[i].reduce(context)) {
-                context.backtraceRule(this, false);
-                context.getStream().reset();
+                context.tracer().backtrace(this, false);
+                context.stream().reset();
                 return false;
             }
         }
-        context.backtraceRule(this, true);
-        context.getStream().release();
+        context.tracer().backtrace(this, true);
+        context.stream().release();
         return true;
     }
     
+    @Override
     public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
     
+    @Override
     public void toString(StringBuilder buf, boolean debug) {
         toString(children[0], buf, children[0] instanceof Expression.Nary, debug);
         for (int i = 1; i < children.length; i++) {

@@ -16,39 +16,24 @@
 
 package org.foxlabs.peg4j.grammar;
 
-import java.io.IOException;
-
-import org.foxlabs.peg4j.ActionException;
+import org.foxlabs.peg4j.Parser;
+import org.foxlabs.peg4j.Transaction;
+import org.foxlabs.peg4j.ActionContext;
 import org.foxlabs.peg4j.BacktrackingReader;
+import org.foxlabs.peg4j.debug.RuleTracer;
 
 /**
  * 
  * @author Fox Mulder
  */
-public interface ParseContext {
+public interface ParseContext<P extends Parser<?>> extends ActionContext {
     
-    // Stream operations
+    P parser();
     
-    BacktrackingReader getStream();
+    BacktrackingReader stream();
     
-    // State operations
+    RuleTracer tracer();
     
-    void startTransaction();
-    
-    void commitTransaction();
-    
-    void rollbackTransaction();
-    
-    void storeTransaction(Production prod) throws IOException;
-    
-    boolean restoreTransaction(Production prod) throws IOException;
-    
-    boolean handleAction(Action action) throws ActionException;
-    
-    // Trace operations
-    
-    void traceRule(Rule rule) throws IOException;
-    
-    void backtraceRule(Rule rule, boolean success) throws IOException;
+    Transaction transaction();
     
 }

@@ -18,6 +18,7 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public abstract class Exclusion extends Expression.Unary implements Operator {
@@ -45,20 +46,23 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
             super(owner, child);
         }
         
+        @Override
         public Predicate getPredicate() {
             return Predicate.NOT;
         }
         
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.getStream().mark();
-            context.traceRule(this);
+        @Override
+        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+                throws IOException, RecognitionException {
+            context.stream().mark();
+            context.tracer().trace(this);
             if (child.reduce(context)) {
-                context.backtraceRule(this, false);
-                context.getStream().reset();
+                context.tracer().backtrace(this, false);
+                context.stream().reset();
                 return false;
             }
-            context.backtraceRule(this, true);
-            context.getStream().reset();
+            context.tracer().backtrace(this, true);
+            context.stream().reset();
             return true;
         }
         
@@ -72,20 +76,23 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
             super(owner, child);
         }
         
+        @Override
         public Predicate getPredicate() {
             return Predicate.AND;
         }
         
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.getStream().mark();
-            context.traceRule(this);
+        @Override
+        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+                throws IOException, RecognitionException {
+            context.stream().mark();
+            context.tracer().trace(this);
             if (child.reduce(context)) {
-                context.backtraceRule(this, true);
-                context.getStream().reset();
+                context.tracer().backtrace(this, true);
+                context.stream().reset();
                 return true;
             }
-            context.backtraceRule(this, false);
-            context.getStream().reset();
+            context.tracer().backtrace(this, false);
+            context.stream().reset();
             return false;
         }
         

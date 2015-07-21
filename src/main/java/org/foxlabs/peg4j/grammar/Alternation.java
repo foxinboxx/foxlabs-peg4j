@@ -18,6 +18,7 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public final class Alternation extends Expression.Nary implements Operator {
@@ -26,28 +27,32 @@ public final class Alternation extends Expression.Nary implements Operator {
         super(owner, children);
     }
     
-    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.traceRule(this);
-        context.getStream().mark();
+    @Override
+    public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+            throws IOException, RecognitionException {
+        context.tracer().trace(this);
+        context.stream().mark();
         for (int i = 0; i < children.length; i++) {
             if (children[i].reduce(context)) {
-                context.getStream().release();
-                context.backtraceRule(this, true);
+                context.stream().release();
+                context.tracer().backtrace(this, true);
                 return true;
             }
-            context.getStream().reset();
-            context.getStream().mark();
+            context.stream().reset();
+            context.stream().mark();
         }
-        context.getStream().release();
+        context.stream().release();
         
-        context.backtraceRule(this, false);
+        context.tracer().backtrace(this, false);
         return false;
     }
     
+    @Override
     public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
     
+    @Override
     public void toString(StringBuilder buf, boolean debug) {
         toString(children[0], buf, children[0] instanceof Expression.Nary, debug);
         for (int i = 1; i < children.length; i++) {

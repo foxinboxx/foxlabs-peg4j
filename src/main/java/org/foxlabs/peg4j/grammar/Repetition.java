@@ -18,6 +18,7 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public class Repetition extends Expression.Unary implements Operator {
@@ -43,30 +44,36 @@ public class Repetition extends Expression.Unary implements Operator {
         return null;
     }
     
-    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.getStream().mark();
-        context.traceRule(this);
-        for (int i = 0; i < min; i++)
+    @Override
+    public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+            throws IOException, RecognitionException {
+        context.stream().mark();
+        context.tracer().trace(this);
+        for (int i = 0; i < min; i++) {
             if (!child.reduce(context)) {
-                context.backtraceRule(this, false);
-                context.getStream().reset();
+                context.tracer().backtrace(this, false);
+                context.stream().reset();
                 return false;
             }
-        for (int i = min; i < max; i++)
+        }
+        for (int i = min; i < max; i++) {
             if (!child.reduce(context)) {
-                context.backtraceRule(this, true);
-                context.getStream().reset();
+                context.tracer().backtrace(this, true);
+                context.stream().reset();
                 return true;
             }
-        context.backtraceRule(this, true);
-        context.getStream().release();
+        }
+        context.tracer().backtrace(this, true);
+        context.stream().release();
         return true;
     }
     
+    @Override
     public final <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
     
+    @Override
     public void toString(StringBuilder buf, boolean debug) {
         toString(child, buf, child instanceof Operator, debug);
         buf.append('{');
@@ -87,23 +94,27 @@ public class Repetition extends Expression.Unary implements Operator {
             super(owner, child, 0, 1);
         }
         
+        @Override
         public Quantifier getQuantifier() {
             return Quantifier.ONCEORNONE;
         }
         
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.getStream().mark();
-            context.traceRule(this);
+        @Override
+        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+                throws IOException, RecognitionException {
+            context.stream().mark();
+            context.tracer().trace(this);
             if (child.reduce(context)) {
-                context.backtraceRule(this, true);
-                context.getStream().release();
+                context.tracer().backtrace(this, true);
+                context.stream().release();
             } else {
-                context.backtraceRule(this, true);
-                context.getStream().reset();
+                context.tracer().backtrace(this, true);
+                context.stream().reset();
             }
             return true;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             toString(child, buf, child instanceof Operator, debug);
             buf.append(getQuantifier());
@@ -119,22 +130,26 @@ public class Repetition extends Expression.Unary implements Operator {
             super(owner, child, 0, Integer.MAX_VALUE);
         }
         
+        @Override
         public Quantifier getQuantifier() {
             return Quantifier.ZEROORMORE;
         }
         
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.getStream().mark();
-            context.traceRule(this);
+        @Override
+        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+                throws IOException, RecognitionException {
+            context.stream().mark();
+            context.tracer().trace(this);
             while (child.reduce(context)) {
-                context.getStream().release();
-                context.getStream().mark();
+                context.stream().release();
+                context.stream().mark();
             }
-            context.backtraceRule(this, true);
-            context.getStream().reset();
+            context.tracer().backtrace(this, true);
+            context.stream().reset();
             return true;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             toString(child, buf, child instanceof Operator, debug);
             buf.append(getQuantifier());
@@ -150,29 +165,33 @@ public class Repetition extends Expression.Unary implements Operator {
             super(owner, child, 1, Integer.MAX_VALUE);
         }
         
+        @Override
         public Quantifier getQuantifier() {
             return Quantifier.ONCEORMORE;
         }
         
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.getStream().mark();
-            context.traceRule(this);
+        @Override
+        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+                throws IOException, RecognitionException {
+            context.stream().mark();
+            context.tracer().trace(this);
             if (child.reduce(context)) {
-                context.getStream().release();
-                context.getStream().mark();
+                context.stream().release();
+                context.stream().mark();
                 while (child.reduce(context)) {
-                    context.getStream().release();
-                    context.getStream().mark();
+                    context.stream().release();
+                    context.stream().mark();
                 }
-                context.backtraceRule(this, true);
-                context.getStream().reset();
+                context.tracer().backtrace(this, true);
+                context.stream().reset();
                 return true;
             }
-            context.backtraceRule(this, false);
-            context.getStream().reset();
+            context.tracer().backtrace(this, false);
+            context.stream().reset();
             return false;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             toString(child, buf, child instanceof Operator, debug);
             buf.append(getQuantifier());

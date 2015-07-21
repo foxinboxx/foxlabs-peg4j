@@ -18,8 +18,11 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
+import org.foxlabs.peg4j.ActionException;
 import org.foxlabs.peg4j.ActionHandler;
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
+import org.foxlabs.util.reflect.Types;
 
 public final class Action extends Expression.Unary {
     
@@ -61,28 +64,39 @@ public final class Action extends Expression.Unary {
         return name != UNDO && handler == ActionHandler.NOP;
     }
     
-    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.traceRule(this);
-        context.getStream().mark();
-        context.startTransaction();
+    @Override
+    public <P extends Parser<?>> boolean reduce(ParseContext<P> context) throws IOException, RecognitionException {
+        context.tracer().trace(this);
+        context.stream().mark();
+        context.transaction().begin();
         if (child.reduce(context)) {
-            if (context.handleAction(this)) {
-                context.commitTransaction();
-                context.getStream().release();
-                context.backtraceRule(this, true);
+            if (handleAction(context)) {
+                context.transaction().commit();
+                context.stream().release();
+                context.tracer().backtrace(this, true);
                 return true;
             }
         }
-        context.rollbackTransaction();
-        context.getStream().reset();
-        context.backtraceRule(this, false);
+        context.transaction().rollback();
+        context.stream().reset();
+        context.tracer().backtrace(this, false);
         return false;
     }
     
+    private <P extends Parser<?>> boolean handleAction(ParseContext<P> context) throws RecognitionException {
+        try {
+            return Types.<ActionHandler<P>>cast(handler).handle(context.parser(), context);
+        } catch (Throwable e) {
+            throw new ActionException(this, e, context.end());
+        }
+    }
+    
+    @Override
     public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
     
+    @Override
     public void toString(StringBuilder buf, boolean debug) {
         if (debug || !injected) {
             buf.append('$').append(name);

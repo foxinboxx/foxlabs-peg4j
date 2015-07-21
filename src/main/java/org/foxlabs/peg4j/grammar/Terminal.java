@@ -18,8 +18,8 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
-
 import org.foxlabs.peg4j.BacktrackingReader;
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.util.UnicodeSet;
 
 public abstract class Terminal extends Expression {
@@ -65,13 +65,14 @@ public abstract class Terminal extends Expression {
      */
     public abstract boolean isInefficient();
     
-    public boolean reduce(ParseContext context) throws IOException {
-        context.traceRule(this);
-        if (match(context.getStream())) {
-            context.backtraceRule(this, true);
+    @Override
+    public <P extends Parser<?>> boolean reduce(ParseContext<P> context) throws IOException {
+        context.tracer().trace(this);
+        if (match(context.stream())) {
+            context.tracer().backtrace(this, true);
             return true;
         }
-        context.backtraceRule(this, false);
+        context.tracer().backtrace(this, false);
         return false;
     }
     

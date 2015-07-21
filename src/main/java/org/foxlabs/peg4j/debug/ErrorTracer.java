@@ -16,16 +16,18 @@
 
 package org.foxlabs.peg4j.debug;
 
-import java.io.IOException;
-
 import java.util.Set;
 import java.util.HashSet;
 
-import org.foxlabs.peg4j.BacktrackingReader;
+import java.io.IOException;
+
 import org.foxlabs.peg4j.SyntaxException;
+import org.foxlabs.peg4j.BacktrackingReader;
 import org.foxlabs.peg4j.grammar.Rule;
 import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Exclusion;
+import org.foxlabs.peg4j.grammar.Reference;
+import org.foxlabs.peg4j.grammar.Production;
 
 import org.foxlabs.util.Location;
 
@@ -38,10 +40,16 @@ public class ErrorTracer extends RuleTracer.Adapter {
     private int errorColumn;
     private int predicateLevel;
     
+    private ReferenceNode referenceHead = null;
+    
     private final Set<Terminal> expectedSet = new HashSet<Terminal>();
     
     public RuleTracer getWrappedTracer() {
         return null;
+    }
+    
+    public Production getCurrentReference() {
+        return referenceHead.reference.getTarget();
     }
     
     public Location getErrorLocation() {
@@ -65,30 +73,51 @@ public class ErrorTracer extends RuleTracer.Adapter {
         this.errorColumn = 0;
         this.predicateLevel = 0;
         
+        this.referenceHead = null;
         this.expectedSet.clear();
     }
     
     @Override
     public void trace(Rule rule) throws IOException {
-        if (rule instanceof Exclusion)
+        if (rule instanceof Reference) {
+            referenceHead = new ReferenceNode((Reference) rule, referenceHead);
+        } else if (rule instanceof Exclusion) {
             predicateLevel++;
+        }
     }
     
     @Override
     public void backtrace(Rule rule, boolean success) throws IOException {
-        if (rule instanceof Exclusion) {
+        if (rule instanceof Reference) {
+            referenceHead = referenceHead.next;
+        } else if (rule instanceof Exclusion) {
             predicateLevel--;
         } else if (rule instanceof Terminal && predicateLevel == 0 && !success) {
             int offset = stream.getStartOffset();
             if (offset >= errorOffset) {
-                if (offset > errorOffset)
+                if (offset > errorOffset) {
                     expectedSet.clear();
+                }
                 errorOffset = offset;
                 errorLine = stream.getStartLine();
                 errorColumn = stream.getStartColumn();
                 expectedSet.add((Terminal) rule);
             }
         }
+    }
+    
+    // ReferenceNode
+    
+    private static class ReferenceNode {
+        
+        final Reference reference;
+        final ReferenceNode next;
+        
+        private ReferenceNode(Reference reference, ReferenceNode next) {
+            this.reference = reference;
+            this.next = next;
+        }
+        
     }
     
     // Wrapper
@@ -131,11 +160,13 @@ public class ErrorTracer extends RuleTracer.Adapter {
     }
     
     public static ErrorTracer newTracer(RuleTracer tracer) {
-        return tracer == null
-            ? new ErrorTracer()
-            : tracer instanceof ErrorTracer
-                ? (ErrorTracer) tracer
-                : new ErrorTracer.Wrapper(tracer);
+        if (tracer == null) {
+            return new ErrorTracer();
+        } else if (tracer instanceof ErrorTracer) {
+            return (ErrorTracer) tracer;
+        } else {
+            return new ErrorTracer.Wrapper(tracer);
+        }
     }
     
 }

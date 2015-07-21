@@ -37,6 +37,8 @@ public final class GrammarParser extends Parser<Grammar> {
     private final LocalStack<UnicodeSet> usetStack = new LocalStack<UnicodeSet>();
     private final LocalStack<Problem> problemStack = new LocalStack<Problem>();
     
+    private Tx transaction = new Tx();
+    
     private String source = null;
     private Location errorLocation = null;
     private Location eofLocation = null;
@@ -65,8 +67,8 @@ public final class GrammarParser extends Parser<Grammar> {
     }
     
     @Override
-    protected Transaction startTransaction() {
-        return new Tx();
+    protected Transaction getTransaction() {
+        return transaction;
     }
     
     @Override
@@ -97,7 +99,7 @@ public final class GrammarParser extends Parser<Grammar> {
     
     // Transaction
 
-    private final class Tx extends Transaction.Default {
+    private final class Tx implements Transaction {
         
         private Expression[] rules;
         private String[] symbols;
@@ -105,7 +107,8 @@ public final class GrammarParser extends Parser<Grammar> {
         private UnicodeSet[] usets;
         private Problem[] problems;
         
-        public Tx() {
+        @Override
+        public void begin() {
             builder.mark();
             symbolStack.mark();
             intStack.mark();
@@ -132,23 +135,24 @@ public final class GrammarParser extends Parser<Grammar> {
         }
         
         @Override
-        public void store(int length) {
-            super.store(length);
-            rules = builder.peekAll(new Expression[builder.size()]);
-            symbols = symbolStack.peekAll(new String[symbolStack.size()]);
-            ints = intStack.peekAll(new Integer[intStack.size()]);
-            usets = usetStack.peekAll(new UnicodeSet[usetStack.size()]);
-            problems = problemStack.peekAll(new Problem[problemStack.size()]);
-        }
-        
-        @Override
-        public int restore() {
+        public boolean load() {
             builder.pushAll(rules);
             symbolStack.pushAll(symbols);
             intStack.pushAll(ints);
             usetStack.pushAll(usets);
             problemStack.pushAll(problems);
-            return super.restore();
+            return true;
+        }
+        
+        @Override
+        public boolean save() {
+            rules = builder.peekAll(new Expression[builder.size()]);
+            symbols = symbolStack.peekAll(new String[symbolStack.size()]);
+            ints = intStack.peekAll(new Integer[intStack.size()]);
+            usets = usetStack.peekAll(new UnicodeSet[usetStack.size()]);
+            problems = problemStack.peekAll(new Problem[problemStack.size()]);
+            transaction = new Tx();
+            return true;
         }
         
     }

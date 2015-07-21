@@ -17,14 +17,13 @@
 package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Collections;
 
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
-
 import org.foxlabs.util.Location;
 
 public abstract class Rule {
@@ -71,7 +70,8 @@ public abstract class Rule {
     
     protected abstract void findProblems(List<Problem> foundProblems);
     
-    public abstract boolean reduce(ParseContext context) throws IOException, RecognitionException;
+    public abstract <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+            throws IOException, RecognitionException;
     
     public abstract <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E;
     

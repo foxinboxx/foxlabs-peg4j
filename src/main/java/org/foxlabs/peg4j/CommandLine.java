@@ -437,8 +437,8 @@ public final class CommandLine {
                 protected Grammar getGrammar() {
                     return grammar;
                 }
-                protected Transaction startTransaction() {
-                    return new Transaction.Default();
+                protected Transaction getTransaction() {
+                    return Transaction.NONE;
                 }
                 protected Object buildResult() {
                     return null;

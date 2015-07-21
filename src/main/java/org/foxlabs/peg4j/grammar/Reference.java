@@ -18,6 +18,7 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public class Reference extends Expression {
@@ -43,16 +44,17 @@ public class Reference extends Expression {
         return null;
     }
     
-    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.traceRule(this);
-        context.getStream().mark();
+    public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+            throws IOException, RecognitionException {
+        context.tracer().trace(this);
+        context.stream().mark();
         if (target.reduce(context)) {
-            context.getStream().release();
-            context.backtraceRule(this, true);
+            context.stream().release();
+            context.tracer().backtrace(this, true);
             return true;
         }
-        context.getStream().reset();
-        context.backtraceRule(this, false);
+        context.stream().reset();
+        context.tracer().backtrace(this, false);
         return false;
     }
     
@@ -76,24 +78,25 @@ public class Reference extends Expression {
             return Modifier.MEMO;
         }
         
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.traceRule(this);
-            if (context.restoreTransaction(target)) {
-                context.backtraceRule(this, true);
+        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+                throws IOException, RecognitionException {
+            context.tracer().trace(this);
+            if (context.transaction().load()) {
+                context.tracer().backtrace(this, true);
                 return true;
             }
-            context.getStream().mark();
-            context.startTransaction();
+            context.stream().mark();
+            context.transaction().begin();
             if (target.reduce(context)) {
-                context.storeTransaction(target);
-                context.commitTransaction();
-                context.getStream().release();
-                context.backtraceRule(this, true);
+                context.transaction().save();
+                context.transaction().commit();
+                context.stream().release();
+                context.tracer().backtrace(this, true);
                 return true;
             }
-            context.rollbackTransaction();
-            context.getStream().reset();
-            context.backtraceRule(this, false);
+            context.transaction().rollback();
+            context.stream().reset();
+            context.tracer().backtrace(this, false);
             return false;
         }
         

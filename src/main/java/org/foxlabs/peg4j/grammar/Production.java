@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
-
 import java.io.IOException;
 
+import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public final class Production extends Rule implements Comparable<Production> {
@@ -84,27 +84,32 @@ public final class Production extends Rule implements Comparable<Production> {
         expression.findProblems(foundProblems);
     }
     
-    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.getStream().mark();
-        context.traceRule(this);
+    @Override
+    public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
+            throws IOException, RecognitionException {
+        context.stream().mark();
+        context.tracer().trace(this);
         if (expression.reduce(context)) {
-            context.backtraceRule(this, true);
-            context.getStream().release();
+            context.tracer().backtrace(this, true);
+            context.stream().release();
             return true;
         }
-        context.backtraceRule(this, false);
-        context.getStream().reset();
+        context.tracer().backtrace(this, false);
+        context.stream().reset();
         return false;
     }
     
+    @Override
     public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
     
+    @Override
     public int compareTo(Production other) {
         return index - other.index;
     }
     
+    @Override
     public void toString(StringBuilder buf, boolean debug) {
         buf.append(name);
         buf.append(" : ");
