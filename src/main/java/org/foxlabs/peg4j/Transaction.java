@@ -28,9 +28,9 @@ public interface Transaction {
     
     void rollback();
     
-    int load(long id);
+    boolean load();
     
-    void save(long id, int length);
+    Transaction save();
     
     // Adapter
     
@@ -52,13 +52,13 @@ public interface Transaction {
         }
         
         @Override
-        public int load(long id) {
-            return -1;
+        public boolean load() {
+            return false;
         }
         
         @Override
-        public void save(long id, int length) {
-            // nop
+        public Transaction save() {
+            return null;
         }
         
     }

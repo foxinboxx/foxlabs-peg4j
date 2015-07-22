@@ -18,12 +18,12 @@ package org.foxlabs.peg4j.grammar;
 
 import java.util.Map;
 
-import org.foxlabs.peg4j.LocalStack;
 import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.ActionContext;
-import org.foxlabs.peg4j.MemoableTransaction;
 import org.foxlabs.peg4j.Transaction;
+import org.foxlabs.peg4j.LocalStack;
+
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 
@@ -93,7 +93,6 @@ public final class GrammarParser extends Parser<Grammar> {
         intStack.clear();
         usetStack.clear();
         problemStack.clear();
-        transaction.clear();
         source = null;
         errorLocation = null;
         eofLocation = null;
@@ -101,7 +100,7 @@ public final class GrammarParser extends Parser<Grammar> {
     
     // Transaction
 
-    private final class Tx extends MemoableTransaction<Tx> {
+    private final class Tx implements Transaction {
         
         private Expression[] rules;
         private String[] symbols;
@@ -137,12 +136,13 @@ public final class GrammarParser extends Parser<Grammar> {
         }
         
         @Override
-        public void load(Tx tx) {
-            builder.pushAll(tx.rules);
-            symbolStack.pushAll(tx.symbols);
-            intStack.pushAll(tx.ints);
-            usetStack.pushAll(tx.usets);
-            problemStack.pushAll(tx.problems);
+        public boolean load() {
+            builder.pushAll(rules);
+            symbolStack.pushAll(symbols);
+            intStack.pushAll(ints);
+            usetStack.pushAll(usets);
+            problemStack.pushAll(problems);
+            return true;
         }
         
         @Override

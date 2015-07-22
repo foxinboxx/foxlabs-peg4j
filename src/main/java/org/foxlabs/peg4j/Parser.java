@@ -18,6 +18,8 @@ package org.foxlabs.peg4j;
 
 import java.net.URL;
 
+import java.util.HashMap;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Reader;
@@ -143,8 +145,8 @@ public abstract class Parser<T> {
     
     private class Context<P extends Parser<?>> extends Transaction.Adapter implements ParseContext<P> {
         
-        private final BacktrackingReader stream;
-        private final ErrorTracer tracer;
+        final BacktrackingReader stream;
+        final ErrorTracer tracer;
         
         private Context(BacktrackingReader stream, ErrorTracer tracer) {
             this.stream = stream;
@@ -223,18 +225,51 @@ public abstract class Parser<T> {
     
     private class MemoContext<P extends Parser<?>> extends Context<P> {
         
+        final HashMap<Long, TxSnapshot> snapshotCache = new HashMap<Long, TxSnapshot>();
+        
         private MemoContext(BacktrackingReader stream, ErrorTracer tracer) {
             super(stream, tracer);
         }
         
         @Override
-        public int load(long id) {
-            return getTransaction().load(id);
+        public boolean load() {
+            TxSnapshot snapshot = snapshotCache.get(snapshotID());
+            if (snapshot != null && snapshot.snapshot.load()) {
+                try {
+                    stream.skip(snapshot.length);
+                    return true;
+                } catch (IOException e) {
+                    throw new InternalError();
+                }
+            }
+            return false;
         }
         
         @Override
-        public void save(long id, int length) {
-            getTransaction().save(id, length);
+        public Transaction save() {
+            Transaction tx = getTransaction().save();
+            if (tx != null) {
+                snapshotCache.put(snapshotID(), new TxSnapshot(tx, stream.getLength()));
+            }
+            return tx;
+        }
+        
+        private Long snapshotID() {
+            return ((long) tracer.getCurrentReference().getIndex() << 32) | stream.getStartOffset();
+        }
+        
+    }
+    
+    // Entry
+    
+    private static final class TxSnapshot {
+        
+        private final Transaction snapshot;
+        private final int length;
+        
+        private TxSnapshot(Transaction snapshot, int length) {
+            this.snapshot = snapshot;
+            this.length = length;
         }
         
     }

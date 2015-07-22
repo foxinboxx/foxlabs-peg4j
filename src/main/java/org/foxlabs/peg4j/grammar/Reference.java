@@ -87,15 +87,14 @@ public class Reference extends Expression {
                 throws IOException, RecognitionException {
             context.tracer().trace(this);
             context.stream().mark();
-            for (int length = context.transaction().load(id(context)); length >= 0;) {
+            if (context.transaction().load()) {
                 context.stream().release();
-                context.stream().skip(length);
                 context.tracer().backtrace(this, true);
                 return true;
             }
             context.transaction().begin();
             if (target.reduce(context)) {
-                context.transaction().save(id(context), context.stream().getLength());
+                context.transaction().save();
                 context.transaction().commit();
                 context.stream().release();
                 context.tracer().backtrace(this, true);
@@ -105,10 +104,6 @@ public class Reference extends Expression {
             context.stream().reset();
             context.tracer().backtrace(this, false);
             return false;
-        }
-        
-        private long id(ParseContext<?> context) {
-            return ((long) target.getIndex() << 32) | context.stream().getStartOffset();
         }
         
         @Override
