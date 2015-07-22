@@ -22,6 +22,7 @@ import org.foxlabs.peg4j.LocalStack;
 import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.ActionContext;
+import org.foxlabs.peg4j.MemoableTransaction;
 import org.foxlabs.peg4j.Transaction;
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
@@ -37,7 +38,7 @@ public final class GrammarParser extends Parser<Grammar> {
     private final LocalStack<UnicodeSet> usetStack = new LocalStack<UnicodeSet>();
     private final LocalStack<Problem> problemStack = new LocalStack<Problem>();
     
-    private Tx transaction = new Tx();
+    private final Tx transaction = new Tx();
     
     private String source = null;
     private Location errorLocation = null;
@@ -92,6 +93,7 @@ public final class GrammarParser extends Parser<Grammar> {
         intStack.clear();
         usetStack.clear();
         problemStack.clear();
+        transaction.clear();
         source = null;
         errorLocation = null;
         eofLocation = null;
@@ -99,7 +101,7 @@ public final class GrammarParser extends Parser<Grammar> {
     
     // Transaction
 
-    private final class Tx implements Transaction {
+    private final class Tx extends MemoableTransaction<Tx> {
         
         private Expression[] rules;
         private String[] symbols;
@@ -135,24 +137,23 @@ public final class GrammarParser extends Parser<Grammar> {
         }
         
         @Override
-        public boolean load() {
-            builder.pushAll(rules);
-            symbolStack.pushAll(symbols);
-            intStack.pushAll(ints);
-            usetStack.pushAll(usets);
-            problemStack.pushAll(problems);
-            return true;
+        public void load(Tx tx) {
+            builder.pushAll(tx.rules);
+            symbolStack.pushAll(tx.symbols);
+            intStack.pushAll(tx.ints);
+            usetStack.pushAll(tx.usets);
+            problemStack.pushAll(tx.problems);
         }
         
         @Override
-        public boolean save() {
-            rules = builder.peekAll(new Expression[builder.size()]);
-            symbols = symbolStack.peekAll(new String[symbolStack.size()]);
-            ints = intStack.peekAll(new Integer[intStack.size()]);
-            usets = usetStack.peekAll(new UnicodeSet[usetStack.size()]);
-            problems = problemStack.peekAll(new Problem[problemStack.size()]);
-            transaction = new Tx();
-            return true;
+        public Tx save() {
+            Tx tx = new Tx();
+            tx.rules = builder.peekAll(new Expression[builder.size()]);
+            tx.symbols = symbolStack.peekAll(new String[symbolStack.size()]);
+            tx.ints = intStack.peekAll(new Integer[intStack.size()]);
+            tx.usets = usetStack.peekAll(new UnicodeSet[usetStack.size()]);
+            tx.problems = problemStack.peekAll(new Problem[problemStack.size()]);
+            return tx;
         }
         
     }

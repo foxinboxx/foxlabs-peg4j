@@ -438,7 +438,7 @@ public final class CommandLine {
                     return grammar;
                 }
                 protected Transaction getTransaction() {
-                    return Transaction.NONE;
+                    return Transaction.STATELESS;
                 }
                 protected Object buildResult() {
                     return null;

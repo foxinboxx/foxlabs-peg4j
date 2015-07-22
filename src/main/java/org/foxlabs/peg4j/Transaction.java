@@ -16,8 +16,6 @@
 
 package org.foxlabs.peg4j;
 
-import java.io.IOException;
-
 /**
  * 
  * @author Fox Mulder
@@ -30,11 +28,13 @@ public interface Transaction {
     
     void rollback();
     
-    boolean load() throws IOException;
+    int load(long id);
     
-    boolean save() throws IOException;
+    void save(long id, int length);
     
-    Transaction NONE = new Transaction() {
+    // Adapter
+    
+    class Adapter implements Transaction {
         
         @Override
         public void begin() {
@@ -52,15 +52,17 @@ public interface Transaction {
         }
         
         @Override
-        public boolean load() {
-            return false;
+        public int load(long id) {
+            return -1;
         }
         
         @Override
-        public boolean save() {
-            return false;
+        public void save(long id, int length) {
+            // nop
         }
         
-    };
+    }
+    
+    Transaction STATELESS = new Adapter();        
     
 }

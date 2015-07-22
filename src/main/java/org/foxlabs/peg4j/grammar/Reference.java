@@ -44,6 +44,7 @@ public class Reference extends Expression {
         return null;
     }
     
+    @Override
     public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
             throws IOException, RecognitionException {
         context.tracer().trace(this);
@@ -58,10 +59,12 @@ public class Reference extends Expression {
         return false;
     }
     
+    @Override
     public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
     
+    @Override
     public void toString(StringBuilder buf, boolean debug) {
         buf.append(target.getName());
     }
@@ -74,21 +77,25 @@ public class Reference extends Expression {
             super(owner, target);
         }
         
+        @Override
         public Modifier getModifier() {
             return Modifier.MEMO;
         }
         
+        @Override
         public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
                 throws IOException, RecognitionException {
             context.tracer().trace(this);
-            if (context.transaction().load()) {
+            context.stream().mark();
+            for (int length = context.transaction().load(id(context)); length >= 0;) {
+                context.stream().release();
+                context.stream().skip(length);
                 context.tracer().backtrace(this, true);
                 return true;
             }
-            context.stream().mark();
             context.transaction().begin();
             if (target.reduce(context)) {
-                context.transaction().save();
+                context.transaction().save(id(context), context.stream().getLength());
                 context.transaction().commit();
                 context.stream().release();
                 context.tracer().backtrace(this, true);
@@ -100,6 +107,11 @@ public class Reference extends Expression {
             return false;
         }
         
+        private long id(ParseContext<?> context) {
+            return ((long) target.getIndex() << 32) | context.stream().getStartOffset();
+        }
+        
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append(getModifier()).append(target.getName());
         }

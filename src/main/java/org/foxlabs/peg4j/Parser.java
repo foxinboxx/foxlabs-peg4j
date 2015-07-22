@@ -17,7 +17,7 @@
 package org.foxlabs.peg4j;
 
 import java.net.URL;
-import java.util.HashMap;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Reader;
@@ -27,10 +27,10 @@ import java.io.StringReader;
 import java.io.IOException;
 
 import org.foxlabs.peg4j.grammar.Grammar;
-import org.foxlabs.peg4j.grammar.Production;
 import org.foxlabs.peg4j.grammar.ParseContext;
 import org.foxlabs.peg4j.debug.RuleTracer;
 import org.foxlabs.peg4j.debug.ErrorTracer;
+
 import org.foxlabs.util.Location;
 import org.foxlabs.util.reflect.Types;
 
@@ -141,10 +141,10 @@ public abstract class Parser<T> {
     
     // Context
     
-    private class Context<P extends Parser<?>> implements ParseContext<P>, Transaction {
+    private class Context<P extends Parser<?>> extends Transaction.Adapter implements ParseContext<P> {
         
-        final BacktrackingReader stream;
-        final ErrorTracer tracer;
+        private final BacktrackingReader stream;
+        private final ErrorTracer tracer;
         
         private Context(BacktrackingReader stream, ErrorTracer tracer) {
             this.stream = stream;
@@ -217,65 +217,24 @@ public abstract class Parser<T> {
             getTransaction().rollback();
         }
         
-        @Override
-        public boolean load() throws IOException {
-            return false;
-        }
-        
-        @Override
-        public boolean save() throws IOException {
-            return false;
-        }
-        
     }
     
+    // MemoContext
+    
     private class MemoContext<P extends Parser<?>> extends Context<P> {
-        
-        final HashMap<Long, TxData> txCache = new HashMap<Long, TxData>();
         
         private MemoContext(BacktrackingReader stream, ErrorTracer tracer) {
             super(stream, tracer);
         }
         
         @Override
-        public boolean load() throws IOException {
-            Production prod = tracer.getCurrentReference();
-            long offset = stream.getEndOffset();
-            TxData data = txCache.get(TxData.keyFor(prod, offset));
-            if (data != null && data.transaction.load()) {
-                stream.skip(data.length);
-                return true;
-            }
-            return false;
+        public int load(long id) {
+            return getTransaction().load(id);
         }
         
         @Override
-        public boolean save() throws IOException {
-            Transaction tx = getTransaction();
-            if (tx.save()) {
-                Production prod = tracer.getCurrentReference();
-                long offset = stream.getStartOffset();
-                TxData data = new TxData(tx, stream.getLength());
-                txCache.put(TxData.keyFor(prod, offset), data);
-                return true;
-            }
-            return false;
-        }
-        
-    }
-    
-    private static final class TxData {
-        
-        final Transaction transaction;
-        final int length;
-        
-        private TxData(Transaction transaction, int length) {
-            this.transaction = transaction;
-            this.length = length;
-        }
-        
-        private static Long keyFor(Production prod, long offset) {
-            return Long.valueOf(((long) prod.getIndex() << 32) | offset);
+        public void save(long id, int length) {
+            getTransaction().save(id, length);
         }
         
     }
