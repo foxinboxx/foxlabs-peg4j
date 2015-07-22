@@ -18,7 +18,6 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
-import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public final class Alternation extends Expression.Nary implements Operator {
@@ -28,8 +27,7 @@ public final class Alternation extends Expression.Nary implements Operator {
     }
     
     @Override
-    public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
-            throws IOException, RecognitionException {
+    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
         context.tracer().trace(this);
         context.stream().mark();
         for (int i = 0; i < children.length; i++) {

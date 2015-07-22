@@ -18,10 +18,11 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
-import org.foxlabs.peg4j.ActionException;
-import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.Parser;
+import org.foxlabs.peg4j.ActionHandler;
+import org.foxlabs.peg4j.ActionException;
 import org.foxlabs.peg4j.RecognitionException;
+
 import org.foxlabs.util.reflect.Types;
 
 public final class Action extends Expression.Unary {
@@ -65,7 +66,7 @@ public final class Action extends Expression.Unary {
     }
     
     @Override
-    public <P extends Parser<?>> boolean reduce(ParseContext<P> context) throws IOException, RecognitionException {
+    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
         context.tracer().trace(this);
         context.stream().mark();
         context.transaction().begin();
@@ -83,9 +84,9 @@ public final class Action extends Expression.Unary {
         return false;
     }
     
-    private <P extends Parser<?>> boolean handleAction(ParseContext<P> context) throws RecognitionException {
+    private boolean handleAction(ParseContext context) throws RecognitionException {
         try {
-            return Types.<ActionHandler<P>>cast(handler).handle(context.parser(), context);
+            return Types.<ActionHandler<Parser<?>>>cast(handler).handle(context.parser(), context);
         } catch (Throwable e) {
             throw new ActionException(this, e, context.end());
         }

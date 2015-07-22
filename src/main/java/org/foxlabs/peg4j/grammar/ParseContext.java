@@ -26,9 +26,9 @@ import org.foxlabs.peg4j.debug.RuleTracer;
  * 
  * @author Fox Mulder
  */
-public interface ParseContext<P extends Parser<?>> extends ActionContext {
+public interface ParseContext extends ActionContext {
     
-    P parser();
+    Parser<?> parser();
     
     BacktrackingReader stream();
     

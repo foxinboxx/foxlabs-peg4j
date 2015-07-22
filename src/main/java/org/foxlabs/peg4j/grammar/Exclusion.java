@@ -18,7 +18,6 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
-import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public abstract class Exclusion extends Expression.Unary implements Operator {
@@ -52,8 +51,7 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
         }
         
         @Override
-        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
-                throws IOException, RecognitionException {
+        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
             context.tracer().trace(this);
             if (child.reduce(context)) {
@@ -82,8 +80,7 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
         }
         
         @Override
-        public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
-                throws IOException, RecognitionException {
+        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
             context.tracer().trace(this);
             if (child.reduce(context)) {

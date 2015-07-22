@@ -19,7 +19,7 @@ package org.foxlabs.peg4j.grammar;
 import java.io.IOException;
 
 import org.foxlabs.peg4j.BacktrackingReader;
-import org.foxlabs.peg4j.Parser;
+
 import org.foxlabs.util.UnicodeSet;
 
 public abstract class Terminal extends Expression {
@@ -66,7 +66,7 @@ public abstract class Terminal extends Expression {
     public abstract boolean isInefficient();
     
     @Override
-    public <P extends Parser<?>> boolean reduce(ParseContext<P> context) throws IOException {
+    public boolean reduce(ParseContext context) throws IOException {
         context.tracer().trace(this);
         if (match(context.stream())) {
             context.tracer().backtrace(this, true);

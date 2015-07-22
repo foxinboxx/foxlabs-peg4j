@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
+
 import java.io.IOException;
 
-import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.RecognitionException;
 
 public final class Production extends Rule implements Comparable<Production> {
@@ -85,8 +85,7 @@ public final class Production extends Rule implements Comparable<Production> {
     }
     
     @Override
-    public <P extends Parser<?>> boolean reduce(ParseContext<P> context)
-            throws IOException, RecognitionException {
+    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
         context.stream().mark();
         context.tracer().trace(this);
         if (expression.reduce(context)) {

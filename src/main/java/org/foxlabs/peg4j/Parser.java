@@ -16,9 +16,9 @@
 
 package org.foxlabs.peg4j;
 
-import java.net.URL;
-
 import java.util.HashMap;
+
+import java.net.URL;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +34,6 @@ import org.foxlabs.peg4j.debug.RuleTracer;
 import org.foxlabs.peg4j.debug.ErrorTracer;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.reflect.Types;
 
 public abstract class Parser<T> {
     
@@ -128,7 +127,7 @@ public abstract class Parser<T> {
     public final T parse(BacktrackingReader stream) throws IOException, RecognitionException {
         boolean success = false;
         ErrorTracer tracer = ErrorTracer.newTracer(getTracer());
-        Context<?> context = isMemoable() ? new MemoContext<Parser<?>>(stream, tracer) : new Context<Parser<?>>(stream, tracer);
+        Context context = isMemoable() ? new MemoContext(stream, tracer) : new Context(stream, tracer);
         tracer.open(stream);
         try {
             success = getGrammar().getStart().reduce(context);
@@ -143,7 +142,7 @@ public abstract class Parser<T> {
     
     // Context
     
-    private class Context<P extends Parser<?>> extends Transaction.Adapter implements ParseContext<P> {
+    private class Context extends Transaction.Adapter implements ParseContext {
         
         final BacktrackingReader stream;
         final ErrorTracer tracer;
@@ -156,8 +155,8 @@ public abstract class Parser<T> {
         // ParseContext
         
         @Override
-        public P parser() {
-            return Types.cast(Parser.this);
+        public Parser<?> parser() {
+            return Parser.this;
         }
         
         @Override
@@ -223,7 +222,7 @@ public abstract class Parser<T> {
     
     // MemoContext
     
-    private class MemoContext<P extends Parser<?>> extends Context<P> {
+    private class MemoContext extends Context {
         
         final HashMap<Long, TxSnapshot> snapshotCache = new HashMap<Long, TxSnapshot>();
         
@@ -239,7 +238,8 @@ public abstract class Parser<T> {
                     stream.skip(snapshot.length);
                     return true;
                 } catch (IOException e) {
-                    throw new InternalError();
+                    // Should never happen
+                    throw new RuntimeException(e);
                 }
             }
             return false;
@@ -260,12 +260,12 @@ public abstract class Parser<T> {
         
     }
     
-    // Entry
+    // TxSnapshot
     
     private static final class TxSnapshot {
         
-        private final Transaction snapshot;
-        private final int length;
+        final Transaction snapshot;
+        final int length;
         
         private TxSnapshot(Transaction snapshot, int length) {
             this.snapshot = snapshot;
