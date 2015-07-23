@@ -41,7 +41,7 @@ public class LocalStack<E> {
     }
     
     public int size() {
-        return marker > 0 ? size - marks[marker - 1] : 0;
+        return marker > 0 ? size - marks[marker - 1] : size;
     }
     
     public LocalStack<E> mark() {
@@ -74,22 +74,14 @@ public class LocalStack<E> {
     }
     
     public void push(E element) {
-        if (marker == 0) {
-            throw new IllegalStateException();
-        } else {
-            ensureCapacity(1);
-            elements[size++] = element;
-        }
+        ensureCapacity(1);
+        elements[size++] = element;
     }
     
     public void pushAll(E... elements) {
-        if (marker == 0) {
-            throw new IllegalStateException();
-        } else {
-            ensureCapacity(elements.length);
-            System.arraycopy(elements, 0, this.elements, size, elements.length);
-            size += elements.length;
-        }
+        ensureCapacity(elements.length);
+        System.arraycopy(elements, 0, this.elements, size, elements.length);
+        size += elements.length;
     }
     
     public E pop() {
@@ -103,15 +95,11 @@ public class LocalStack<E> {
     }
     
     public E[] popAll(E[] array) {
-        if (marker == 0) {
-            throw new IllegalStateException();
-        } else {
-            int length = Math.min(size - marks[marker - 1], array.length);
-            System.arraycopy(elements, size - length, array, 0, length);
-            Arrays.fill(elements, size - length, size, null);
-            size -= length;
-            return array;
-        }
+        int length = Math.min(marker == 0 ? size : size - marks[marker - 1], array.length);
+        System.arraycopy(elements, size - length, array, 0, length);
+        Arrays.fill(elements, size - length, size, null);
+        size -= length;
+        return array;
     }
     
     public E peek() {
@@ -123,13 +111,9 @@ public class LocalStack<E> {
     }
     
     public E[] peekAll(E[] array) {
-        if (marker == 0) {
-            throw new IllegalStateException();
-        } else {
-            int length = Math.min(size - marks[marker - 1], array.length);
-            System.arraycopy(elements, size - length, array, 0, length);
-            return array;
-        }
+        int length = Math.min(marker == 0 ? size : size - marks[marker - 1], array.length);
+        System.arraycopy(elements, size - length, array, 0, length);
+        return array;
     }
     
     public void clear() {
