@@ -233,7 +233,7 @@ public abstract class Parser<T> {
         @Override
         public boolean load() {
             TxSnapshot snapshot = snapshotCache.get(snapshotID());
-            if (snapshot != null && snapshot.snapshot.load()) {
+            if (snapshot != null && snapshot.delta.load()) {
                 try {
                     stream.skip(snapshot.length);
                     return true;
@@ -264,11 +264,11 @@ public abstract class Parser<T> {
     
     private static final class TxSnapshot {
         
-        final Transaction snapshot;
+        final Transaction delta;
         final int length;
         
-        private TxSnapshot(Transaction snapshot, int length) {
-            this.snapshot = snapshot;
+        private TxSnapshot(Transaction delta, int length) {
+            this.delta = delta;
             this.length = length;
         }
         

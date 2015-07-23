@@ -28,10 +28,12 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
     
     public abstract Predicate getPredicate();
     
+    @Override
     public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
     
+    @Override
     public void toString(StringBuilder buf, boolean debug) {
         buf.append(getPredicate());
         toString(child, buf, child instanceof Operator, debug);

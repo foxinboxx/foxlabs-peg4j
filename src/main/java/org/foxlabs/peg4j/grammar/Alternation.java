@@ -40,7 +40,6 @@ public final class Alternation extends Expression.Nary implements Operator {
             context.stream().mark();
         }
         context.stream().release();
-        
         context.tracer().backtrace(this, false);
         return false;
     }

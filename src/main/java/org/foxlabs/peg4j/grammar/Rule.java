@@ -51,15 +51,18 @@ public abstract class Rule {
     }
     
     final void addProblem(Problem problem) {
-        if (problems == null)
+        if (problems == null) {
             problems = new LinkedList<Problem>();
+        }
         problems.add(problem);
     }
     
     public final List<Problem> getProblems() {
-        if (problems == null)
+        if (problems == null) {
             return Collections.emptyList();
-        return Collections.unmodifiableList(problems);
+        } else {
+            return Collections.unmodifiableList(problems);
+        }
     }
     
     public final List<Problem> getAllProblems() {

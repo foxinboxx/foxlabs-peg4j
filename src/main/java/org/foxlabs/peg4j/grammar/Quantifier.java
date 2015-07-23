@@ -33,13 +33,15 @@ public enum Quantifier {
     }
     
     public static Quantifier quantifierOf(String symbol) {
-        if (ONCEORNONE.symbol.equals(symbol))
+        if (ONCEORNONE.symbol.equals(symbol)) {
             return ONCEORNONE;
-        if (ZEROORMORE.symbol.equals(symbol))
+        } else if (ZEROORMORE.symbol.equals(symbol)) {
             return ZEROORMORE;
-        if (ONCEORMORE.symbol.equals(symbol))
+        } else if (ONCEORMORE.symbol.equals(symbol)) {
             return ONCEORMORE;
-        return null;
+        } else {
+            return null;
+        }
     }
     
 }

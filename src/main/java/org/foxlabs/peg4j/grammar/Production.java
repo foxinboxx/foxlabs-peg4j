@@ -79,6 +79,7 @@ public final class Production extends Rule implements Comparable<Production> {
         return expression instanceof Terminal.Nil;
     }
     
+    @Override
     protected void findProblems(List<Problem> foundProblems) {
         foundProblems.addAll(getProblems());
         expression.findProblems(foundProblems);

@@ -31,11 +31,7 @@ public enum Modifier {
     }
     
     public static Modifier modifierOf(String symbol) {
-        if (MEMO.symbol.equals(symbol)) {
-            return MEMO;
-        } else {
-            return null;
-        }
+        return MEMO.symbol.equals(symbol) ? MEMO : null;
     }
     
 }

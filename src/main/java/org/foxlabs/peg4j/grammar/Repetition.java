@@ -78,8 +78,9 @@ public class Repetition extends Expression.Unary implements Operator {
         buf.append(min);
         if (min < max) {
             buf.append(',');
-            if (max < Integer.MAX_VALUE)
+            if (max < Integer.MAX_VALUE) {
                 buf.append(max);
+            }
         }
         buf.append('}');
     }

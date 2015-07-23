@@ -85,6 +85,7 @@ public abstract class Terminal extends Expression {
      */
     protected abstract boolean match(BacktrackingReader stream) throws IOException;
     
+    @Override
     public final <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
         visitor.visit(this);
     }
@@ -97,22 +98,27 @@ public abstract class Terminal extends Expression {
             super(owner);
         }
         
+        @Override
         public boolean isEmpty() {
             return true;
         }
         
+        @Override
         public boolean isDetermined() {
             return false;
         }
         
+        @Override
         public boolean isInefficient() {
             return false;
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             return true;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             // Empty
         }
@@ -131,22 +137,27 @@ public abstract class Terminal extends Expression {
             super(owner);
         }
         
+        @Override
         public boolean isEmpty() {
             return false;
         }
         
+        @Override
         public boolean isDetermined() {
             return false;
         }
         
+        @Override
         public boolean isInefficient() {
             return false;
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             return stream.read() >= 0;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('.');
         }
@@ -172,6 +183,7 @@ public abstract class Terminal extends Expression {
             return image;
         }
         
+        @Override
         public boolean isEmpty() {
             return image.length() == 0;
         }
@@ -204,14 +216,17 @@ public abstract class Terminal extends Expression {
             super(owner, image);
         }
         
+        @Override
         public final boolean isInefficient() {
             return false;
         }
         
+        @Override
         public final boolean isCaseSensitive() {
             return true;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('\'');
             buf.append(UnicodeSet.escape(getImage()));
@@ -226,14 +241,17 @@ public abstract class Terminal extends Expression {
             super(owner, image);
         }
         
+        @Override
         public final boolean isInefficient() {
             return getImage().toLowerCase().equals(getImage().toUpperCase());
         }
         
+        @Override
         public final boolean isCaseSensitive() {
             return false;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('\"');
             buf.append(UnicodeSet.escape(getImage()));
@@ -251,10 +269,12 @@ public abstract class Terminal extends Expression {
             value = image;
         }
         
+        @Override
         public boolean isDetermined() {
             return true;
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             return stream.read() == value;
         }
@@ -270,10 +290,12 @@ public abstract class Terminal extends Expression {
             value = Character.toUpperCase(image);
         }
         
+        @Override
         public boolean isDetermined() {
             return false;
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             return Character.toUpperCase(stream.read()) == value;
         }
@@ -292,10 +314,12 @@ public abstract class Terminal extends Expression {
             }
         }
         
+        @Override
         public boolean isDetermined() {
             return false;
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             for (int i = 0; i < value.length; i++) {
                 if (stream.read() != value[i]) {
@@ -319,10 +343,12 @@ public abstract class Terminal extends Expression {
             }
         }
         
+        @Override
         public boolean isDetermined() {
             return false;
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             for (int i = 0; i < value.length; i++) {
                 if (Character.toUpperCase(stream.read()) != value[i]) {
@@ -342,13 +368,11 @@ public abstract class Terminal extends Expression {
         int length = value.length();
         if (length == 0) {
             return new SequenceCS(owner, value); // Empty sequence
-        }
-        
-        if (length == 1) {
+        } else if (length == 1) {
             return tokenOf(owner, value.charAt(0), cs);
+        } else {
+            return cs ? new SequenceCS(owner, value) : new SequenceIC(owner, value);
         }
-        
-        return cs ? new SequenceCS(owner, value) : new SequenceIC(owner, value);
     }
     
     // Interval
@@ -372,18 +396,22 @@ public abstract class Terminal extends Expression {
             return max;
         }
         
+        @Override
         public boolean isEmpty() {
             return false;
         }
         
+        @Override
         public boolean isDetermined() {
             return true;
         }
         
+        @Override
         public boolean isInefficient() {
             return min == max; // Can be replaced by Token
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             int ch = stream.read();
             return ch >= min && ch <= max;
@@ -401,6 +429,7 @@ public abstract class Terminal extends Expression {
             return false;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('\'')
                .append(UnicodeSet.escape((char) min))
@@ -432,20 +461,24 @@ public abstract class Terminal extends Expression {
             return uset;
         }
         
+        @Override
         public boolean isEmpty() {
             return uset == UnicodeSet.EMPTY;
         }
         
+        @Override
         public boolean isDetermined() {
             return true;
         }
         
+        @Override
         public boolean isInefficient() {
             return uset == UnicodeSet.WHOLE // Can be replaced by Any
                 || uset.getMin() == uset.getMax() // Can be replaced by Token
                 || uset.size() == 1; // Can be replaced by Interval
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             return uset.contains(stream.read());
         }
@@ -462,6 +495,7 @@ public abstract class Terminal extends Expression {
             return false;
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             uset.toString(buf);
         }
@@ -479,8 +513,9 @@ public abstract class Terminal extends Expression {
     static Set setOf(Production owner, UnicodeSet uset) {
         if (uset == null) {
             throw new IllegalArgumentException();
+        } else {
+            return new Set(owner, uset);
         }
-        return new Set(owner, uset);
     }
     
     static Set setOf(Production owner, UnicodeSet... usets) {
@@ -502,14 +537,17 @@ public abstract class Terminal extends Expression {
             return name;
         }
         
+        @Override
         public boolean isEmpty() {
             return false;
         }
         
+        @Override
         public boolean isDetermined() {
             return false;
         }
         
+        @Override
         public boolean isInefficient() {
             return false;
         }
@@ -518,6 +556,7 @@ public abstract class Terminal extends Expression {
             return getClass() == Class.class;
         }
         
+        @Override
         protected boolean match(BacktrackingReader stream) throws IOException {
             return match(stream.read());
         }
@@ -535,6 +574,7 @@ public abstract class Terminal extends Expression {
             }
         }
         
+        @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('<')
                .append(name)
@@ -551,6 +591,7 @@ public abstract class Terminal extends Expression {
             super(owner, name);
         }
         
+        @Override
         protected boolean match(int ch) {
             return Character.isLowerCase(ch);
         }
@@ -565,6 +606,7 @@ public abstract class Terminal extends Expression {
             super(owner, name);
         }
         
+        @Override
         protected boolean match(int ch) {
             return Character.isUpperCase(ch);
         }
@@ -579,6 +621,7 @@ public abstract class Terminal extends Expression {
             super(owner, name);
         }
         
+        @Override
         protected boolean match(int ch) {
             return Character.isTitleCase(ch);
         }
@@ -593,6 +636,7 @@ public abstract class Terminal extends Expression {
             super(owner, name);
         }
         
+        @Override
         protected boolean match(int ch) {
             return Character.isLetter(ch);
         }
@@ -607,6 +651,7 @@ public abstract class Terminal extends Expression {
             super(owner, name);
         }
         
+        @Override
         protected boolean match(int ch) {
             return Character.isDigit(ch);
         }
@@ -621,6 +666,7 @@ public abstract class Terminal extends Expression {
             super(owner, name);
         }
         
+        @Override
         protected boolean match(int ch) {
             return Character.isLetterOrDigit(ch);
         }
@@ -635,6 +681,7 @@ public abstract class Terminal extends Expression {
             super(owner, name);
         }
         
+        @Override
         protected boolean match(int ch) {
             return Character.isWhitespace(ch);
         }

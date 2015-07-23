@@ -32,11 +32,13 @@ public enum Predicate {
     }
     
     public static Predicate predicateOf(String symbol) {
-        if (NOT.symbol.equals(symbol))
+        if (NOT.symbol.equals(symbol)) {
             return NOT;
-        if (AND.symbol.equals(symbol))
+        } else if (AND.symbol.equals(symbol)) {
             return AND;
-        return null;
+        } else {
+            return null;
+        }
     }
     
 }

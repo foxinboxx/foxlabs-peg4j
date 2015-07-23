@@ -39,6 +39,7 @@ public abstract class Expression extends Rule {
         return parent;
     }
     
+    @Override
     protected void findProblems(List<Problem> foundProblems) {
         foundProblems.addAll(getProblems());
     }
@@ -59,6 +60,7 @@ public abstract class Expression extends Rule {
             return child;
         }
         
+        @Override
         protected void findProblems(List<Problem> foundProblems) {
             foundProblems.addAll(getProblems());
             child.findProblems(foundProblems);
@@ -91,6 +93,7 @@ public abstract class Expression extends Rule {
             return children.clone();
         }
         
+        @Override
         protected void findProblems(List<Problem> foundProblems) {
             foundProblems.addAll(getProblems());
             for (Expression child : children)
