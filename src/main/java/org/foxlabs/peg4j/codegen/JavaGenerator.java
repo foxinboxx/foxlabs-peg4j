@@ -45,6 +45,7 @@ public final class JavaGenerator extends BaseGenerator {
     
     public static final int INCLUDE_DEBUGINFO = 0x01;
     public static final int GENERATE_COMMENTS = 0x02;
+    public static final int GENERATE_PROBLEMS = 0x04;
     
     static final Set<Class<?>> DEFAULT_IMPORTS = new LinkedHashSet<Class<?>>();
     
@@ -78,6 +79,7 @@ public final class JavaGenerator extends BaseGenerator {
     
     private boolean includeDebugInfo;
     private boolean generateComments;
+    private boolean generateProblems;
     
     public JavaGenerator() {
         this(null, null, null, 0x07);
@@ -100,12 +102,14 @@ public final class JavaGenerator extends BaseGenerator {
     
     public int getFlags() {
         return (includeDebugInfo ? INCLUDE_DEBUGINFO : 0)
-             | (generateComments ? GENERATE_COMMENTS : 0);
+             | (generateComments ? GENERATE_COMMENTS : 0)
+             | (generateProblems ? GENERATE_PROBLEMS : 0);
     }
     
     public void setFlags(int flags) {
         includeDebugInfo = (flags & INCLUDE_DEBUGINFO) != 0;
         generateComments = (flags & GENERATE_COMMENTS) != 0;
+        generateProblems = (flags & GENERATE_PROBLEMS) != 0;
     }
     
     @Override
@@ -138,8 +142,9 @@ public final class JavaGenerator extends BaseGenerator {
     
     // ${result_type}
     private void defineResultType(DeclContext dc) {
-        if (!Object.class.getPackage().getName().equals(result.getPackage().getName()))
+        if (!Object.class.getPackage().getName().equals(result.getPackage().getName())) {
             dc.imports.add(result);
+        }
         dc.variables.put("result_type", result.getSimpleName());
     }
     
@@ -200,7 +205,7 @@ public final class JavaGenerator extends BaseGenerator {
     // ${problems}
     private void defineProblems(DeclContext dc) {
         StringBuilder problemComments = new StringBuilder();
-        if (generateComments && dc.grammar.hasProblems()) {
+        if (generateComments && generateProblems && dc.grammar.hasProblems()) {
             appendComment("PROBLEMS:", problemComments);
             problemComments.append("\n");
             for (Problem problem : dc.grammar.getProblems().getProblemList())
@@ -300,13 +305,17 @@ public final class JavaGenerator extends BaseGenerator {
         }
         
         public void visit(Production rule) {
-            if (statements.length() > 0)
+            if (statements.length() > 0) {
                 statements.append("\n");
+            }
             
             if (generateComments) {
                 appendComment(rule.toString(), statements);
-                for (Problem problem : rule.getAllProblems())
-                    appendComment(problem.toString(), statements);
+                if (generateProblems) {
+                    for (Problem problem : rule.getAllProblems()) {
+                        appendComment(problem.toString(), statements);
+                    }
+                }
             }
             
             statements.append(".startProduction(");

@@ -18,7 +18,6 @@ package org.foxlabs.peg4j.debug;
 
 import java.util.Set;
 import java.util.HashSet;
-
 import java.io.IOException;
 
 import org.foxlabs.peg4j.SyntaxException;
@@ -28,7 +27,6 @@ import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Exclusion;
 import org.foxlabs.peg4j.grammar.Reference;
 import org.foxlabs.peg4j.grammar.Production;
-
 import org.foxlabs.util.Location;
 
 public class ErrorTracer extends RuleTracer.Adapter {
@@ -137,6 +135,7 @@ public class ErrorTracer extends RuleTracer.Adapter {
         
         @Override
         public void open(BacktrackingReader stream) throws IOException {
+            super.open(stream);
             tracer.open(stream);
         }
         
@@ -153,7 +152,20 @@ public class ErrorTracer extends RuleTracer.Adapter {
         }
         
         @Override
+        public void lookup(Reference reference, boolean hit) throws IOException {
+            super.lookup(reference, hit);
+            tracer.lookup(reference, hit);
+        }
+
+        @Override
+        public void cache(Reference reference) throws IOException {
+            super.cache(reference);
+            tracer.cache(reference);
+        }
+        
+        @Override
         public void close(boolean result) throws IOException {
+            super.close(result);
             tracer.close(result);
         }
         

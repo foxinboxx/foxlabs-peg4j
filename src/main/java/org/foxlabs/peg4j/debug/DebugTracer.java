@@ -129,8 +129,10 @@ public class DebugTracer implements RuleTracer {
         ruleCount = 0;
         terminalCount = 0;
         productionCount = 0;
-        memoCacheSize = 0;
         actionCount = 0;
+        memoCacheSize = 0;
+        memoCacheHitCount = 0;
+        memoCacheMissCount = 0;
         maxDepth = 0;
         
         depthLevel = 0;

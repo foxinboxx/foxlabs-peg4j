@@ -16,9 +16,9 @@ public class ${parser_type} extends Parser<${result_type}> {
     }
     
     @Override
-    protected Transaction startTransaction() {
+    protected Transaction getTransaction() {
         // FIXME
-        return Transaction.NONE;
+        return Transaction.STATELESS;
     }
     
     @Override

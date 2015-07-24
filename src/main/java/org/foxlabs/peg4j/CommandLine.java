@@ -308,17 +308,18 @@ public final class CommandLine {
     static abstract class Command {
         
         // grammar source file encoding
-        protected String encoding;
+        protected String encoding = Charset.defaultCharset().name();
         // grammar compilation flags
-        private int flags;
+        private int flags = 0;
         
         // compiled grammar object
         protected Grammar grammar;
         
         // -encoding <charset>
         public void setEncoding(String value) {
-            if (!Charset.isSupported(value))
+            if (!Charset.isSupported(value)) {
                 throw new CommandLineException("cmd.unsupportedEncoding", value);
+            }
             encoding = value;
         }
         
@@ -353,17 +354,15 @@ public final class CommandLine {
         }
         
         public void execute(File source) throws Throwable {
-            if (encoding == null)
-                encoding = Charset.defaultCharset().name();
-            
             GrammarParser parser = new GrammarParser();
             grammar = parser.parse(source, encoding);
             GrammarCompiler.compile(grammar, flags);
             
             if (grammar.hasProblems()) {
                 print(grammar.getProblems().toString());
-                if (grammar.hasErrors())
+                if (grammar.hasErrors()) {
                     terminateAbnormal(false);
+                }
             }
         }
         
@@ -390,6 +389,8 @@ public final class CommandLine {
         private File source;
         // trace log file
         private File log;
+        // memoization flag
+        private boolean memoable = true;
         // trace level
         private TraceLevel level = TraceLevel.MEDIUM;
         // max logging depth
@@ -405,6 +406,11 @@ public final class CommandLine {
         // -log <file>
         public void setLog(File value) {
             log = value;
+        }
+        
+        // -memoff
+        public void setMemoff() {
+            memoable = false;
         }
         
         // -level <LOW|MEDIUM|HIGH>
@@ -423,15 +429,18 @@ public final class CommandLine {
         }
         
         public void execute(File source) throws Throwable {
-            if (this.source == null)
+            if (this.source == null) {
                 throw new CommandLineException("cmd.traceSourceRequired");
+            }
             
             super.execute(source);
             
-            if (level == null)
+            if (level == null) {
                 level = TraceLevel.MEDIUM;
-            if (log == null)
+            }
+            if (log == null) {
                 log = changeExt(source, "log");
+            }
             
             Parser<Object> parser = new Parser<Object>() {
                 protected Grammar getGrammar() {
@@ -450,6 +459,7 @@ public final class CommandLine {
             tracer.setMaxDepthLevel(maxDepth);
             tracer.setMaxTextSize(maxTextLength);
             parser.setTracer(tracer);
+            parser.setMemoable(memoable);
             
             parser.parse(this.source);
         }
@@ -508,11 +518,17 @@ public final class CommandLine {
             flags &= ~JavaGenerator.GENERATE_COMMENTS;
         }
         
+        // -noproblems
+        public void setNoProblems() {
+            flags &= ~JavaGenerator.GENERATE_PROBLEMS;
+        }
+        
         public void execute(File source) throws Throwable {
             super.execute(source);
             
-            if (outdir == null)
+            if (outdir == null) {
                 outdir = source.getParentFile();
+            }
             
             String filename = name == null ? "MyParser" : name;
             FileWriter out = new FileWriter(new File(outdir, filename + ".java"));

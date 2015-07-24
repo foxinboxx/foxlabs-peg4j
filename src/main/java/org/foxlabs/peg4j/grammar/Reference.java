@@ -82,30 +82,34 @@ public class Reference extends Expression {
         
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.tracer().trace(this);
-            context.stream().mark();
-            if (context.transaction().load()) {
-                context.tracer().lookup(this, true);
-                context.stream().release();
-                context.tracer().backtrace(this, true);
-                return true;
-            } else {
-                context.tracer().lookup(this, false);
-            }
-            context.transaction().begin();
-            if (target.reduce(context)) {
-                if (context.transaction().save() != null) {
-                    context.tracer().cache(this);
+            if (context.parser().isMemoable()) {
+                context.tracer().trace(this);
+                context.stream().mark();
+                if (context.transaction().load()) {
+                    context.tracer().lookup(this, true);
+                    context.stream().release();
+                    context.tracer().backtrace(this, true);
+                    return true;
+                } else {
+                    context.tracer().lookup(this, false);
                 }
-                context.transaction().commit();
-                context.stream().release();
-                context.tracer().backtrace(this, true);
-                return true;
+                context.transaction().begin();
+                if (target.reduce(context)) {
+                    if (context.transaction().save() != null) {
+                        context.tracer().cache(this);
+                    }
+                    context.transaction().commit();
+                    context.stream().release();
+                    context.tracer().backtrace(this, true);
+                    return true;
+                }
+                context.transaction().rollback();
+                context.stream().reset();
+                context.tracer().backtrace(this, false);
+                return false;
+            } else {
+                return super.reduce(context);
             }
-            context.transaction().rollback();
-            context.stream().reset();
-            context.tracer().backtrace(this, false);
-            return false;
         }
         
         @Override

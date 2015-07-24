@@ -233,25 +233,32 @@ public abstract class Parser<T> {
         @Override
         public boolean load() {
             TxSnapshot snapshot = snapshotCache.get(snapshotID());
-            if (snapshot != null && snapshot.delta.load()) {
-                try {
-                    stream.skip(snapshot.length);
-                    return true;
-                } catch (IOException e) {
-                    // Should never happen
-                    throw new RuntimeException(e);
+            if (snapshot != null) {
+                if (snapshot.delta != null) {
+                    snapshot.delta.load();
                 }
+                if (snapshot.length > 0) {
+                    try {
+                        stream.skip(snapshot.length);
+                    } catch (IOException e) {
+                        // Should never happen
+                        throw new RuntimeException(e);
+                    }
+                }
+                return true;
             }
             return false;
         }
         
         @Override
         public Transaction save() {
-            Transaction tx = getTransaction().save();
-            if (tx != null) {
-                snapshotCache.put(snapshotID(), new TxSnapshot(tx, stream.getLength()));
+            int length = stream.getLength();
+            Transaction delta = getTransaction().save();
+            if (length > 0 || delta != null) {
+                snapshotCache.put(snapshotID(), new TxSnapshot(delta, length));
+                return delta == null ? Transaction.STATELESS : delta;
             }
-            return tx;
+            return null;
         }
         
         private Long snapshotID() {
