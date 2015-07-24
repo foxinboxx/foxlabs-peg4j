@@ -85,13 +85,18 @@ public class Reference extends Expression {
             context.tracer().trace(this);
             context.stream().mark();
             if (context.transaction().load()) {
+                context.tracer().lookup(this, true);
                 context.stream().release();
                 context.tracer().backtrace(this, true);
                 return true;
+            } else {
+                context.tracer().lookup(this, false);
             }
             context.transaction().begin();
             if (target.reduce(context)) {
-                context.transaction().save();
+                if (context.transaction().save() != null) {
+                    context.tracer().cache(this);
+                }
                 context.transaction().commit();
                 context.stream().release();
                 context.tracer().backtrace(this, true);

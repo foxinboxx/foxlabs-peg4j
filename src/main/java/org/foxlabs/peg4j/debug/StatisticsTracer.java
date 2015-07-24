@@ -19,6 +19,7 @@ package org.foxlabs.peg4j.debug;
 import java.io.IOException;
 
 import org.foxlabs.peg4j.BacktrackingReader;
+import org.foxlabs.peg4j.grammar.Reference;
 import org.foxlabs.peg4j.grammar.Rule;
 
 /**
@@ -41,6 +42,18 @@ public class StatisticsTracer implements RuleTracer {
     
     @Override
     public void backtrace(Rule rule, boolean success) throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public void lookup(Reference reference, boolean hit) throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public void cache(Reference reference) throws IOException {
         // TODO Auto-generated method stub
         
     }

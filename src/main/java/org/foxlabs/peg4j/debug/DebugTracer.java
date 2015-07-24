@@ -23,11 +23,11 @@ import java.io.OutputStreamWriter;
 import java.io.IOException;
 
 import org.foxlabs.peg4j.BacktrackingReader;
+import org.foxlabs.peg4j.grammar.Reference;
 import org.foxlabs.peg4j.grammar.Rule;
 import org.foxlabs.peg4j.grammar.Action;
 import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Production;
-
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 import org.foxlabs.util.PeriodCounter;
@@ -49,7 +49,9 @@ public class DebugTracer implements RuleTracer {
     protected int ruleCount;
     protected int terminalCount;
     protected int productionCount;
-    protected int memoizationCount;
+    protected int memoCacheSize;
+    protected int memoCacheHitCount;
+    protected int memoCacheMissCount;
     protected int actionCount;
     protected int maxDepth;
     
@@ -102,8 +104,9 @@ public class DebugTracer implements RuleTracer {
     
     @Override
     public void open(BacktrackingReader stream) throws IOException {
-        if (file != null)
+        if (file != null) {
             out = new FileWriter(file);
+        }
         
         out.write(new java.util.Date().toString());
         out.write("\nSOURCE: ");
@@ -126,7 +129,7 @@ public class DebugTracer implements RuleTracer {
         ruleCount = 0;
         terminalCount = 0;
         productionCount = 0;
-        memoizationCount = 0;
+        memoCacheSize = 0;
         actionCount = 0;
         maxDepth = 0;
         
@@ -160,8 +163,9 @@ public class DebugTracer implements RuleTracer {
         
         ruleCount++;
         depthLevel++;
-        if (depthLevel > maxDepth)
+        if (depthLevel > maxDepth) {
             maxDepth = depthLevel;
+        }
     }
     
     @Override
@@ -203,6 +207,20 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
+    public void lookup(Reference reference, boolean hit) throws IOException {
+        if (hit) {
+            memoCacheHitCount++;
+        } else {
+            memoCacheMissCount++;
+        }
+    }
+    
+    @Override
+    public void cache(Reference reference) throws IOException {
+        memoCacheSize++;
+    }
+    
+    @Override
     public void close(boolean result) throws IOException {
         out.write("\n\nTRACE RESULTS:");
         
@@ -215,22 +233,28 @@ public class DebugTracer implements RuleTracer {
         out.write(Integer.toString(terminalCount));
         out.write("\nProduction invocations: ");
         out.write(Integer.toString(productionCount));
-        out.write("\nMemoization invocations: ");
-        out.write(Integer.toString(memoizationCount));
         out.write("\nAction invocations: ");
         out.write(Integer.toString(actionCount));
+        out.write("\nMemo cache size: ");
+        out.write(Integer.toString(memoCacheSize));
+        out.write("\nMemo cache hits: ");
+        out.write(Integer.toString(memoCacheHitCount));
+        out.write("\nMemo cache misses: ");
+        out.write(Integer.toString(memoCacheMissCount));
         out.write("\nMax depth: ");
         out.write(Integer.toString(maxDepth));
         
         out.write(result ? "\n\nSUCCESS!\n" : "\n\nFAILURE!\n");
         
-        if (file != null)
+        if (file != null) {
             out.close();
+        }
     }
     
     protected void writeIdent() throws IOException {
-        for (int i = ident * identSize; i > 0; i--)
+        for (int i = ident * identSize; i > 0; i--) {
             out.write("\u0020");
+        }
     }
     
     protected void writeLocation(Location location) throws IOException {

@@ -262,11 +262,28 @@ public abstract class Parser<T> {
     
     // TxSnapshot
     
+    /**
+     * An entry in the shapshot cache. This entry stores transaction snapshot
+     * and number of parsed characters.
+     */
     private static final class TxSnapshot {
         
+        /**
+         * Transaction snapshot.
+         */
         final Transaction delta;
+        
+        /**
+         * Number of parsed characters.
+         */
         final int length;
         
+        /**
+         * Constructs new <code>TxSnapshot</code>.
+         * 
+         * @param delta Transaction snapshot.
+         * @param length Number of parsed characters.
+         */
         private TxSnapshot(Transaction delta, int length) {
             this.delta = delta;
             this.length = length;
