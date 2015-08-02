@@ -123,8 +123,9 @@ public final class HtmlGenerator extends BaseGenerator {
         String title = this.title;
         if (title == null) {
             title = hc.grammar.getFile();
-            if (title == null)
+            if (title == null) {
                 title = "Unknown Grammar";
+            }
         }
         hc.variables.put("title", encodeHtml(title));
     }
@@ -132,8 +133,9 @@ public final class HtmlGenerator extends BaseGenerator {
     // ${grammar_theme}
     private void defineGrammarTheme(HtmlContext hc) {
         String theme = this.theme;
-        if (theme == null)
+        if (theme == null) {
             theme = ResourceManager.getGrammarDefaultCssTheme();
+        }
         hc.variables.put("grammar_theme", theme);
     }
     
@@ -152,8 +154,9 @@ public final class HtmlGenerator extends BaseGenerator {
         int count = hc.grammar.getProductionCount();
         for (int i = 0; i < count; i++) {
             Production rule = hc.grammar.getProduction(i);
-            if (!(rule.getExpression() instanceof Terminal.Nil))
+            if (!(rule.getExpression() instanceof Terminal.Nil)) {
                 rule.accept(rw);
+            }
         }
         rw.appendFooter();
         
@@ -475,8 +478,9 @@ public final class HtmlGenerator extends BaseGenerator {
         }
         
         private void appendIdent(int size) {
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < size; i++) {
                 tags.append("&nbsp;");
+            }
         }
         
         private void appendTagId(String id) {
@@ -566,8 +570,9 @@ public final class HtmlGenerator extends BaseGenerator {
         
         private void appendAnchor(String text, String href, HighlightSet set, String... clazzez) {
             tags.append("<a");
-            if (set != null)
+            if (set != null) {
                 appendTagId(set.addElement());
+            }
             appendTagClasses(clazzez);
             appendTagHighlighting(set);
             tags.append("\u0020href=\"");
@@ -625,14 +630,17 @@ public final class HtmlGenerator extends BaseGenerator {
                 Problem.Kind worst = problems.get(0).getKind();
                 for (Problem problem : problems) {
                     String problemId = problemIds.get(problem);
-                    if (problemId != null)
+                    if (problemId != null) {
                         ruleSet.addElement(problemId);
+                    }
                     HighlightSet problemSet = problemSets.get(problem);
-                    if (problemSet != null)
+                    if (problemSet != null) {
                         problemSet.addElement(id);
+                    }
                     Problem.Kind kind = problem.getKind();
-                    if (kind.ordinal() < worst.ordinal())
+                    if (kind.ordinal() < worst.ordinal()) {
                         worst = kind;
+                    }
                 }
                 tags.append("<span");
                 appendTagId(id);
@@ -643,8 +651,9 @@ public final class HtmlGenerator extends BaseGenerator {
         }
         
         private void appendProblemEnd(List<Problem> problems) {
-            if (commentProblems && problems.size() > 0)
+            if (commentProblems && problems.size() > 0) {
                 tags.append("</span>");
+            }
         }
         
     }

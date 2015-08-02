@@ -234,8 +234,8 @@ public abstract class Parser<T> {
         public boolean load() {
             TxSnapshot snapshot = snapshotCache.get(snapshotID());
             if (snapshot != null) {
-                if (snapshot.delta != null) {
-                    snapshot.delta.load();
+                if (!(snapshot.delta == null || snapshot.delta.load())) {
+                    return false;
                 }
                 if (snapshot.length > 0) {
                     try {
@@ -245,7 +245,6 @@ public abstract class Parser<T> {
                         throw new RuntimeException(e);
                     }
                 }
-                return true;
             }
             return false;
         }
@@ -261,6 +260,13 @@ public abstract class Parser<T> {
             return null;
         }
         
+        /**
+         * Returns current transaction ID that is concatenation of current
+         * production index and character stream offset.
+         * 
+         * @return Current transaction ID that is concatenation of current
+         *         production index and character stream offset.
+         */
         private Long snapshotID() {
             return ((long) tracer.getCurrentReference().getIndex() << 32) | stream.getStartOffset();
         }

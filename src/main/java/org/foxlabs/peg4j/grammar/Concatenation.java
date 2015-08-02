@@ -29,15 +29,15 @@ public final class Concatenation extends Expression.Nary implements Operator {
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
         context.stream().mark();
-        context.tracer().trace(this);
+        context.tracer().onTrace(this);
         for (int i = 0; i < children.length; i++) {
             if (!children[i].reduce(context)) {
-                context.tracer().backtrace(this, false);
+                context.tracer().onBacktrace(this, false);
                 context.stream().reset();
                 return false;
             }
         }
-        context.tracer().backtrace(this, true);
+        context.tracer().onBacktrace(this, true);
         context.stream().release();
         return true;
     }

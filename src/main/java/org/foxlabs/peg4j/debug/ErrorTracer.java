@@ -18,6 +18,7 @@ package org.foxlabs.peg4j.debug;
 
 import java.util.Set;
 import java.util.HashSet;
+
 import java.io.IOException;
 
 import org.foxlabs.peg4j.SyntaxException;
@@ -27,6 +28,7 @@ import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Exclusion;
 import org.foxlabs.peg4j.grammar.Reference;
 import org.foxlabs.peg4j.grammar.Production;
+
 import org.foxlabs.util.Location;
 
 public class ErrorTracer extends RuleTracer.Adapter {
@@ -47,7 +49,7 @@ public class ErrorTracer extends RuleTracer.Adapter {
     }
     
     public Production getCurrentReference() {
-        return referenceHead.reference.getTarget();
+        return referenceHead == null ? null : referenceHead.reference.getTarget();
     }
     
     public Location getErrorLocation() {
@@ -76,7 +78,7 @@ public class ErrorTracer extends RuleTracer.Adapter {
     }
     
     @Override
-    public void trace(Rule rule) throws IOException {
+    public void onTrace(Rule rule) throws IOException {
         if (rule instanceof Reference) {
             referenceHead = new ReferenceNode((Reference) rule, referenceHead);
         } else if (rule instanceof Exclusion) {
@@ -85,7 +87,7 @@ public class ErrorTracer extends RuleTracer.Adapter {
     }
     
     @Override
-    public void backtrace(Rule rule, boolean success) throws IOException {
+    public void onBacktrace(Rule rule, boolean success) throws IOException {
         if (rule instanceof Reference) {
             referenceHead = referenceHead.next;
         } else if (rule instanceof Exclusion) {
@@ -108,8 +110,8 @@ public class ErrorTracer extends RuleTracer.Adapter {
     
     private static class ReferenceNode {
         
-        final Reference reference;
-        final ReferenceNode next;
+        private final Reference reference;
+        private final ReferenceNode next;
         
         private ReferenceNode(Reference reference, ReferenceNode next) {
             this.reference = reference;
@@ -140,27 +142,27 @@ public class ErrorTracer extends RuleTracer.Adapter {
         }
         
         @Override
-        public void trace(Rule rule) throws IOException {
-            super.trace(rule);
-            tracer.trace(rule);
+        public void onTrace(Rule rule) throws IOException {
+            super.onTrace(rule);
+            tracer.onTrace(rule);
         }
         
         @Override
-        public void backtrace(Rule rule, boolean success) throws IOException {
-            super.backtrace(rule, success);
-            tracer.backtrace(rule, success);
+        public void onBacktrace(Rule rule, boolean success) throws IOException {
+            super.onBacktrace(rule, success);
+            tracer.onBacktrace(rule, success);
         }
         
         @Override
-        public void lookup(Reference reference, boolean hit) throws IOException {
-            super.lookup(reference, hit);
-            tracer.lookup(reference, hit);
+        public void onLookup(Reference reference, boolean hit) throws IOException {
+            super.onLookup(reference, hit);
+            tracer.onLookup(reference, hit);
         }
 
         @Override
-        public void cache(Reference reference) throws IOException {
-            super.cache(reference);
-            tracer.cache(reference);
+        public void onCache(Reference reference) throws IOException {
+            super.onCache(reference);
+            tracer.onCache(reference);
         }
         
         @Override

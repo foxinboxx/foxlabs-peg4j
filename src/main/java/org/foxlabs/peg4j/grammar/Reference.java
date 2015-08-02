@@ -45,15 +45,15 @@ public class Reference extends Expression {
     
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.tracer().trace(this);
+        context.tracer().onTrace(this);
         context.stream().mark();
         if (target.reduce(context)) {
             context.stream().release();
-            context.tracer().backtrace(this, true);
+            context.tracer().onBacktrace(this, true);
             return true;
         }
         context.stream().reset();
-        context.tracer().backtrace(this, false);
+        context.tracer().onBacktrace(this, false);
         return false;
     }
     
@@ -83,29 +83,29 @@ public class Reference extends Expression {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             if (context.parser().isMemoable()) {
-                context.tracer().trace(this);
+                context.tracer().onTrace(this);
                 context.stream().mark();
                 if (context.transaction().load()) {
-                    context.tracer().lookup(this, true);
+                    context.tracer().onLookup(this, true);
                     context.stream().release();
-                    context.tracer().backtrace(this, true);
+                    context.tracer().onBacktrace(this, true);
                     return true;
                 } else {
-                    context.tracer().lookup(this, false);
+                    context.tracer().onLookup(this, false);
                 }
                 context.transaction().begin();
                 if (target.reduce(context)) {
                     if (context.transaction().save() != null) {
-                        context.tracer().cache(this);
+                        context.tracer().onCache(this);
                     }
                     context.transaction().commit();
                     context.stream().release();
-                    context.tracer().backtrace(this, true);
+                    context.tracer().onBacktrace(this, true);
                     return true;
                 }
                 context.transaction().rollback();
                 context.stream().reset();
-                context.tracer().backtrace(this, false);
+                context.tracer().onBacktrace(this, false);
                 return false;
             } else {
                 return super.reduce(context);

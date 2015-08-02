@@ -67,20 +67,20 @@ public final class Action extends Expression.Unary {
     
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.tracer().trace(this);
+        context.tracer().onTrace(this);
         context.stream().mark();
         context.transaction().begin();
         if (child.reduce(context)) {
             if (handleAction(context)) {
                 context.transaction().commit();
                 context.stream().release();
-                context.tracer().backtrace(this, true);
+                context.tracer().onBacktrace(this, true);
                 return true;
             }
         }
         context.transaction().rollback();
         context.stream().reset();
-        context.tracer().backtrace(this, false);
+        context.tracer().onBacktrace(this, false);
         return false;
     }
     

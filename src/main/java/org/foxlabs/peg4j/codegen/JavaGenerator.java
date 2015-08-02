@@ -73,9 +73,10 @@ public final class JavaGenerator extends BaseGenerator {
         
     }
     
-    private String name = null;
+    private String className = null;
     private String namespace = null;
     private Class<?> result = null;
+    private String actionPrefix = "handle";
     
     private boolean includeDebugInfo;
     private boolean generateComments;
@@ -94,9 +95,17 @@ public final class JavaGenerator extends BaseGenerator {
     }
     
     public JavaGenerator(String name, String namespace, Class<?> result, int flags) {
-        this.name = name == null ? "MyParser" : name;
+        this.className = name == null ? "MyParser" : name;
         this.namespace = namespace == null ? "" : namespace;
         this.result = result == null ? Object.class : result;
+        setFlags(flags);
+    }
+    
+    public JavaGenerator(String name, String namespace, Class<?> result, String actionPrefix, int flags) {
+        this.className = name == null ? "MyParser" : name;
+        this.namespace = namespace == null ? "" : namespace;
+        this.result = result == null ? Object.class : result;
+        this.actionPrefix = actionPrefix == null || actionPrefix.trim().isEmpty() ? "handle" : actionPrefix.trim();
         setFlags(flags);
     }
     
@@ -137,7 +146,7 @@ public final class JavaGenerator extends BaseGenerator {
     
     // ${parser_type}
     private void defineParserType(DeclContext dc) {
-        dc.variables.put("parser_type", name);
+        dc.variables.put("parser_type", className);
     }
     
     // ${result_type}
@@ -208,11 +217,12 @@ public final class JavaGenerator extends BaseGenerator {
         if (generateComments && generateProblems && dc.grammar.hasProblems()) {
             appendComment("PROBLEMS:", problemComments);
             problemComments.append("\n");
-            for (Problem problem : dc.grammar.getProblems().getProblemList())
+            for (Problem problem : dc.grammar.getProblems().getProblemList()) {
                 if (Location.UNKNOWN != problem.getStart()) {
                     appendComment(problem.toString(), problemComments);
                     problemComments.append("\n");
                 }
+            }
         }
         dc.variables.put("problems", problemComments.toString());
     }
@@ -339,8 +349,9 @@ public final class JavaGenerator extends BaseGenerator {
             
             if (includeDebugInfo) {
                 Location end = rule.getEnd();
-                if (Location.UNKNOWN != end)
+                if (Location.UNKNOWN != end) {
                     appendLocation(end, statements);
+                }
             }
             
             statements.append(")\n");
@@ -376,7 +387,9 @@ public final class JavaGenerator extends BaseGenerator {
                     statements.append(".mark()\n");
                 }
                 
-                dc.actions.add(rule.getName());
+                String name = rule.getName();
+                name = actionPrefix + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+                dc.actions.add(name);
                 
                 statements.append(".action(");
                 statements.append("\"");
@@ -384,11 +397,11 @@ public final class JavaGenerator extends BaseGenerator {
                 statements.append("\", new ");
                 statements.append(ActionHandler.class.getSimpleName());
                 statements.append("<");
-                statements.append(name);
+                statements.append(JavaGenerator.this.className);
                 statements.append(">() {\n");
                 appendIdent(3, statements);
                 statements.append("public boolean handle(");
-                statements.append(name);
+                statements.append(JavaGenerator.this.className);
                 statements.append(" parser, ");
                 statements.append(ActionContext.class.getSimpleName());
                 statements.append(" context) throws ");
@@ -396,14 +409,15 @@ public final class JavaGenerator extends BaseGenerator {
                 statements.append(" {\n");
                 appendIdent(7, statements);
                 statements.append("return parser.");
-                statements.append(rule.getName());
+                statements.append(name);
                 statements.append("(context);\n");
                 appendIdent(3, statements);
                 statements.append("}\n");
                 statements.append("})\n");
                 
-                if (rule.getChild() instanceof Terminal.Nil)
+                if (rule.getChild() instanceof Terminal.Nil) {
                     statements.append(".release()\n");
+                }
                 
                 appendStartLocation(rule);
                 appendEndLocation(rule);
@@ -414,8 +428,9 @@ public final class JavaGenerator extends BaseGenerator {
             statements.append(".mark()\n");
             
             int length = rule.length();
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++) {
                 rule.getChild(i).accept(this);
+            }
             
             statements.append(".concat(");
             statements.append(").release()\n");
@@ -428,8 +443,9 @@ public final class JavaGenerator extends BaseGenerator {
             statements.append(".mark()\n");
             
             int length = rule.length();
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++) {
                 rule.getChild(i).accept(this);
+            }
             
             statements.append(".choice(");
             statements.append(").release()\n");

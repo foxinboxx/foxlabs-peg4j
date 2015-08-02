@@ -79,8 +79,9 @@ public final class TextGenerator extends BaseGenerator {
         int count = tc.grammar.getProductionCount();
         for (int i = 0; i < count; i++) {
             Production rule = tc.grammar.getProduction(i);
-            if (!(rule.getExpression() instanceof Terminal.Nil))
+            if (!(rule.getExpression() instanceof Terminal.Nil)) {
                 rule.accept(rw);
+            }
         }
         tc.variables.put("grammar_statements", rw.statements.toString());
     }
@@ -161,9 +162,11 @@ public final class TextGenerator extends BaseGenerator {
         
         public void visit(Production rule) {
             if (generateComments) {
-                for (Problem problem : rule.getAllProblems())
-                    if (Location.UNKNOWN != problem.getStart())
+                for (Problem problem : rule.getAllProblems()) {
+                    if (Location.UNKNOWN != problem.getStart()) {
                         appendComment(problem.toString(), statements);
+                    }
+                }
             }
             String name = rule.getName();
             statements.append(name);
@@ -243,9 +246,10 @@ public final class TextGenerator extends BaseGenerator {
                 statements.append(min);
                 if (min < max) {
                     statements.append(',');
-                    if (max < Integer.MAX_VALUE)
+                    if (max < Integer.MAX_VALUE) {
                         statements.append(' ')
                                   .append(max);
+                    }
                 }
                 statements.append('}');
             } else {

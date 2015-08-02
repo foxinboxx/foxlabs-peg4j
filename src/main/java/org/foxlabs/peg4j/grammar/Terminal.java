@@ -67,12 +67,12 @@ public abstract class Terminal extends Expression {
     
     @Override
     public boolean reduce(ParseContext context) throws IOException {
-        context.tracer().trace(this);
+        context.tracer().onTrace(this);
         if (match(context.stream())) {
-            context.tracer().backtrace(this, true);
+            context.tracer().onBacktrace(this, true);
             return true;
         }
-        context.tracer().backtrace(this, false);
+        context.tracer().onBacktrace(this, false);
         return false;
     }
     

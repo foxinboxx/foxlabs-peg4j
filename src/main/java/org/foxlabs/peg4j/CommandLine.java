@@ -114,7 +114,7 @@ public final class CommandLine {
     }
     
     /*
-     * If this exception thrown then arguments not matches command line format.
+     * If this exception thrown then arguments don't match command line format.
      */
     static class CommandLineException extends RuntimeException {
         private static final long serialVersionUID = 5634864241563049519L;
@@ -138,19 +138,21 @@ public final class CommandLine {
     
     /*
      * Search for non abstract static Command subclass with name as the
-     * specified command name and create instance of it class.
+     * specified command name and create instance of its class.
      * If command class doesn't exist then exception will be thrown.
      */
     static Command createCommand(String cmd) throws Throwable {
         // search for Command subclass
-        for (Class<?> cc : CommandLine.class.getDeclaredClasses())
+        for (Class<?> cc : CommandLine.class.getDeclaredClasses()) {
             if (cc.getSimpleName().equalsIgnoreCase(cmd)) {
                 if (Command.class.isAssignableFrom(cc)) {
                     int mod = cc.getModifiers();
-                    if (Modifier.isStatic(mod) && !Modifier.isAbstract(mod))
+                    if (Modifier.isStatic(mod) && !Modifier.isAbstract(mod)) {
                         return (Command) cc.newInstance();
+                    }
                 }
             }
+        }
         
         // there is no command found
         throw new CommandLineException("cmd.unsupportedCommand", cmd);
@@ -169,23 +171,26 @@ public final class CommandLine {
             String option = options[index++];
             
             // option must start with "-"
-            if (!(option.length() > 1 && option.startsWith("-")))
+            if (!(option.length() > 1 && option.startsWith("-"))) {
                 throw new CommandLineException("cmd.illegalOption", option);
+            }
             
             // search for option setter in command class hierarchy
             Method sm = findOptionSetter(option.substring(1), cc);
-            if (sm == null) // unsupported option
+            if (sm == null) { // unsupported option
                 throw new CommandLineException("cmd.unsupportedOption",
                         cmd, option);
+            }
             
             // decode option arguments
             Class<?>[] argtypes = sm.getParameterTypes();
             Object[] args = new Object[argtypes.length];
             for (int i = 0; i < argtypes.length; i++) {
                 Decoder decoder = decoders.get(argtypes[i]);
-                if (index == lastIndex) // insufficient option arguments
+                if (index == lastIndex) { // insufficient option arguments
                     throw new CommandLineException("cmd.insufficientOptionArguments",
                             cmd, option, argtypes.length);
+                }
                 try {
                     args[i] = decoder.decode(options[index++]);
                 } catch (CommandLineException e) {
@@ -198,24 +203,31 @@ public final class CommandLine {
             try {
                 sm.invoke(command, args);
             } catch (InvocationTargetException e) {
-                if (e.getCause() instanceof CommandLineException)
+                if (e.getCause() instanceof CommandLineException) {
                     throw e.getCause();
-                throw e;
+                } else {
+                    throw e;
+                }
             }
         }
     }
     
     /*
-     * Searches command option setter for specified option name.
+     * Searches command option setter for the specified option name.
      */
     static Method findOptionSetter(String name, Class<?> cc) {
-        if (cc == Object.class)
+        if (cc == Object.class) {
             return null;
+        }
+        
         // search in the command class first
         String setterName = "set" + name;
-        for (Method sm : cc.getDeclaredMethods())
-            if (sm.getName().equalsIgnoreCase(setterName))
+        for (Method sm : cc.getDeclaredMethods()) {
+            if (sm.getName().equalsIgnoreCase(setterName)) {
                 return sm;
+            }
+        }
+        
         // search in parent class
         return findOptionSetter(name, cc.getSuperclass());
     }
@@ -276,9 +288,11 @@ public final class CommandLine {
             }
             
             public Object decode(String text) {
-                for (Enum<?> constant : constants)
-                    if (constant.name().equalsIgnoreCase(text))
+                for (Enum<?> constant : constants) {
+                    if (constant.name().equalsIgnoreCase(text)) {
                         return constant;
+                    }
+                }
                 throw new CommandLineException("cmd.illegalEnumValue", text);
             }
             
@@ -319,8 +333,9 @@ public final class CommandLine {
         public void setEncoding(String value) {
             if (!Charset.isSupported(value)) {
                 throw new CommandLineException("cmd.unsupportedEncoding", value);
+            } else {
+                encoding = value;
             }
-            encoding = value;
         }
         
         // -sw
@@ -570,8 +585,9 @@ public final class CommandLine {
         public void execute(File source) throws Throwable {
             super.execute(source);
             
-            if (target == null)
+            if (target == null) {
                 target = changeExt(source, "peg");
+            }
             
             FileWriter out = new FileWriter(target);
             try {
@@ -643,8 +659,9 @@ public final class CommandLine {
         public void execute(File source) throws Throwable {
             super.execute(source);
             
-            if (document == null)
+            if (document == null) {
                 document = changeExt(source, "html");
+            }
             
             String styles = null;
             if (theme != null) {
@@ -680,8 +697,9 @@ public final class CommandLine {
     static File changeExt(File source, String ext) {
         String filename = source.getPath();
         int index = filename.lastIndexOf('.');
-        if (index >= 0)
+        if (index >= 0) {
             filename = filename.substring(0, index + 1);
+        }
         return new File(filename + ext);
     }
     
@@ -705,8 +723,9 @@ public final class CommandLine {
     static void printError(Throwable e) {
         if (e instanceof CommandLineException) {
             printUsage();
-            if (e.getMessage() != null)
+            if (e.getMessage() != null) {
                 print(e.getMessage());
+            }
         } else if (e instanceof Peg4jException) {
             printPattern("cmd.specificationError", e.getMessage());
         } else if (e instanceof SyntaxException) {

@@ -55,13 +55,13 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
-            context.tracer().trace(this);
+            context.tracer().onTrace(this);
             if (child.reduce(context)) {
-                context.tracer().backtrace(this, false);
+                context.tracer().onBacktrace(this, false);
                 context.stream().reset();
                 return false;
             }
-            context.tracer().backtrace(this, true);
+            context.tracer().onBacktrace(this, true);
             context.stream().reset();
             return true;
         }
@@ -84,13 +84,13 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
-            context.tracer().trace(this);
+            context.tracer().onTrace(this);
             if (child.reduce(context)) {
-                context.tracer().backtrace(this, true);
+                context.tracer().onBacktrace(this, true);
                 context.stream().reset();
                 return true;
             }
-            context.tracer().backtrace(this, false);
+            context.tracer().onBacktrace(this, false);
             context.stream().reset();
             return false;
         }

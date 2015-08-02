@@ -46,22 +46,22 @@ public class Repetition extends Expression.Unary implements Operator {
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
         context.stream().mark();
-        context.tracer().trace(this);
+        context.tracer().onTrace(this);
         for (int i = 0; i < min; i++) {
             if (!child.reduce(context)) {
-                context.tracer().backtrace(this, false);
+                context.tracer().onBacktrace(this, false);
                 context.stream().reset();
                 return false;
             }
         }
         for (int i = min; i < max; i++) {
             if (!child.reduce(context)) {
-                context.tracer().backtrace(this, true);
+                context.tracer().onBacktrace(this, true);
                 context.stream().reset();
                 return true;
             }
         }
-        context.tracer().backtrace(this, true);
+        context.tracer().onBacktrace(this, true);
         context.stream().release();
         return true;
     }
@@ -101,12 +101,12 @@ public class Repetition extends Expression.Unary implements Operator {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
-            context.tracer().trace(this);
+            context.tracer().onTrace(this);
             if (child.reduce(context)) {
-                context.tracer().backtrace(this, true);
+                context.tracer().onBacktrace(this, true);
                 context.stream().release();
             } else {
-                context.tracer().backtrace(this, true);
+                context.tracer().onBacktrace(this, true);
                 context.stream().reset();
             }
             return true;
@@ -136,12 +136,12 @@ public class Repetition extends Expression.Unary implements Operator {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
-            context.tracer().trace(this);
+            context.tracer().onTrace(this);
             while (child.reduce(context)) {
                 context.stream().release();
                 context.stream().mark();
             }
-            context.tracer().backtrace(this, true);
+            context.tracer().onBacktrace(this, true);
             context.stream().reset();
             return true;
         }
@@ -170,7 +170,7 @@ public class Repetition extends Expression.Unary implements Operator {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
-            context.tracer().trace(this);
+            context.tracer().onTrace(this);
             if (child.reduce(context)) {
                 context.stream().release();
                 context.stream().mark();
@@ -178,11 +178,11 @@ public class Repetition extends Expression.Unary implements Operator {
                     context.stream().release();
                     context.stream().mark();
                 }
-                context.tracer().backtrace(this, true);
+                context.tracer().onBacktrace(this, true);
                 context.stream().reset();
                 return true;
             }
-            context.tracer().backtrace(this, false);
+            context.tracer().onBacktrace(this, false);
             context.stream().reset();
             return false;
         }

@@ -62,7 +62,7 @@ public abstract class BaseGenerator {
                     if (ch == '{') {
                         int ident = in.getEndColumn() - 3;
                         StringBuilder var = new StringBuilder();
-                        for (ch = in.read();; ch = in.read())
+                        for (ch = in.read();; ch = in.read()) {
                             if (ch < 0) {
                                 out.write('$');
                                 out.write('{');
@@ -72,8 +72,9 @@ public abstract class BaseGenerator {
                                 String name = var.toString();
                                 if (variables.containsKey(name)) {
                                     String value = variables.get(name);
-                                    if (value == null || value.length() == 0)
+                                    if (value == null || value.length() == 0) {
                                         break;
+                                    }
                                     writeVariable(value, ident, out);
                                 } else {
                                     out.write('$');
@@ -85,10 +86,12 @@ public abstract class BaseGenerator {
                             } else {
                                 var.append((char) ch);
                             }
+                        }
                     } else {
                         out.write('$');
-                        if (ch >= 0)
+                        if (ch >= 0) {
                             out.write(ch);
+                        }
                     }
                 } else {
                     out.write(ch);
@@ -120,8 +123,9 @@ public abstract class BaseGenerator {
     }
     
     public static final void appendIdent(int ident, StringBuilder buf) {
-        for (int i = 0; i < ident; i++)
+        for (int i = 0; i < ident; i++) {
             buf.append(' ');
+        }
     }
     
     static final String LINE_SEPARATOR = System.getProperty("line.separator");

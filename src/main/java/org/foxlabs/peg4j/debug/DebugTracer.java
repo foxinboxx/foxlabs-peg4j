@@ -28,6 +28,7 @@ import org.foxlabs.peg4j.grammar.Rule;
 import org.foxlabs.peg4j.grammar.Action;
 import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Production;
+
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 import org.foxlabs.util.PeriodCounter;
@@ -139,7 +140,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void trace(Rule rule) throws IOException {
+    public void onTrace(Rule rule) throws IOException {
         if (rule instanceof Terminal) {
             terminalCount++;
         } else if (rule instanceof Production) {
@@ -171,7 +172,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void backtrace(Rule rule, boolean success) throws IOException {
+    public void onBacktrace(Rule rule, boolean success) throws IOException {
         depthLevel--;
         if (traceLevel.compareTo(TraceLevel.forRule(rule)) >= 0) {
             if (maxDepthLevel == 0 || depthLevel < maxDepthLevel) {
@@ -200,6 +201,7 @@ public class DebugTracer implements RuleTracer {
                         } else {
                             out.write("\"");
                         }
+                        
                         out.write(UnicodeSet.escape(text));
                         out.write("\"\n");
                     }
@@ -209,7 +211,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void lookup(Reference reference, boolean hit) throws IOException {
+    public void onLookup(Reference reference, boolean hit) throws IOException {
         if (hit) {
             memoCacheHitCount++;
         } else {
@@ -218,7 +220,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void cache(Reference reference) throws IOException {
+    public void onCache(Reference reference) throws IOException {
         memoCacheSize++;
     }
     

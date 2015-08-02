@@ -35,25 +35,25 @@ public class StatisticsTracer implements RuleTracer {
     }
     
     @Override
-    public void trace(Rule rule) throws IOException {
+    public void onTrace(Rule rule) throws IOException {
         // TODO Auto-generated method stub
         
     }
     
     @Override
-    public void backtrace(Rule rule, boolean success) throws IOException {
+    public void onBacktrace(Rule rule, boolean success) throws IOException {
         // TODO Auto-generated method stub
         
     }
     
     @Override
-    public void lookup(Reference reference, boolean hit) throws IOException {
+    public void onLookup(Reference reference, boolean hit) throws IOException {
         // TODO Auto-generated method stub
         
     }
     
     @Override
-    public void cache(Reference reference) throws IOException {
+    public void onCache(Reference reference) throws IOException {
         // TODO Auto-generated method stub
         
     }

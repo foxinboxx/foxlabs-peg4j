@@ -19,20 +19,20 @@ package org.foxlabs.peg4j.debug;
 import java.io.IOException;
 
 import org.foxlabs.peg4j.BacktrackingReader;
-import org.foxlabs.peg4j.grammar.Reference;
 import org.foxlabs.peg4j.grammar.Rule;
+import org.foxlabs.peg4j.grammar.Reference;
 
 public interface RuleTracer {
     
     void open(BacktrackingReader stream) throws IOException;
     
-    void trace(Rule rule) throws IOException;
+    void onTrace(Rule rule) throws IOException;
     
-    void backtrace(Rule rule, boolean success) throws IOException;
+    void onBacktrace(Rule rule, boolean success) throws IOException;
     
-    void lookup(Reference reference, boolean hit) throws IOException;
+    void onLookup(Reference reference, boolean hit) throws IOException;
     
-    void cache(Reference reference) throws IOException;
+    void onCache(Reference reference) throws IOException;
     
     void close(boolean result) throws IOException;
     
@@ -44,16 +44,16 @@ public interface RuleTracer {
         public void open(BacktrackingReader stream) throws IOException {}
         
         @Override
-        public void trace(Rule rule) throws IOException {}
+        public void onTrace(Rule rule) throws IOException {}
         
         @Override
-        public void backtrace(Rule rule, boolean success) throws IOException {}
+        public void onBacktrace(Rule rule, boolean success) throws IOException {}
         
         @Override
-        public void lookup(Reference reference, boolean hit) throws IOException {}
+        public void onLookup(Reference reference, boolean hit) throws IOException {}
         
         @Override
-        public void cache(Reference reference) throws IOException {}
+        public void onCache(Reference reference) throws IOException {}
         
         @Override
         public void close(boolean result) throws IOException {}
@@ -76,23 +76,23 @@ public interface RuleTracer {
         }
         
         @Override
-        public void trace(Rule rule) throws IOException {
-            tracer.trace(rule);
+        public void onTrace(Rule rule) throws IOException {
+            tracer.onTrace(rule);
         }
         
         @Override
-        public void backtrace(Rule rule, boolean success) throws IOException {
-            tracer.backtrace(rule, success);
+        public void onBacktrace(Rule rule, boolean success) throws IOException {
+            tracer.onBacktrace(rule, success);
         }
         
         @Override
-        public void lookup(Reference reference, boolean hit) throws IOException {
-            tracer.lookup(reference, hit);
+        public void onLookup(Reference reference, boolean hit) throws IOException {
+            tracer.onLookup(reference, hit);
         }
         
         @Override
-        public void cache(Reference reference) throws IOException {
-            tracer.cache(reference);
+        public void onCache(Reference reference) throws IOException {
+            tracer.onCache(reference);
         }
         
         @Override
@@ -120,30 +120,30 @@ public interface RuleTracer {
         }
         
         @Override
-        public void trace(Rule rule) throws IOException {
+        public void onTrace(Rule rule) throws IOException {
             for (RuleTracer tracer : chain) {
-                tracer.trace(rule);
+                tracer.onTrace(rule);
             }
         }
         
         @Override
-        public void backtrace(Rule rule, boolean success) throws IOException {
+        public void onBacktrace(Rule rule, boolean success) throws IOException {
             for (RuleTracer tracer : chain) {
-                tracer.backtrace(rule, success);
+                tracer.onBacktrace(rule, success);
             }
         }
         
         @Override
-        public void lookup(Reference reference, boolean hit) throws IOException {
+        public void onLookup(Reference reference, boolean hit) throws IOException {
             for (RuleTracer tracer : chain) {
-                tracer.lookup(reference, hit);
+                tracer.onLookup(reference, hit);
             }
         }
         
         @Override
-        public void cache(Reference reference) throws IOException {
+        public void onCache(Reference reference) throws IOException {
             for (RuleTracer tracer : chain) {
-                tracer.cache(reference);
+                tracer.onCache(reference);
             }
         }
         

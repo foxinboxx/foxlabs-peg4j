@@ -28,19 +28,19 @@ public final class Alternation extends Expression.Nary implements Operator {
     
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.tracer().trace(this);
+        context.tracer().onTrace(this);
         context.stream().mark();
         for (int i = 0; i < children.length; i++) {
             if (children[i].reduce(context)) {
                 context.stream().release();
-                context.tracer().backtrace(this, true);
+                context.tracer().onBacktrace(this, true);
                 return true;
             }
             context.stream().reset();
             context.stream().mark();
         }
         context.stream().release();
-        context.tracer().backtrace(this, false);
+        context.tracer().onBacktrace(this, false);
         return false;
     }
     
