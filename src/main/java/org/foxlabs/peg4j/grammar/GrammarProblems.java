@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.foxlabs.peg4j.grammar.Problem.Kind;
-
 import org.foxlabs.util.Location;
 
 public class GrammarProblems extends RuntimeException {
@@ -43,25 +41,25 @@ public class GrammarProblems extends RuntimeException {
         return Collections.unmodifiableList(problems);
     }
     
-    void addProblem(int code, Location start, Location end) {
+    void addProblem(Problem.Code code, Location start, Location end) {
         addProblem(new Problem(code, start, end));
     }
     
-    void addProblem(int code, Location start, Location end, String... attributes) {
+    void addProblem(Problem.Code code, Location start, Location end, String... attributes) {
         addProblem(new Problem(code, start, end, attributes));
     }
     
-    void addProblem(int code, Rule source) {
+    void addProblem(Problem.Code code, Rule source) {
         addProblem(new Problem(code, source));
     }
     
-    void addProblem(int code, Rule source, String... attributes) {
+    void addProblem(Problem.Code code, Rule source, String... attributes) {
         addProblem(new Problem(code, source, attributes));
     }
     
     void addProblem(Problem problem) {
         problems.add(problem);
-        switch (problem.getKind()) {
+        switch (problem.getCode().getType()) {
             case FATAL:
                 fatals.add(problem);
                 break;
@@ -131,9 +129,11 @@ public class GrammarProblems extends RuntimeException {
     }
     
     void clear() {
-        for (Problem problem : problems)
-            if (problem.source != null)
-                problem.source.problems = null;
+        for (Problem problem : problems) {
+            if (problem.getRule() != null) {
+                problem.getRule().problems = null;
+            }
+        }
         
         problems.clear();
         fatals.clear();
@@ -161,18 +161,18 @@ public class GrammarProblems extends RuntimeException {
                 buf.append("\n");
             }
             
-            toCountString(buf, Kind.FATAL, fatals.size());
-            toCountString(buf, Kind.ERROR, errors.size());
-            toCountString(buf, Kind.WARNING, warnings.size());
-            toCountString(buf, Kind.HINT, hints.size());
+            toCountString(buf, Problem.Type.FATAL, fatals.size());
+            toCountString(buf, Problem.Type.ERROR, errors.size());
+            toCountString(buf, Problem.Type.WARNING, warnings.size());
+            toCountString(buf, Problem.Type.HINT, hints.size());
         }
     }
     
-    static void toCountString(StringBuilder buf, Kind kind, int count) {
+    static void toCountString(StringBuilder buf, Problem.Type type, int count) {
         if (count > 0) {
             buf.append(count)
                .append(" ")
-               .append(kind.name().toLowerCase());
+               .append(type.name().toLowerCase());
             if (count > 1)
                 buf.append("s");
             buf.append("\n");

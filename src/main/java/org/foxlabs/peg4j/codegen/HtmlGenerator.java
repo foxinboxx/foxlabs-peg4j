@@ -609,7 +609,7 @@ public final class HtmlGenerator extends BaseGenerator {
                         problemSets.put(problem, set);
                         String id = set.addElement();
                         problemIds.put(problem, id);
-                        String message = problem.getKind() + ": " + problem.getMessage();
+                        String message = problem.getCode().getType() + ": " + problem.getMessage();
                         appendIdent(1);
                         appendCommentText("*");
                         appendIdent(1);
@@ -627,7 +627,7 @@ public final class HtmlGenerator extends BaseGenerator {
             if (commentProblems && problems.size() > 0) {
                 HighlightSet ruleSet = addHighlightSet();
                 String id = ruleSet.addElement();
-                Problem.Kind worst = problems.get(0).getKind();
+                Problem.Type worst = problems.get(0).getCode().getType();
                 for (Problem problem : problems) {
                     String problemId = problemIds.get(problem);
                     if (problemId != null) {
@@ -637,9 +637,9 @@ public final class HtmlGenerator extends BaseGenerator {
                     if (problemSet != null) {
                         problemSet.addElement(id);
                     }
-                    Problem.Kind kind = problem.getKind();
-                    if (kind.ordinal() < worst.ordinal()) {
-                        worst = kind;
+                    Problem.Type type = problem.getCode().getType();
+                    if (type.ordinal() < worst.ordinal()) {
+                        worst = type;
                     }
                 }
                 tags.append("<span");

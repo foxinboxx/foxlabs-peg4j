@@ -77,8 +77,9 @@ public abstract class Expression extends Rule {
         Nary(Production owner, Expression[] children) {
             super(owner);
             this.children = children;
-            for (int i = 0; i < children.length; i++)
+            for (int i = 0; i < children.length; i++) {
                 children[i].parent = this;
+            }
         }
         
         public final int length() {
@@ -96,8 +97,9 @@ public abstract class Expression extends Rule {
         @Override
         protected void findProblems(List<Problem> foundProblems) {
             foundProblems.addAll(getProblems());
-            for (Expression child : children)
+            for (Expression child : children) {
                 child.findProblems(foundProblems);
+            }
         }
         
     }

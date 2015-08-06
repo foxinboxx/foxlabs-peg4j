@@ -34,7 +34,9 @@ public abstract class Rule {
     
     List<Problem> problems = null;
     
-    Rule() {}
+    Rule() {
+        super();
+    }
     
     public abstract Grammar getGrammar();
     

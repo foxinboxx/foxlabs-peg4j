@@ -19,6 +19,7 @@ package org.foxlabs.peg4j.resource;
 import java.net.URL;
 
 import org.foxlabs.peg4j.CommandLine;
+import org.foxlabs.peg4j.grammar.Problem;
 
 import org.foxlabs.util.resource.MessageBundle;
 import org.foxlabs.util.resource.ResourceHelper;
@@ -30,10 +31,12 @@ public class ResourceManager {
     
     private static final MessageBundle cmdBundle;
     private static final MessageBundle messageBundle;
+    private static final MessageBundle PROBLEM_BUNDLE;
     
     static {
         cmdBundle = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/cmd");
         messageBundle = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/messages");
+        PROBLEM_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/problems");
     }
     
     private ResourceManager() {}
@@ -44,6 +47,10 @@ public class ResourceManager {
     
     public static String getMessage(String key, Object... arguments) {
         return messageBundle.format(key, arguments);
+    }
+    
+    public static String getProblemMessage(Problem.Code code, String... attributes) {
+        return PROBLEM_BUNDLE.format(code.getType().name().toLowerCase() + "." + code.name(), (Object[]) attributes);
     }
     
     public static URL getTextTemplateURL() {

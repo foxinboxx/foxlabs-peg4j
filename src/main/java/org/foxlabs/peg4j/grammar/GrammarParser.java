@@ -27,7 +27,7 @@ import org.foxlabs.peg4j.LocalStack;
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 
-import static org.foxlabs.peg4j.grammar.Problem.*;
+import static org.foxlabs.peg4j.grammar.Problem.Code.*;
 
 public final class GrammarParser extends Parser<Grammar> {
     
@@ -80,7 +80,7 @@ public final class GrammarParser extends Parser<Grammar> {
         GrammarCompiler.compile(grammar, compilationFlags);
         
         if (grammar.getProductionCount() == 0) {
-            problems.addProblem(fatalEmptyGrammar, eofLocation, eofLocation);
+            problems.addProblem(EMPTY_GRAMMAR, eofLocation, eofLocation);
             problems.sort();
         }
         
@@ -302,12 +302,12 @@ public final class GrammarParser extends Parser<Grammar> {
     }
     
     private boolean handleInvalidExpression(ActionContext context) {
-        problemStack.push(new Problem(errorInvalidExpression, context.start(), context.end()));
+        problemStack.push(new Problem(INVALID_EXPRESSION, context.start(), context.end()));
         return true;
     }
     
     private boolean handleMissingSemi(ActionContext context) {
-        problemStack.push(new Problem(errorMissingSemi, context.start(), context.end()));
+        problemStack.push(new Problem(MISSING_SEMI, context.start(), context.end()));
         return true;
     }
     
@@ -317,32 +317,32 @@ public final class GrammarParser extends Parser<Grammar> {
     }
     
     private boolean handleEndError(ActionContext context) {
-        problemStack.push(new Problem(errorSyntax, context.start(), context.end()));
+        problemStack.push(new Problem(SYNTAX_ERROR, context.start(), context.end()));
         return true;
     }
     
     private boolean handleErrorMissingClosingParenthesize(ActionContext context) {
-        problemStack.push(new Problem(errorMissingClosingParenthesize, context.start(), context.end()));
+        problemStack.push(new Problem(MISSING_CLOSING_PARENTHESIZE, context.start(), context.end()));
         return true;
     }
     
     private boolean handleErrorUnterminatedString(ActionContext context) {
-        problemStack.push(new Problem(errorUnterminatedString, context.start(), context.end()));
+        problemStack.push(new Problem(UNTERMINATED_STRING, context.start(), context.end()));
         return true;
     }
     
     private boolean handleErrorInvalidEscapeSequence(ActionContext context) {
-        problemStack.push(new Problem(errorInvalidEscapeSequence, context.start(), context.end()));
+        problemStack.push(new Problem(INVALID_ESCAPE_SEQUENCE, context.start(), context.end()));
         return true;
     }
     
     private boolean handleErrorInvalidUnicodeCharacter(ActionContext context) {
-        problemStack.push(new Problem(errorInvalidUnicodeCharacter, context.start(), context.end()));
+        problemStack.push(new Problem(INVALID_UNICODE_CHARACTER, context.start(), context.end()));
         return true;
     }
     
     private boolean handleErrorUnterminatedBlockComment(ActionContext context) {
-        problemStack.push(new Problem(errorUnterminatedBlockComment, context.start(), context.end()));
+        problemStack.push(new Problem(UNTERMINATED_BLOCK_COMMENT, context.start(), context.end()));
         return true;
     }
     

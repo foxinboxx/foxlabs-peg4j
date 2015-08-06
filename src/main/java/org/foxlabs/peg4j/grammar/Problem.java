@@ -22,185 +22,371 @@ import org.foxlabs.peg4j.resource.ResourceManager;
 
 import org.foxlabs.util.Location;
 
+/**
+ * Defines a problem in a grammar. There are four types of problems defined
+ * (<code>FATAL</code>, <code>ERROR</code>, <code>WARNING</code> and
+ * <code>HINT</code>). Also each problem has associated code, location in
+ * character stream and rule if rule is the cause of the problem. All possible
+ * problem codes are listed in the {@link Problem.Code} enumeration.
+ * 
+ * @author Fox Mulder
+ * @see GrammarProblems
+ * @see GrammarCompiler
+ * @see GrammarParser
+ */
 public final class Problem implements Serializable, Comparable<Problem> {
-    private static final long serialVersionUID = -7144206945196894506L;
+    private static final long serialVersionUID = -4976957943431107554L;
     
-    public enum Kind { FATAL, ERROR, WARNING, HINT }
+    /**
+     * Code of this problem.
+     */
+    private final Code code;
     
-    private static final int fCodeBase = 1000;
-    private static final int eCodeBase = 2000;
-    private static final int wCodeBase = 3000;
-    private static final int hCodeBase = 4000;
+    /**
+     * Start location of this problem in character stream.
+     */
+    private final Location start;
     
-    static final String[] emptyAttributes = new String[0];
+    /**
+     * End location of this problem in character stream.
+     */
+    private final Location end;
     
-    final int code;
-    final Location start;
-    final Location end;
-    final String[] attributes;
+    /**
+     * Attributes that will be substituted in this problem description message.
+     */
+    private final String[] attributes;
     
-    transient Rule source;
+    /**
+     * Rule that is the cause of this problem.
+     */
+    private transient Rule rule;
     
-    Problem(int code, Location start, Location end) {
-        this(code, start, end, null, emptyAttributes);
+    /**
+     * Constructs a new problem with the specified code and source location.
+     * 
+     * @param code Code of this problem.
+     * @param start Start location of this problem in character stream.
+     * @param end End location of this problem in character stream.
+     */
+    Problem(Code code, Location start, Location end) {
+        this(code, start, end, null, (String[]) null);
     }
     
-    Problem(int code, Location start, Location end, String... attributes) {
+    /**
+     * Constructs a new problem with the specified code, source location and
+     * attributes.
+     * 
+     * @param code Code of this problem.
+     * @param start Start location of this problem in character stream.
+     * @param end End location of this problem in character stream.
+     * @param attributes Attributes that will be substituted in this problem
+     *        description message.
+     */
+    Problem(Code code, Location start, Location end, String... attributes) {
         this(code, start, end, null, attributes);
     }
     
-    Problem(int code, Rule source) {
-        this(code, source.getStart(), source.getEnd(), source, emptyAttributes);
+    /**
+     * Constructs a new problem with the specified code and rule.
+     * 
+     * @param code Code of this problem.
+     * @param rule Rule that is the cause of this problem.
+     */
+    Problem(Code code, Rule rule) {
+        this(code, rule.getStart(), rule.getEnd(), rule, (String[]) null);
     }
     
-    Problem(int code, Rule source, String... attributes) {
-        this(code, source.getStart(), source.getEnd(), source, attributes);
+    /**
+     * Constructs a new problem with the specified code, rule and attributes.
+     * 
+     * @param code Code of this problem.
+     * @param rule Rule that is the cause of this problem.
+     * @param attributes Attributes that will be substituted in this problem
+     *        description message.
+     */
+    Problem(Code code, Rule rule, String... attributes) {
+        this(code, rule.getStart(), rule.getEnd(), rule, attributes);
     }
     
-    Problem(int code, Location start, Location end, Rule source, String... attributes) {
+    /**
+     * Constructs a new problem with the specified code, source location, rule
+     * and attributes.
+     * 
+     * @param code Code of this problem.
+     * @param start Start location of this problem in character stream.
+     * @param end End location of this problem in character stream.
+     * @param rule Rule that is the cause of this problem.
+     * @param attributes Attributes that will be substituted in this problem
+     *        description message.
+     */
+    Problem(Code code, Location start, Location end, Rule rule, String... attributes) {
         this.code = code;
         this.start = start;
         this.end = end;
         this.attributes = attributes;
-        if ((this.source = source) != null)
-            source.addProblem(this);
+        if ((this.rule = rule) != null) {
+            rule.addProblem(this);
+        }
     }
     
-    public int getCode() {
+    /**
+     * Returns type of this problem.
+     * 
+     * @return Type of this problem.
+     */
+    public Type getType() {
+        return code.getType();
+    }
+    
+    /**
+     * Returns code of this problem.
+     * 
+     * @return Code of this problem.
+     */
+    public Code getCode() {
         return code;
     }
     
+    /**
+     * Returns start location of this problem in character stream.
+     * 
+     * @return Start location of this problem in character stream.
+     */
     public Location getStart() {
         return start;
     }
     
+    /**
+     * Returns end location of this problem in character stream.
+     * 
+     * @return End location of this problem in character stream.
+     */
     public Location getEnd() {
         return end;
     }
     
-    public Rule getSource() {
-        return source;
+    /**
+     * Returns rule that is the cause of this problem.
+     * 
+     * @return Rule that is the cause of this problem or <code>null</code> if
+     *         this problem is not related to any grammar rule.
+     */
+    public Rule getRule() {
+        return rule;
     }
     
-    public Kind getKind() {
-        return code < eCodeBase
-            ? Kind.FATAL
-            : code < wCodeBase
-                ? Kind.ERROR
-                : code < hCodeBase
-                    ? Kind.WARNING
-                    : Kind.HINT;
-    }
-    
-    public String getMessage() {
-        int index;
-        String[] messages;
-        
-        if (code < eCodeBase) {
-            index = code - fCodeBase;
-            messages = fatals;
-        } else if (code < wCodeBase) {
-            index = code - eCodeBase;
-            messages = errors;
-        } else if (code < hCodeBase) {
-            index = code - wCodeBase;
-            messages = warnings;
+    /**
+     * Returns source of this problem if available.
+     * 
+     * @return Source of this problem or <code>null</code> if source is not
+     *         available.
+     */
+    public String getSource() {
+        if (rule == null || start == Location.UNKNOWN || end == Location.UNKNOWN) {
+            return null;
         } else {
-            index = code - hCodeBase;
-            messages = hints;
+            return rule.getGrammar().getSource(start, end);
         }
-        
-        return ResourceManager.getMessage(messages[index], (Object[]) attributes);
     }
     
+    /**
+     * Returns description message of this problem.
+     * 
+     * @return Description message of this problem.
+     */
+    public String getMessage() {
+        return ResourceManager.getProblemMessage(code, attributes);
+    }
+    
+    /**
+     * Compares this problem with another one for order.
+     * 
+     * @return A negative integer, zero, or a positive integer as this problem
+     *         has less order, equal order, or greater order than the specified
+     *         problem.
+     */
     public int compareTo(Problem other) {
         int c = start.compareTo(other.start);
-        return c == 0 ? code - other.code : c;
+        return c == 0 ? code.ordinal() - other.code.ordinal() : c;
     }
     
+    /**
+     * Returns string representation of this problem.
+     * 
+     * @return String representation of this problem.
+     * @see #toString(StringBuilder)
+     */
     public String toString() {
         StringBuilder buf = new StringBuilder();
         toString(buf);
         return buf.toString();
     }
     
+    /**
+     * Appends string representation of this problem to the specified buffer.
+     * 
+     * @param buf Buffer to append.
+     */
     public void toString(StringBuilder buf) {
         getStart().toString(buf);
         buf.append("\n")
-           .append(getKind())
+           .append(getType())
            .append(": ")
            .append(getMessage())
            .append("\n");
     }
     
-    // Fatal messages
+    // Type
     
-    public static final int fatalEmptyGrammar               = fCodeBase + 0;
+    /**
+     * Enumeration of possible problem types.
+     * 
+     * @author Fox Mulder
+     */
+    public enum Type {
+        
+        FATAL, ERROR, WARNING, HINT
+        
+    }
     
-    private static final String[] fatals = new String[]{
-        "fatal.emptyGrammar"
-    };
+    // Code
     
-    // Error messages
-    
-    // Syntax error codes
-    public static final int errorSyntax                     = eCodeBase + 0;
-    public static final int errorInvalidExpression          = eCodeBase + 1;
-    public static final int errorMissingSemi                = eCodeBase + 2;
-    public static final int errorMissingClosingParenthesize = eCodeBase + 3;
-    public static final int errorUnterminatedString         = eCodeBase + 4;
-    public static final int errorInvalidEscapeSequence      = eCodeBase + 5;
-    public static final int errorInvalidUnicodeCharacter    = eCodeBase + 6;
-    public static final int errorUnterminatedBlockComment   = eCodeBase + 7;
-    // Semantic error codes
-    public static final int errorLeftRecursion              = eCodeBase + 8;
-    public static final int errorUnsafeSkipReference        = eCodeBase + 9;
-    public static final int errorEmptyTerminal              = eCodeBase + 10;
-    public static final int errorUnsupportedClass           = eCodeBase + 11;
-    public static final int errorDuplicateProduction        = eCodeBase + 12;
-    public static final int errorUndefinedProduction        = eCodeBase + 13;
-    
-    private static final String[] errors = new String[]{
-        // Syntax error messages
-        "error.syntaxError",
-        "error.invalidExpression",
-        "error.missingSemi",
-        "error.missingClosingParenthesize",
-        "error.unterminatedString",
-        "error.invalidEscapeSequence",
-        "error.invalidUnicodeCharacter",
-        "error.unterminatedBlockComment",
-        // Semantic error messages
-        "error.leftRecursion",
-        "error.unsafeSkipReference",
-        "error.emptyTerminal",
-        "error.unsupportedClass",
-        "error.duplicateProduction",
-        "error.undefinedProduction"
-    };
-    
-    // Warning messages
-    
-    public static final int warningUnusedProduction         = wCodeBase + 0;
-    public static final int warningUndefinedAction          = wCodeBase + 1;
-    
-    private static final String[] warnings = new String[]{
-        "warning.unusedProduction",
-        "warning.undefinedAction"
-    };
-    
-    // Hint messages
-    
-    public static final int hintInefficientTerminal         = hCodeBase + 0;
-    public static final int hintInefficientConcatenation    = hCodeBase + 1;
-    public static final int hintInefficientAlternation      = hCodeBase + 2;
-    public static final int hintPossibleSkipReference       = hCodeBase + 3;
-    
-    private static final String[] hints = new String[]{
-        "hint.inefficientTerminal",
-        "hint.inefficientConcatenation",
-        "hint.inefficientAlternation",
-        "hint.possibleSkipReference"
-    };
+    /**
+     * Enumeration of possible problem codes.
+     * 
+     * @author Fox Mulder
+     */
+    public enum Code {
+        
+        // Fatal errors
+        
+        /**
+         * Grammar must define at least one production.
+         */
+        EMPTY_GRAMMAR(Type.FATAL),
+        
+        // Syntax errors
+        
+        /**
+         * Syntax error.
+         */
+        SYNTAX_ERROR(Type.ERROR),
+        
+        /**
+         * Expression is invalid.
+         */
+        INVALID_EXPRESSION(Type.ERROR),
+        
+        /**
+         * The <code>;<code> character is missing.
+         */
+        MISSING_SEMI(Type.ERROR),
+        
+        /**
+         * Closing parenthesize is missing.
+         */
+        MISSING_CLOSING_PARENTHESIZE(Type.ERROR),
+        
+        /**
+         * String is not properly closed.
+         */
+        UNTERMINATED_STRING(Type.ERROR),
+        
+        /**
+         * Escape sequence is invalid.
+         */
+        INVALID_ESCAPE_SEQUENCE(Type.ERROR),
+        
+        /**
+         * Declaration of unicode character is invalid.
+         */
+        INVALID_UNICODE_CHARACTER(Type.ERROR),
+        
+        /**
+         * Block comment is not properly closed.
+         */
+        UNTERMINATED_BLOCK_COMMENT(Type.ERROR),
+        
+        // Semantic errors
+        
+        /**
+         * Left recursion detected.
+         */
+        LEFT_RECURSION(Type.ERROR),
+        
+        /**
+         * Terminal does not match any characters.
+         */
+        EMPTY_TERMINAL(Type.ERROR),
+        
+        /**
+         * Character class is not supported.
+         */
+        UNSUPPORTED_CLASS(Type.ERROR),
+        
+        /**
+         * Production has been already declared.
+         */
+        DUPLICATE_PRODUCTION(Type.ERROR),
+        
+        /**
+         * Reference to undefined production was found.
+         */
+        UNDEFINED_PRODUCTION(Type.ERROR),
+        
+        // Warnings
+        
+        /**
+         * Production is never used.
+         */
+        UNUSED_PRODUCTION(Type.WARNING),
+        
+        /**
+         * Action is not defined.
+         */
+        UNDEFINED_ACTION(Type.WARNING),
+        
+        // Hints
+        
+        /**
+         * Terminal could be replaced by more efficient terminal.
+         */
+        INEFFICIENT_TERMINAL(Type.HINT),
+        
+        /**
+         * Concatenation could be optimized.
+         */
+        INEFFICIENT_CONCATENATION(Type.HINT),
+        
+        /**
+         * Alternation could be optimized.
+         */
+        INEFFICIENT_ALTERNATION(Type.HINT);
+        
+        /**
+         * Type of the problem.
+         */
+        private final Type type;
+        
+        /**
+         * Constructs a new problem code with the specified type.
+         * 
+         * @param type Type of the problem.
+         */
+        private Code(Type type) {
+            this.type = type;
+        }
+        
+        /**
+         * Returns type of the problem.
+         * 
+         * @return Type of the problem.
+         */
+        public Type getType() {
+            return type;
+        }
+        
+    }
     
 }
