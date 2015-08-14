@@ -40,14 +40,14 @@ public final class GrammarCompiler {
         if (grammar.getProductionCount() > 0) {
             synchronized (grammar) {
                 GrammarProblems unbindedProblems = new GrammarProblems();
-                for (Problem problem : grammar.getProblems().getProblemList()) {
+                for (Problem problem : grammar.getProblems().getProblems()) {
                     if (problem.getRule() == null) {
-                        unbindedProblems.addProblem(problem);
+                        unbindedProblems.add(problem);
                     }
                 }
                 
                 grammar.getProblems().clear();
-                grammar.getProblems().addProblems(unbindedProblems);
+                grammar.getProblems().addAll(unbindedProblems);
                 
                 boolean sw = (flags & SUPPRESS_WARNINGS) != 0;
                 boolean sh = (flags & SUPPRESS_HINTS) != 0;
@@ -86,27 +86,27 @@ public final class GrammarCompiler {
         public void visit(Terminal rule) {
             if (!(rule instanceof Terminal.Nil)) {
                 if (rule.isEmpty()) {
-                    grammar.getProblems().addProblem(EMPTY_TERMINAL, rule);
+                    grammar.getProblems().add(EMPTY_TERMINAL, rule);
                 } else if (rule instanceof Terminal.Class) {
                     Terminal.Class term = (Terminal.Class) rule;
                     if (term.isUndefined())
-                        grammar.getProblems().addProblem(UNSUPPORTED_CLASS,
+                        grammar.getProblems().add(UNSUPPORTED_CLASS,
                                 term, term.getName());
                 } else {
                     if (!sh && rule.isInefficient())
-                        grammar.getProblems().addProblem(INEFFICIENT_TERMINAL, rule);
+                        grammar.getProblems().add(INEFFICIENT_TERMINAL, rule);
                 }
             }
         }
         
         public void visit(Production rule) {
             if (rule.isDuplicated())
-                grammar.getProblems().addProblem(DUPLICATE_PRODUCTION,
+                grammar.getProblems().add(DUPLICATE_PRODUCTION,
                         rule, rule.getName());
             
             if (!sw)
                 if (rule.isStandalone() && rule != grammar.getStart())
-                    grammar.getProblems().addProblem(UNUSED_PRODUCTION,
+                    grammar.getProblems().add(UNUSED_PRODUCTION,
                             rule, rule.getName());
             
             rule.expression.accept(this);
@@ -114,14 +114,14 @@ public final class GrammarCompiler {
         
         public void visit(Reference rule) {
             if (rule.target.isUndefined())
-                grammar.getProblems().addProblem(UNDEFINED_PRODUCTION,
+                grammar.getProblems().add(UNDEFINED_PRODUCTION,
                         rule, rule.getTargetName());
         }
         
         public void visit(Action rule) {
             if (!sw)
                 if (rule.isUndefined())
-                    grammar.getProblems().addProblem(UNDEFINED_ACTION,
+                    grammar.getProblems().add(UNDEFINED_ACTION,
                             rule, rule.getName());
             
             rule.child.accept(this);
@@ -141,7 +141,7 @@ public final class GrammarCompiler {
                         Terminal.Token term1 = (Terminal.Token) rule1;
                         Terminal.Token term2 = (Terminal.Token) rule2;
                         if (term1.isCaseSensitive() == term2.isCaseSensitive()) {
-                            grammar.getProblems().addProblem(INEFFICIENT_CONCATENATION, rule);
+                            grammar.getProblems().add(INEFFICIENT_CONCATENATION, rule);
                             break;
                         }
                     }
@@ -164,7 +164,7 @@ public final class GrammarCompiler {
                         Terminal term1 = (Terminal) rule1;
                         Terminal term2 = (Terminal) rule2;
                         if (term1.isDetermined() && term2.isDetermined()) {
-                            grammar.getProblems().addProblem(INEFFICIENT_ALTERNATION, rule);
+                            grammar.getProblems().add(INEFFICIENT_ALTERNATION, rule);
                             break;
                         }
                     }
@@ -231,7 +231,7 @@ public final class GrammarCompiler {
         public void visit(Reference rule) {
             if (source == rule.target) {
                 if (!consuming) {
-                    grammar.getProblems().addProblem(LEFT_RECURSION,
+                    grammar.getProblems().add(LEFT_RECURSION,
                             rule, rule.getTargetName(), referencePath.toString());
                     recursion = true;
                 }

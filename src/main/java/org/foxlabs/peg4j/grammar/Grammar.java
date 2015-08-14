@@ -51,7 +51,7 @@ public final class Grammar {
     }
     
     public boolean hasProblems() {
-        return !problems.isEmpty();
+        return problems.hasProblems();
     }
     
     public boolean hasErrors() {
@@ -70,11 +70,9 @@ public final class Grammar {
     public boolean hasSource() {
         if (source == null) {
             return false;
-        }
-        
-        if (offsets == null) {
+        } else if (offsets == null) {
             int count = 0;
-            offsets = new int[256];
+            offsets = new int[source.length() / 80 + 10];
             offsets[count++] = 0;
             int length = source.length();
             for (int i = 0; i < length; i++) {
@@ -87,7 +85,6 @@ public final class Grammar {
             }
             offsets = Arrays.copyOf(offsets, count);
         }
-        
         return true;
     }
     
@@ -100,9 +97,9 @@ public final class Grammar {
         
         if (line < 1 || line > offsets.length) {
             throw new IndexOutOfBoundsException();
+        } else {
+            return offsets[line] - offsets[line - 1];
         }
-        
-        return offsets[line] - offsets[line - 1];
     }
     
     public String getSource() {
@@ -114,9 +111,9 @@ public final class Grammar {
         
         if (line < 1 || line > offsets.length) {
             throw new IndexOutOfBoundsException();
+        } else {
+            return source.substring(offsets[line - 1], offsets[line]);
         }
-        
-        return source.substring(offsets[line - 1], offsets[line]);
     }
     
     public String getSource(int startLine, int startColumn, int endLine, int endColumn) {
@@ -138,11 +135,11 @@ public final class Grammar {
     }
     
     public String getSource(Location start, Location end) {
-        if (start == Location.UNKNOWN || end == Location.UNKNOWN) {
+        if (start.isUnknown() || end.isUnknown()) {
             throw new IllegalArgumentException();
+        } else {
+            return getSource(start.line, start.column, end.line, end.column);
         }
-        
-        return getSource(start.line, start.column, end.line, end.column);
     }
     
     private void checkSource() {

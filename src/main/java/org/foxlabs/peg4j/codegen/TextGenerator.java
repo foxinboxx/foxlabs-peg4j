@@ -91,7 +91,7 @@ public final class TextGenerator extends BaseGenerator {
         if (generateComments && tc.grammar.hasProblems()) {
             appendComment("PROBLEMS:", comments);
             comments.append("\n");
-            for (Problem problem : tc.grammar.getProblems().getProblemList())
+            for (Problem problem : tc.grammar.getProblems().getProblems())
                 if (Location.UNKNOWN != problem.getStart()) {
                     appendComment(problem.toString(), comments);
                     comments.append("\n");

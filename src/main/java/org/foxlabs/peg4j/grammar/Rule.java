@@ -29,11 +29,24 @@ import org.foxlabs.util.Location;
 
 public abstract class Rule {
     
+    /**
+     * Start location of this rule in character stream.
+     */
     Location start = Location.UNKNOWN;
+    
+    /**
+     * End location of this rule in character stream.
+     */
     Location end = Location.UNKNOWN;
     
-    List<Problem> problems = null;
+    /**
+     * List of problems associated with this rule.
+     */
+    List<Problem> problems = Collections.emptyList();
     
+    /**
+     * Constructs a new rule.
+     */
     Rule() {
         super();
     }
@@ -52,19 +65,8 @@ public abstract class Rule {
         return getGrammar().getSource(start, end);
     }
     
-    final void addProblem(Problem problem) {
-        if (problems == null) {
-            problems = new LinkedList<Problem>();
-        }
-        problems.add(problem);
-    }
-    
     public final List<Problem> getProblems() {
-        if (problems == null) {
-            return Collections.emptyList();
-        } else {
-            return Collections.unmodifiableList(problems);
-        }
+        return Collections.unmodifiableList(problems);
     }
     
     public final List<Problem> getAllProblems() {
@@ -104,6 +106,17 @@ public abstract class Rule {
         } else {
             rule.toString(buf, debug);
         }
+    }
+    
+    static void addProblem(Rule rule, Problem problem) {
+        if (rule.problems.isEmpty()) {
+            rule.problems = new LinkedList<Problem>();
+        }
+        rule.problems.add(problem);
+    }
+    
+    static void clearProblems(Rule rule) {
+        rule.problems = Collections.emptyList();
     }
     
 }

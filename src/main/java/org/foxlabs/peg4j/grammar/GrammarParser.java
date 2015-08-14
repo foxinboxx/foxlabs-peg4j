@@ -75,12 +75,12 @@ public final class GrammarParser extends Parser<Grammar> {
     @Override
     protected Grammar buildResult() {
         GrammarProblems problems = new GrammarProblems();
-        problems.addProblems(problemStack.popAll(new Problem[problemStack.size()]));
+        problems.addAll(problemStack.popAll(new Problem[problemStack.size()]));
         Grammar grammar = builder.buildGrammar(problems, source);
         GrammarCompiler.compile(grammar, compilationFlags);
         
         if (grammar.getProductionCount() == 0) {
-            problems.addProblem(EMPTY_GRAMMAR, eofLocation, eofLocation);
+            problems.add(EMPTY_GRAMMAR, eofLocation, eofLocation);
             problems.sort();
         }
         

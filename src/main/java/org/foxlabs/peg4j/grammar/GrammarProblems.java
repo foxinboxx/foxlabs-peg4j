@@ -23,7 +23,7 @@ import java.util.Collections;
 import org.foxlabs.util.Location;
 
 public class GrammarProblems extends RuntimeException {
-    private static final long serialVersionUID = 2936597885158820284L;
+    private static final long serialVersionUID = -2577809311036208714L;
     
     private List<Problem> problems = new ArrayList<Problem>();
     private List<Problem> fatals = new ArrayList<Problem>();
@@ -31,35 +31,29 @@ public class GrammarProblems extends RuntimeException {
     private List<Problem> warnings = new ArrayList<Problem>();
     private List<Problem> hints = new ArrayList<Problem>();
     
-    GrammarProblems() {}
-    
-    public boolean isEmpty() {
-        return problems.isEmpty();
+    GrammarProblems() {
+        super();
     }
     
-    public List<Problem> getProblemList() {
-        return Collections.unmodifiableList(problems);
+    void add(Problem.Code code, Location start, Location end) {
+        add(new Problem(code, start, end));
     }
     
-    void addProblem(Problem.Code code, Location start, Location end) {
-        addProblem(new Problem(code, start, end));
+    void add(Problem.Code code, Location start, Location end, String... attributes) {
+        add(new Problem(code, start, end, attributes));
     }
     
-    void addProblem(Problem.Code code, Location start, Location end, String... attributes) {
-        addProblem(new Problem(code, start, end, attributes));
+    void add(Problem.Code code, Rule rule) {
+        add(new Problem(code, rule));
     }
     
-    void addProblem(Problem.Code code, Rule source) {
-        addProblem(new Problem(code, source));
+    void add(Problem.Code code, Rule rule, String... attributes) {
+        add(new Problem(code, rule, attributes));
     }
     
-    void addProblem(Problem.Code code, Rule source, String... attributes) {
-        addProblem(new Problem(code, source, attributes));
-    }
-    
-    void addProblem(Problem problem) {
+    void add(Problem problem) {
         problems.add(problem);
-        switch (problem.getCode().getType()) {
+        switch (problem.getType()) {
             case FATAL:
                 fatals.add(problem);
                 break;
@@ -75,17 +69,48 @@ public class GrammarProblems extends RuntimeException {
         }
     }
     
-    void addProblems(Problem[] problems) {
-        for (Problem problem : problems)
-            addProblem(problem);
+    void addAll(Problem[] problems) {
+        for (Problem problem : problems) {
+            add(problem);
+        }
     }
     
-    void addProblems(GrammarProblems other) {
+    void addAll(GrammarProblems other) {
         problems.addAll(other.problems);
         fatals.addAll(other.fatals);
         errors.addAll(other.errors);
         warnings.addAll(other.warnings);
         hints.addAll(other.hints);
+    }
+    
+    void sort() {
+        Collections.sort(problems);
+        Collections.sort(fatals);
+        Collections.sort(errors);
+        Collections.sort(warnings);
+        Collections.sort(hints);
+    }
+    
+    void clear() {
+        for (Problem problem : problems) {
+            if (problem.getRule() != null) {
+                Rule.clearProblems(problem.getRule());
+            }
+        }
+        
+        problems.clear();
+        fatals.clear();
+        errors.clear();
+        warnings.clear();
+        hints.clear();
+    }
+    
+    public boolean hasProblems() {
+        return problems.size() > 0;
+    }
+    
+    public List<Problem> getProblems() {
+        return Collections.unmodifiableList(problems);
     }
     
     public boolean hasFatals() {
@@ -120,34 +145,12 @@ public class GrammarProblems extends RuntimeException {
         return Collections.unmodifiableList(hints);
     }
     
-    void sort() {
-        Collections.sort(problems);
-        Collections.sort(fatals);
-        Collections.sort(errors);
-        Collections.sort(warnings);
-        Collections.sort(hints);
-    }
-    
-    void clear() {
-        for (Problem problem : problems) {
-            if (problem.getRule() != null) {
-                problem.getRule().problems = null;
-            }
-        }
-        
-        problems.clear();
-        fatals.clear();
-        errors.clear();
-        warnings.clear();
-        hints.clear();
-    }
-    
+    @Override
     public String getMessage() {
-        StringBuilder buf = new StringBuilder();
-        toString(buf);
-        return buf.toString();
+        return toString();
     }
     
+    @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
         toString(buf);
@@ -168,13 +171,14 @@ public class GrammarProblems extends RuntimeException {
         }
     }
     
-    static void toCountString(StringBuilder buf, Problem.Type type, int count) {
+    private static void toCountString(StringBuilder buf, Problem.Type type, int count) {
         if (count > 0) {
             buf.append(count)
                .append(" ")
                .append(type.name().toLowerCase());
-            if (count > 1)
+            if (count > 1) {
                 buf.append("s");
+            }
             buf.append("\n");
         }
     }

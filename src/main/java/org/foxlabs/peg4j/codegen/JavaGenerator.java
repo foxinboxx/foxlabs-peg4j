@@ -217,7 +217,7 @@ public final class JavaGenerator extends BaseGenerator {
         if (generateComments && generateProblems && dc.grammar.hasProblems()) {
             appendComment("PROBLEMS:", problemComments);
             problemComments.append("\n");
-            for (Problem problem : dc.grammar.getProblems().getProblemList()) {
+            for (Problem problem : dc.grammar.getProblems().getProblems()) {
                 if (Location.UNKNOWN != problem.getStart()) {
                     appendComment(problem.toString(), problemComments);
                     problemComments.append("\n");

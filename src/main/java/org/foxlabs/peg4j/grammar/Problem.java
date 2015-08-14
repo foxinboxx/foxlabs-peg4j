@@ -43,6 +43,11 @@ public final class Problem implements Serializable, Comparable<Problem> {
     private final Code code;
     
     /**
+     * Attributes that will be substituted in this problem description message.
+     */
+    private final String[] attributes;
+    
+    /**
      * Start location of this problem in character stream.
      */
     private final Location start;
@@ -51,11 +56,6 @@ public final class Problem implements Serializable, Comparable<Problem> {
      * End location of this problem in character stream.
      */
     private final Location end;
-    
-    /**
-     * Attributes that will be substituted in this problem description message.
-     */
-    private final String[] attributes;
     
     /**
      * Rule that is the cause of this problem.
@@ -122,11 +122,11 @@ public final class Problem implements Serializable, Comparable<Problem> {
      */
     Problem(Code code, Location start, Location end, Rule rule, String... attributes) {
         this.code = code;
-        this.start = start;
-        this.end = end;
         this.attributes = attributes;
+        this.start = start == null ? Location.UNKNOWN : start;
+        this.end = end == null ? Location.UNKNOWN : end;
         if ((this.rule = rule) != null) {
-            rule.addProblem(this);
+            Rule.addProblem(rule, this);
         }
     }
     
@@ -183,7 +183,7 @@ public final class Problem implements Serializable, Comparable<Problem> {
      *         available.
      */
     public String getSource() {
-        if (rule == null || start == Location.UNKNOWN || end == Location.UNKNOWN) {
+        if (rule == null || start.isUnknown() || end.isUnknown()) {
             return null;
         } else {
             return rule.getGrammar().getSource(start, end);
@@ -206,6 +206,7 @@ public final class Problem implements Serializable, Comparable<Problem> {
      *         has less order, equal order, or greater order than the specified
      *         problem.
      */
+    @Override
     public int compareTo(Problem other) {
         int c = start.compareTo(other.start);
         return c == 0 ? code.ordinal() - other.code.ordinal() : c;
@@ -217,6 +218,7 @@ public final class Problem implements Serializable, Comparable<Problem> {
      * @return String representation of this problem.
      * @see #toString(StringBuilder)
      */
+    @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
         toString(buf);
