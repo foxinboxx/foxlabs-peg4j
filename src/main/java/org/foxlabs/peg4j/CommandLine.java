@@ -85,7 +85,7 @@ public final class CommandLine {
          * localized detail message.
          */
         public CommandLineException(String pattern, Object... args) {
-            super(ResourceManager.formatMessage(pattern, args));
+            super(ResourceManager.formatCliMessage(pattern, args));
         }
         
     }
@@ -109,7 +109,7 @@ public final class CommandLine {
         }
         
         // there is no command found
-        throw new CommandLineException("cmd.unsupportedCommand", cmd);
+        throw new CommandLineException("cli.unsupportedCommand", cmd);
     }
     
     /*
@@ -126,13 +126,13 @@ public final class CommandLine {
             
             // option must start with "-"
             if (!(option.length() > 1 && option.startsWith("-"))) {
-                throw new CommandLineException("cmd.illegalOption", option);
+                throw new CommandLineException("cli.illegalOption", option);
             }
             
             // search for option setter in command class hierarchy
             Method sm = findOptionSetter(option.substring(1), cc);
             if (sm == null) { // unsupported option
-                throw new CommandLineException("cmd.unsupportedOption",
+                throw new CommandLineException("cli.unsupportedOption",
                         cmd, option);
             }
             
@@ -142,13 +142,13 @@ public final class CommandLine {
             for (int i = 0; i < argtypes.length; i++) {
                 Decoder decoder = decoders.get(argtypes[i]);
                 if (index == lastIndex) { // insufficient option arguments
-                    throw new CommandLineException("cmd.insufficientOptionArguments",
+                    throw new CommandLineException("cli.insufficientOptionArguments",
                             cmd, option, argtypes.length);
                 }
                 try {
                     args[i] = decoder.decode(options[index++]);
                 } catch (CommandLineException e) {
-                    throw new CommandLineException("cmd.illegalOptionArgument",
+                    throw new CommandLineException("cli.illegalOptionArgument",
                             cmd, option, i + 1, e.getMessage());
                 }
             }
@@ -209,7 +209,7 @@ public final class CommandLine {
                 try {
                     return Integer.valueOf(text);
                 } catch (NumberFormatException e) {
-                    throw new CommandLineException("cmd.illegalIntValue", text);
+                    throw new CommandLineException("cli.illegalIntValue", text);
                 }
             }
         };
@@ -220,7 +220,7 @@ public final class CommandLine {
                 try {
                     return Class.forName(text);
                 } catch (ClassNotFoundException e) {
-                    throw new CommandLineException("cmd.classNotFound", text);
+                    throw new CommandLineException("cli.classNotFound", text);
                 }
             }
         };
@@ -247,7 +247,7 @@ public final class CommandLine {
                         return constant;
                     }
                 }
-                throw new CommandLineException("cmd.illegalEnumValue", text);
+                throw new CommandLineException("cli.illegalEnumValue", text);
             }
             
         }
@@ -286,7 +286,7 @@ public final class CommandLine {
         // -encoding <charset>
         public void setEncoding(String value) {
             if (!Charset.isSupported(value)) {
-                throw new CommandLineException("cmd.unsupportedEncoding", value);
+                throw new CommandLineException("cli.unsupportedEncoding", value);
             } else {
                 encoding = value;
             }
@@ -389,7 +389,7 @@ public final class CommandLine {
         
         public void execute(File source) throws Throwable {
             if (this.source == null) {
-                throw new CommandLineException("cmd.traceSourceRequired");
+                throw new CommandLineException("cli.traceSourceRequired");
             }
             
             super.execute(source);
@@ -530,7 +530,7 @@ public final class CommandLine {
             super.execute(source);
             
             if (target == null) {
-                target = changeExt(source, "peg");
+                target = changeExt(source, "peg4j");
             }
             
             FileWriter out = new FileWriter(target);
@@ -658,7 +658,7 @@ public final class CommandLine {
      * Prints localized message.
      */
     static void printPattern(String pattern, Object... args) {
-        print(ResourceManager.formatMessage(pattern, args));
+        print(ResourceManager.formatCliMessage(pattern, args));
     }
     
     /*
@@ -671,11 +671,11 @@ public final class CommandLine {
                 print(e.getMessage());
             }
         } else if (e instanceof Peg4jException) {
-            printPattern("cmd.specificationError", e.getMessage());
+            printPattern("cli.specificationError", e.getMessage());
         } else if (e instanceof SyntaxException) {
-            printPattern("cmd.syntaxError", e.getMessage());
+            printPattern("cli.syntaxError", e.getMessage());
         } else if (e instanceof IOException) {
-            printPattern("cmd.ioError", e.getMessage());
+            printPattern("cli.ioError", e.getMessage());
         } else {
             e.printStackTrace();
         }
@@ -685,8 +685,8 @@ public final class CommandLine {
      * Prints usage info.
      */
     static void printUsage() {
-        print(ResourceManager.formatCliMessage("usage", ResourceManager.getProductName(),
-                ResourceManager.getProductVersion(), ResourceManager.getProductURL()));
+        printPattern("cli.usage", ResourceManager.getProductName(),
+                ResourceManager.getProductVersion(), ResourceManager.getProductURL());
     }
     
     /*
@@ -701,7 +701,7 @@ public final class CommandLine {
      * Can be called inside main method only.
      */
     static void terminateSuccessfully() {
-        printPattern("cmd.success");
+        printPattern("cli.success");
         printTook();
         System.exit(0);
     }
@@ -711,7 +711,7 @@ public final class CommandLine {
      */
     static void terminateAbnormal(boolean silent) {
         if (!silent) {
-            printPattern("cmd.failure");
+            printPattern("cli.failure");
             printTook();
         }
         System.exit(1);

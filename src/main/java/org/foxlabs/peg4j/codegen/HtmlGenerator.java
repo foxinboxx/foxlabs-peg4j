@@ -77,6 +77,7 @@ public final class HtmlGenerator extends BaseGenerator {
         this.highlightingOff = (flags & HIGHLIGHTING_OFF) != 0;
     }
     
+    @Override
     protected String getTemplate() {
         return ResourceManager.getGrammarHtmlTemplate();
     }
@@ -107,11 +108,12 @@ public final class HtmlGenerator extends BaseGenerator {
         
     }
     
+    @Override
     protected void defineVariables(Grammar grammar, Map<String, String> variables) {
+        super.defineVariables(grammar, variables);
         HtmlContext hc = new HtmlContext(grammar, variables);
         defineTitle(hc);
         defineGrammarTheme(hc);
-        defineGrammarScript(hc);
         defineGrammar(hc);
     }
     
@@ -129,16 +131,7 @@ public final class HtmlGenerator extends BaseGenerator {
     
     // ${grammar_theme}
     private void defineGrammarTheme(HtmlContext hc) {
-        String theme = this.theme;
-        if (theme == null) {
-            theme = ResourceManager.getGrammarDefaultCssTheme();
-        }
-        hc.variables.put("grammar_theme", theme);
-    }
-    
-    // ${grammar_script}
-    private void defineGrammarScript(HtmlContext hc) {
-        hc.variables.put("grammar_script", ResourceManager.getGrammarJavascriptCode());
+        hc.variables.put("grammar_theme", theme == null ? "" : theme);
     }
     
     // ${grammar_obj}
@@ -435,8 +428,6 @@ public final class HtmlGenerator extends BaseGenerator {
             
             appendStart();
             
-            appendCommentText("//\u0020" + ResourceManager.getCopyrightInfo());
-            appendLine();
             appendCommentText("//\u0020");
             appendAnchor(ResourceManager.getProductURL());
             appendLine();

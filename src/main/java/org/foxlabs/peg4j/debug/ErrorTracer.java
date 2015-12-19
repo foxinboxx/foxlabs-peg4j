@@ -61,7 +61,11 @@ public class ErrorTracer extends RuleTracer.Adapter {
     }
     
     public SyntaxException newSyntaxException() {
-        return new SyntaxException(getExpectedSet(), getErrorLocation());
+        if (expectedSet.isEmpty()) {
+            return new SyntaxException(getErrorLocation());
+        } else {
+            return new SyntaxException(getExpectedSet(), getErrorLocation());
+        }
     }
     
     @Override

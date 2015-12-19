@@ -50,6 +50,7 @@ public final class TextGenerator extends BaseGenerator {
         this.generateComments = (flags & GENERATE_COMMENTS) != 0;
     }
     
+    @Override
     protected String getTemplate() {
         return ResourceManager.getGrammarTextTemplate();
     }
@@ -66,7 +67,9 @@ public final class TextGenerator extends BaseGenerator {
         
     }
     
+    @Override
     protected void defineVariables(Grammar grammar, Map<String, String> variables) {
+        super.defineVariables(grammar, variables);
         TextContext tc = new TextContext(grammar, variables);
         defineGrammarStatements(tc);
         defineGrammarProblems(tc);

@@ -24,13 +24,14 @@ import org.foxlabs.peg4j.resource.ResourceManager;
 import org.foxlabs.util.Location;
 
 public class SyntaxException extends RecognitionException {
-    private static final long serialVersionUID = 2931432937747011390L;
+    private static final long serialVersionUID = -7679475223946902663L;
+    
+    public SyntaxException(Location location) {
+        super(ResourceManager.formatRuntimeMessage("runtime.syntaxError"), location);
+    }
     
     public SyntaxException(Set<Terminal> expectedSet, Location location) {
-        super(expectedSet.isEmpty()
-                ? ResourceManager.getMessage("runtime.syntaxError")
-                : ResourceManager.formatMessage("runtime.expectedTokens", expectedSet),
-              location);
+        super(ResourceManager.formatRuntimeMessage("runtime.expectedTokens", expectedSet), location);
     }
     
 }

@@ -30,22 +30,19 @@ public abstract class BaseGenerator {
     
     protected abstract String getTemplate();
     
-    protected abstract void defineVariables(Grammar grammar, Map<String, String> variables);
-    
-    public void generate(Grammar grammar, Writer out) throws IOException {
-        Map<String, String> variables = new HashMap<String, String>();
-        defineProductInfo(variables);
-        defineVariables(grammar, variables);
-        generate(getTemplate(), variables, out);
-    }
-    
-    public static void defineProductInfo(Map<String, String> variables) {
+    protected void defineVariables(Grammar grammar, Map<String, String> variables) {
         variables.put("product_name", ResourceManager.getProductName());
         variables.put("product_version", ResourceManager.getProductVersion());
         variables.put("product_url", ResourceManager.getProductURL());
     }
     
-    public static void generate(String template, Map<String, String> variables, Writer out) throws IOException {
+    public void generate(Grammar grammar, Writer out) throws IOException {
+        Map<String, String> variables = new HashMap<String, String>();
+        defineVariables(grammar, variables);
+        generate(getTemplate(), variables, out);
+    }
+    
+    protected static void generate(String template, Map<String, String> variables, Writer out) throws IOException {
         BacktrackingReader in = new BacktrackingReader(new StringReader(template));
         try {
             for (int ch = in.read(); ch >= 0; ch = in.read()) {
@@ -94,7 +91,7 @@ public abstract class BaseGenerator {
         }
     }
     
-    public static void writeVariable(String value, int ident, Writer out) throws IOException {
+    protected static void writeVariable(String value, int ident, Writer out) throws IOException {
         if (value.endsWith("\n\r") || value.endsWith("\r\n")) {
             value = value.substring(0, value.length() - 2);
         } else if (value.endsWith("\n") || value.endsWith("\r")) {
@@ -118,7 +115,7 @@ public abstract class BaseGenerator {
         }
     }
     
-    public static final void appendIdent(int ident, StringBuilder buf) {
+    protected static void appendIdent(int ident, StringBuilder buf) {
         for (int i = 0; i < ident; i++) {
             buf.append(' ');
         }

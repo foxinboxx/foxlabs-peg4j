@@ -23,19 +23,16 @@ import org.foxlabs.util.resource.ResourceHelper;
 
 public abstract class ResourceManager {
     
+    private static final String[] PRODUCT_INFO = ResourceHelper.readManifestAttributes("Peg4j-Name", "Peg4j-Version", "Peg4j-URL");
     public static final String RESOURCE_DIRECTORY = ResourceHelper.getResourcePath(ResourceManager.class);
     
-    private static final MessageBundle MESSAGE_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/messages");
-    private static final MessageBundle PROBLEM_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/problems");
-    private static final MessageBundle CLI_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/cli");
-    
-    private static final String[] PRODUCT_INFO = ResourceHelper.readManifestAttributes("Peg4j-Name", "Peg4j-Version", "Peg4j-URL");
+    private static final MessageBundle RUNTIME_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/runtime-messages");
+    private static final MessageBundle PROBLEM_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/problem-messages");
+    private static final MessageBundle CLI_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/cli-messages");
     
     private static String grammarTextTemplate = null;
     private static String grammarJavaTemplate = null;
     private static String grammarHtmlTemplate = null;
-    private static String grammarDefaultCssTheme = null;
-    private static String grammarJavascriptCode = null;
     
     private ResourceManager() {
         super();
@@ -64,45 +61,30 @@ public abstract class ResourceManager {
     
     public static String getGrammarTextTemplate() {
         if (grammarTextTemplate == null) {
-            grammarTextTemplate = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/text.template");
+            grammarTextTemplate = ResourceHelper.readTextResource(
+                    RESOURCE_DIRECTORY + "/template/grammar-template.peg4j");
         }
         return grammarTextTemplate;
     }
     
     public static String getGrammarJavaTemplate() {
         if (grammarJavaTemplate == null) {
-            grammarJavaTemplate = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/java.template");
+            grammarJavaTemplate = ResourceHelper.readTextResource(
+                    RESOURCE_DIRECTORY + "/template/grammar-template.java");
         }
         return grammarJavaTemplate;
     }
     
     public static String getGrammarHtmlTemplate() {
         if (grammarHtmlTemplate == null) {
-            grammarHtmlTemplate = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/html.template");
+            grammarHtmlTemplate = ResourceHelper.readTextResource(
+                    RESOURCE_DIRECTORY + "/template/grammar-template.html");
         }
         return grammarHtmlTemplate;
     }
     
-    public static String getGrammarDefaultCssTheme() {
-        if (grammarDefaultCssTheme == null) {
-            grammarDefaultCssTheme = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/grammar.css");
-        }
-        return grammarDefaultCssTheme;
-    }
-    
-    public static String getGrammarJavascriptCode() {
-        if (grammarJavascriptCode == null) {
-            grammarJavascriptCode = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/grammar.js");
-        }
-        return grammarJavascriptCode;
-    }
-    
-    public static String getMessage(String key) {
-        return MESSAGE_BUNDLE.get(key);
-    }
-    
-    public static String formatMessage(String key, Object... arguments) {
-        return MESSAGE_BUNDLE.format(key, arguments);
+    public static String formatRuntimeMessage(String key, Object... arguments) {
+        return RUNTIME_BUNDLE.format(key, arguments);
     }
     
     public static String formatProblemMessage(String key, String... attributes) {
@@ -111,10 +93,6 @@ public abstract class ResourceManager {
     
     public static String formatCliMessage(String key, Object... arguments) {
         return CLI_BUNDLE.format(key, arguments);
-    }
-    
-    public static String getCopyrightInfo() {
-        return formatMessage("copyright.generatedMessage", getProductName(), getProductVersion());
     }
     
 }

@@ -1,0 +1,181 @@
+<html>
+<head>
+    <title>${title}</title>
+    
+    <style type="text/css">
+        .gx-code {
+            font-family : courier new;
+            font-size : 10pt;
+            color : #000000;
+        }
+        
+        .gx-line {
+            border-right : 1px solid #808080;
+            text-align : right;
+            color : #808080;
+        }
+        
+        .gx-highlighting {
+            background-color : #80ffff !important;
+        }
+        
+        .gx-injection {
+            background-color : #000000;
+            color : #ffffff;
+        }
+        
+        .gx-symbol {
+            color : #000000;
+        }
+        
+        .gx-operator {
+            font-weight : bold;
+            color : #808000;
+        }
+        
+        .gx-string {
+            color : #0000ff;
+        }
+        
+        .gx-number {
+            color : #0000ff;
+        }
+        
+        .gx-comment {
+            color : #008000;
+        }
+        
+        .gx-rule-any {
+            font-weight : bold;
+            color : #0000ff;
+        }
+        
+        .gx-rule-class {
+            font-weight : bold;
+            color : #000080;
+        }
+        
+        .gx-rule-production {
+            font-weight : bold;
+            color : #800000;
+        }
+        
+        .gx-rule-reference {
+            font-weight : bold;
+            color : #408080;
+        }
+        
+        .gx-rule-action {
+            font-style : italic;
+            color : #ff0000;
+        }
+        
+        .gx-problem-fatal {
+            background-color : #ff0000;
+        }
+        
+        .gx-problem-error {
+            background-color : #ff8080;
+        }
+        
+        .gx-problem-warning {
+            background-color : #ffff80;
+        }
+        
+        .gx-problem-hint {
+            background-color : #e0e0e0;
+        }
+    </style>
+    
+    <style type="text/css">
+        ${grammar_theme}
+    </style>
+    
+    <script type="text/javascript">
+        Gx = function() {
+            this.data = [];
+        };
+    
+        Gx.prototype = {
+            
+            appendClass : function(el, cls, deep) {
+                if (el.className) {
+                    if (deep) {
+                        var cn = el.childNodes;
+                        for (var i = 0, length = cn.length; i < length; i++) {
+                            this.appendClass(cn[i], cls, deep);
+                        }
+                    }
+                    if (el.className.length == 0) {
+                        el.className = cls;
+                    } else {
+                        var notfound = true;
+                        var cnames = el.className.split(' ');
+                        for (var i = 0, length = cnames.length; i < length; i++) {
+                            if (cnames[i] == cls) {
+                                notfound = false;
+                                break;
+                            }
+                        }
+                        if (notfound) {
+                            el.className += ' ' + cls;
+                        }
+                    }
+                }
+            },
+            
+            removeClass : function(el, cls, deep) {
+                if (el.className) {
+                    if (deep) {
+                        var cn = el.childNodes;
+                        for (var i = 0, length = cn.length; i < length; i++) {
+                            this.removeClass(cn[i], cls, deep);
+                        }
+                    }
+                    var cnames = el.className.split(' ');
+                    for (var i = 0, length = cnames.length; i < length; i++) {
+                        if (cnames[i] == cls) {
+                            cnames[i] = '';
+                            break;
+                        }
+                    }
+                    el.className = cnames.join(' ');
+                }
+            },
+            
+            on : function(index) {
+                var cls = this.data[index].cls;
+                var set = this.data[index].set;
+                for (var i = 0, length = set.length; i < length; i++) {
+                    var el = document.getElementById(set[i]);
+                    if (el) {
+                        this.appendClass(el, cls, false);
+                    }
+                }
+            },
+            
+            off : function(index) {
+                var cls = this.data[index].cls;
+                var set = this.data[index].set;
+                for (var i = 0, length = set.length; i < length; i++) {
+                    var el = document.getElementById(set[i]);
+                    if (el) {
+                        this.removeClass(el, cls, false);
+                    }
+                }
+            }
+            
+        };
+    </script>
+</head>
+<body style="margin:0px">
+
+<script type="text/javascript">
+(${grammar_obj} = new Gx()).data =
+[${grammar_data}];
+</script>
+
+${grammar_tags}
+
+</body>
+</html>

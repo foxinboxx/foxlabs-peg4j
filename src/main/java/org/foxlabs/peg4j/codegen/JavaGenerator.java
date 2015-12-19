@@ -125,6 +125,7 @@ public final class JavaGenerator extends BaseGenerator {
     
     @Override
     protected void defineVariables(Grammar grammar, Map<String, String> variables) {
+        super.defineVariables(grammar, variables);
         DeclContext dc = new DeclContext(grammar, variables);
         definePackageDecl(dc);
         defineParserType(dc);

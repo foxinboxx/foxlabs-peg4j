@@ -18,13 +18,14 @@ package org.foxlabs.peg4j;
 
 import org.foxlabs.peg4j.grammar.Action;
 import org.foxlabs.peg4j.resource.ResourceManager;
+
 import org.foxlabs.util.Location;
 
 public class ActionException extends RecognitionException {
-    private static final long serialVersionUID = 3405076822593101223L;
+    private static final long serialVersionUID = -914099915000589698L;
     
     public ActionException(Action action, Throwable cause, Location location) {
-        super(ResourceManager.formatMessage("runtime.actionError", action.getName()), cause, location);
+        super(ResourceManager.formatRuntimeMessage("runtime.actionError", action.getName()), cause, location);
     }
     
 }
