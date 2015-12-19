@@ -26,11 +26,13 @@ public enum TraceLevel {
     HIGH, MEDIUM, LOW;
     
     public static TraceLevel forRule(Rule rule) {
-        return rule instanceof Production
-            ? HIGH
-            : rule instanceof Reference || rule instanceof Action
-                ? MEDIUM
-                : LOW;
+        if (rule instanceof Production) {
+            return HIGH;
+        } else if (rule instanceof Reference || rule instanceof Action) {
+            return MEDIUM;
+        } else {
+            return LOW;
+        }
     }
     
 }

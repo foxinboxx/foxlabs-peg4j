@@ -16,6 +16,10 @@
 
 package org.foxlabs.peg4j.grammar;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+
 public interface RuleVisitor<E extends Throwable> {
     
     void visit(Terminal rule) throws E;
@@ -34,6 +38,8 @@ public interface RuleVisitor<E extends Throwable> {
     
     void visit(Exclusion rule) throws E;
     
+    // Adapter
+    
     public static class Adapter<E extends Throwable> implements RuleVisitor<E> {
         
         public void visit(Terminal rule) throws E {}
@@ -51,6 +57,83 @@ public interface RuleVisitor<E extends Throwable> {
         public void visit(Repetition rule) throws E {}
         
         public void visit(Exclusion rule) throws E {}
+        
+    }
+    
+    // ProblemCollector
+    
+    public static class ProblemCollector implements RuleVisitor<RuntimeException> {
+        
+        private final List<Problem> problems;
+        
+        public ProblemCollector() {
+            this(new ArrayList<Problem>());
+        }
+        
+        public ProblemCollector(List<Problem> problems) {
+            this.problems = problems;
+        }
+        
+        public List<Problem> getProblems() {
+            Collections.sort(problems);
+            return problems;
+        }
+        
+        @Override
+        public void visit(Terminal rule) {
+            problems.addAll(rule.getProblems());
+        }
+        
+        @Override
+        public void visit(Production rule) {
+            problems.addAll(rule.getProblems());
+            rule.getExpression().accept(this);
+        }
+        
+        @Override
+        public void visit(Reference rule) {
+            problems.addAll(rule.getProblems());
+        }
+        
+        @Override
+        public void visit(Action rule) {
+            problems.addAll(rule.getProblems());
+            rule.getChild().accept(this);
+        }
+        
+        @Override
+        public void visit(Concatenation rule) {
+            problems.addAll(rule.getProblems());
+            for (int i = 0, count = rule.length(); i < count; i++) {
+                rule.getChild(i).accept(this);
+            }
+        }
+        
+        @Override
+        public void visit(Alternation rule) {
+            problems.addAll(rule.getProblems());
+            for (int i = 0, count = rule.length(); i < count; i++) {
+                rule.getChild(i).accept(this);
+            }
+        }
+        
+        @Override
+        public void visit(Repetition rule) {
+            problems.addAll(rule.getProblems());
+            rule.getChild().accept(this);
+        }
+        
+        @Override
+        public void visit(Exclusion rule) {
+            problems.addAll(rule.getProblems());
+            rule.getChild().accept(this);
+        }
+        
+        public static List<Problem> collect(Rule rule) {
+            ProblemCollector collector = new ProblemCollector();
+            rule.accept(collector);
+            return collector.getProblems();
+        }
         
     }
     

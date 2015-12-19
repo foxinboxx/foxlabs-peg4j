@@ -108,9 +108,11 @@ public class BacktrackingReader extends Reader {
     
     public String getText() {
         int length = getLength();
-        if (length == 0)
+        if (length == 0) {
             return null;
-        return new String(buffer, markOffsets[marker], length);
+        } else {
+            return new String(buffer, markOffsets[marker], length);
+        }
     }
     
     public char[] getChars() {
@@ -128,23 +130,26 @@ public class BacktrackingReader extends Reader {
     public int read() throws IOException {
         if (offset == size) {
             int count = fillBuffer(1);
-            if (count < 0)
+            if (count < 0) {
                 return EOF;
+            }
         }
         return readBuffer();
     }
     
     public int read(char[] buffer, int offset, int length) throws IOException {
-        if (length < 0 || offset < 0 || offset + length > buffer.length)
+        if (length < 0 || offset < 0 || offset + length > buffer.length) {
             throw new IndexOutOfBoundsException();
-        if (length == 0)
+        } else if (length == 0) {
             return 0;
+        }
         
         if (length > 0) {
             length = fillBuffer(length);
             if (length > 0) {
-                for (int i = offset, j = offset + length; i < j; i++)
+                for (int i = offset, j = offset + length; i < j; i++) {
                     buffer[i] = readBuffer();
+                }
             }
         }
         
@@ -156,54 +161,59 @@ public class BacktrackingReader extends Reader {
         int length = 0;
         
         int count = fillBuffer(EXPECTED_LINE_LENGTH);
-        for (; count > 0; count = fillBuffer(EXPECTED_LINE_LENGTH))
-            for (int i = 0; i < count; i++, length++)
-                if (readBuffer() == '\n')
+        for (; count > 0; count = fillBuffer(EXPECTED_LINE_LENGTH)) {
+            for (int i = 0; i < count; i++, length++) {
+                if (readBuffer() == '\n') {
                     return new String(buffer, start, length);
+                }
+            }
+        }
         
         return length > 0 ? new String(buffer, start, length) : null;
     }
     
     public long skip(long count) throws IOException {
-        if (count < 0L)
+        if (count < 0L) {
             throw new IllegalArgumentException();
+        }
         
         count = fillBuffer((int) count); // long is not supported
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++) {
             readBuffer(); // update location
+        }
         
         return count;
     }
     
     public int skip(int offset, int line, int column) throws IOException {
-        if (offset < this.offset || offset > this.size)
+        if (offset < this.offset || offset > this.size) {
             throw new IllegalStateException();
-        if (line < this.line)
+        } else if (line < this.line) {
             throw new IllegalStateException();
-        if (line == this.line)
-            if (column < this.column)
-                throw new IllegalStateException();
-        
-        int oldOffset = this.offset;
-        
-        this.offset = offset;
-        this.line = line;
-        this.column = column;
-        
-        return offset - oldOffset;
+        } else if (line == this.line && column < this.column) {
+            throw new IllegalStateException();
+        } else {
+            int oldOffset = this.offset;
+            this.offset = offset;
+            this.line = line;
+            this.column = column;
+            return offset - oldOffset;
+        }
     }
     
     public int skipWhitespace() throws IOException {
         int length = 0;
         
         int count = fillBuffer(EXPECTED_LINE_LENGTH);
-        for (; count > 0; count = fillBuffer(EXPECTED_LINE_LENGTH))
-            for (int i = 0; i < count; i++, length++)
+        for (; count > 0; count = fillBuffer(EXPECTED_LINE_LENGTH)) {
+            for (int i = 0; i < count; i++, length++) {
                 if (Character.isWhitespace(buffer[offset])) {
                     readBuffer();
                 } else {
                     return length;
                 }
+            }
+        }
         
         return length;
     }
@@ -251,10 +261,11 @@ public class BacktrackingReader extends Reader {
      * @throws IllegalStateException if there are no previously stored pointers.
      */
     public void release() {
-        if (marker == 0)
+        if (marker == 0) {
             throw new IllegalStateException();
-        
-        marker--;
+        } else {
+            marker--;
+        }
     }
     
     /**
@@ -264,14 +275,14 @@ public class BacktrackingReader extends Reader {
      * @throws IllegalStateException if there are no previously stored pointers.
      */
     public void reset() {
-        if (marker == 0)
+        if (marker == 0) {
             throw new IllegalStateException();
-        
-        offset = markOffsets[marker];
-        line = markLines[marker];
-        column = markColumns[marker];
-        
-        marker--;
+        } else {
+            offset = markOffsets[marker];
+            line = markLines[marker];
+            column = markColumns[marker];
+            marker--;
+        }
     }
     
     public void consume() {
@@ -300,8 +311,9 @@ public class BacktrackingReader extends Reader {
     }
     
     private void ensureCapacity(int count) {
-        if (size + count > buffer.length)
+        if (size + count > buffer.length) {
             buffer = Arrays.copyOf(buffer, buffer.length * 3 / 2 + count);
+        }
     }
     
     private char readBuffer() {
@@ -317,17 +329,20 @@ public class BacktrackingReader extends Reader {
     
     private int fillBuffer(int count) throws IOException {
         int rem = size - offset;
-        if (rem >= count)
+        if (rem >= count) {
             return count;
+        }
         
         int delta = (count - rem) * 2; // to avoid long sequence of the \n\r
-        if (delta < MIN_BUFFER_DELTA_SIZE)
+        if (delta < MIN_BUFFER_DELTA_SIZE) {
             delta = MIN_BUFFER_DELTA_SIZE;
+        }
         
         ensureCapacity(delta);
         int length = in.read(buffer, size, delta);
-        if (length < 0)
+        if (length < 0) {
             return rem == 0 ? EOF : rem;
+        }
         
         for (int i = size, j = size + length; i < j;) {
             int ch = buffer[i++];

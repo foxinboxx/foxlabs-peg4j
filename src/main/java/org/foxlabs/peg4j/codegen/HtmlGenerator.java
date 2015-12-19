@@ -16,8 +16,6 @@
 
 package org.foxlabs.peg4j.codegen;
 
-import java.net.URL;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,10 +24,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
-
-import org.foxlabs.peg4j.CommandLine;
 import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
+
 import org.foxlabs.util.UnicodeSet;
 
 public final class HtmlGenerator extends BaseGenerator {
@@ -80,8 +77,8 @@ public final class HtmlGenerator extends BaseGenerator {
         this.highlightingOff = (flags & HIGHLIGHTING_OFF) != 0;
     }
     
-    protected URL getTemplateURL() {
-        return ResourceManager.getHtmlTemplateURL();
+    protected String getTemplate() {
+        return ResourceManager.getGrammarHtmlTemplate();
     }
     
     static int grammarObjSequence = 1;
@@ -141,7 +138,7 @@ public final class HtmlGenerator extends BaseGenerator {
     
     // ${grammar_script}
     private void defineGrammarScript(HtmlContext hc) {
-        hc.variables.put("grammar_script", ResourceManager.getGrammarJsScript());
+        hc.variables.put("grammar_script", ResourceManager.getGrammarJavascriptCode());
     }
     
     // ${grammar_obj}
@@ -438,10 +435,10 @@ public final class HtmlGenerator extends BaseGenerator {
             
             appendStart();
             
-            appendCommentText("//\u0020" + ResourceManager.getGeneratedMessage());
+            appendCommentText("//\u0020" + ResourceManager.getCopyrightInfo());
             appendLine();
             appendCommentText("//\u0020");
-            appendAnchor(CommandLine.getProductURL());
+            appendAnchor(ResourceManager.getProductURL());
             appendLine();
             
             appendEnd();

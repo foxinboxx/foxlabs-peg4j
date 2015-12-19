@@ -156,7 +156,7 @@ public abstract class DefaultParser<T> extends Parser<T> {
             // Lookup for annotation
             GrammarDecl decl = c.getAnnotation(GrammarDecl.class);
             if (decl != null) {
-                if (decl.value().length() > 0) {
+                if (decl.value().trim().length() > 0) {
                     return new BacktrackingReader(new StringReader(decl.value()), c.getName());
                 }
                 

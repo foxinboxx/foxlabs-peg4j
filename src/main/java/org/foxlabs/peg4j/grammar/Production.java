@@ -16,7 +16,6 @@
 
 package org.foxlabs.peg4j.grammar;
 
-import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
@@ -54,6 +53,10 @@ public final class Production extends Rule implements Comparable<Production> {
         return grammar;
     }
     
+    public Production getOwner() {
+        return null;
+    }
+    
     public Expression getExpression() {
         return expression;
     }
@@ -77,12 +80,6 @@ public final class Production extends Rule implements Comparable<Production> {
     
     public boolean isUndefined() {
         return expression instanceof Terminal.Nil;
-    }
-    
-    @Override
-    protected void findProblems(List<Problem> foundProblems) {
-        foundProblems.addAll(getProblems());
-        expression.findProblems(foundProblems);
     }
     
     @Override

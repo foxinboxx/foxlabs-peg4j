@@ -16,8 +16,6 @@
 
 package org.foxlabs.peg4j.codegen;
 
-import java.net.URL;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -30,10 +28,9 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.WildcardType;
 
-
-import org.foxlabs.peg4j.ActionContext;
 import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.Transaction;
+import org.foxlabs.peg4j.ActionContext;
 import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
@@ -122,8 +119,8 @@ public final class JavaGenerator extends BaseGenerator {
     }
     
     @Override
-    protected URL getTemplateURL() {
-        return ResourceManager.getJavaTemplateURL();
+    protected String getTemplate() {
+        return ResourceManager.getGrammarJavaTemplate();
     }
     
     @Override

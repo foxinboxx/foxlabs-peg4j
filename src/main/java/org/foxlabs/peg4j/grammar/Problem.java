@@ -123,10 +123,10 @@ public final class Problem implements Serializable, Comparable<Problem> {
     Problem(Code code, Location start, Location end, Rule rule, String... attributes) {
         this.code = code;
         this.attributes = attributes;
-        this.start = start == null ? Location.UNKNOWN : start;
-        this.end = end == null ? Location.UNKNOWN : end;
+        this.start = Location.resolve(start);
+        this.end = Location.resolve(end);
         if ((this.rule = rule) != null) {
-            Rule.addProblem(rule, this);
+            rule.problems.add(this);
         }
     }
     
@@ -196,7 +196,7 @@ public final class Problem implements Serializable, Comparable<Problem> {
      * @return Description message of this problem.
      */
     public String getMessage() {
-        return ResourceManager.getProblemMessage(code, attributes);
+        return code.getMessage(attributes);
     }
     
     /**
@@ -266,105 +266,105 @@ public final class Problem implements Serializable, Comparable<Problem> {
         /**
          * Grammar must define at least one production.
          */
-        EMPTY_GRAMMAR(Type.FATAL),
+        EMPTY_GRAMMAR(Type.FATAL, "fatal.emptyGrammar"),
         
         // Syntax errors
         
         /**
          * Syntax error.
          */
-        SYNTAX_ERROR(Type.ERROR),
+        SYNTAX_ERROR(Type.ERROR, "error.syntaxError"),
         
         /**
          * Expression is invalid.
          */
-        INVALID_EXPRESSION(Type.ERROR),
+        INVALID_EXPRESSION(Type.ERROR, "error.invalidExpression"),
         
         /**
          * The <code>;<code> character is missing.
          */
-        MISSING_SEMI(Type.ERROR),
+        MISSING_SEMI(Type.ERROR, "error.missingSemi"),
         
         /**
          * Closing parenthesize is missing.
          */
-        MISSING_CLOSING_PARENTHESIZE(Type.ERROR),
+        MISSING_CLOSING_PARENTHESIZE(Type.ERROR, "error.missingClosingParenthesize"),
         
         /**
          * String is not properly closed.
          */
-        UNTERMINATED_STRING(Type.ERROR),
+        UNTERMINATED_STRING(Type.ERROR, "error.unterminatedString"),
         
         /**
          * Escape sequence is invalid.
          */
-        INVALID_ESCAPE_SEQUENCE(Type.ERROR),
+        INVALID_ESCAPE_SEQUENCE(Type.ERROR, "error.invalidEscapeSequence"),
         
         /**
          * Declaration of unicode character is invalid.
          */
-        INVALID_UNICODE_CHARACTER(Type.ERROR),
+        INVALID_UNICODE_CHARACTER(Type.ERROR, "error.invalidUnicodeCharacter"),
         
         /**
          * Block comment is not properly closed.
          */
-        UNTERMINATED_BLOCK_COMMENT(Type.ERROR),
+        UNTERMINATED_BLOCK_COMMENT(Type.ERROR, "error.unterminatedBlockComment"),
         
         // Semantic errors
         
         /**
          * Left recursion detected.
          */
-        LEFT_RECURSION(Type.ERROR),
+        LEFT_RECURSION(Type.ERROR, "error.leftRecursion"),
         
         /**
          * Terminal does not match any characters.
          */
-        EMPTY_TERMINAL(Type.ERROR),
+        EMPTY_TERMINAL(Type.ERROR, "error.emptyTerminal"),
         
         /**
          * Character class is not supported.
          */
-        UNSUPPORTED_CLASS(Type.ERROR),
+        UNSUPPORTED_CLASS(Type.ERROR, "error.unsupportedClass"),
         
         /**
          * Production has been already declared.
          */
-        DUPLICATE_PRODUCTION(Type.ERROR),
+        DUPLICATE_PRODUCTION(Type.ERROR, "error.duplicateProduction"),
         
         /**
-         * Reference to undefined production was found.
+         * Reference to undefined production.
          */
-        UNDEFINED_PRODUCTION(Type.ERROR),
+        UNDEFINED_PRODUCTION(Type.ERROR, "error.undefinedProduction"),
         
         // Warnings
         
         /**
          * Production is never used.
          */
-        UNUSED_PRODUCTION(Type.WARNING),
+        UNUSED_PRODUCTION(Type.WARNING, "warning.unusedProduction"),
         
         /**
          * Action is not defined.
          */
-        UNDEFINED_ACTION(Type.WARNING),
+        UNDEFINED_ACTION(Type.WARNING, "warning.undefinedAction"),
         
         // Hints
         
         /**
          * Terminal could be replaced by more efficient terminal.
          */
-        INEFFICIENT_TERMINAL(Type.HINT),
+        INEFFICIENT_TERMINAL(Type.HINT, "hint.inefficientTerminal"),
         
         /**
          * Concatenation could be optimized.
          */
-        INEFFICIENT_CONCATENATION(Type.HINT),
+        INEFFICIENT_CONCATENATION(Type.HINT, "hint.inefficientConcatenation"),
         
         /**
          * Alternation could be optimized.
          */
-        INEFFICIENT_ALTERNATION(Type.HINT);
+        INEFFICIENT_ALTERNATION(Type.HINT, "hint.inefficientAlternation");
         
         /**
          * Type of the problem.
@@ -372,12 +372,20 @@ public final class Problem implements Serializable, Comparable<Problem> {
         private final Type type;
         
         /**
-         * Constructs a new problem code with the specified type.
+         * Key of the problem description in resource bundle.
+         */
+        private final String key;
+        
+        /**
+         * Constructs a new problem code with the specified type and
+         * message key.
          * 
          * @param type Type of the problem.
+         * @param key Key of the problem description in resource bundle.
          */
-        private Code(Type type) {
+        private Code(Type type, String key) {
             this.type = type;
+            this.key = key;
         }
         
         /**
@@ -387,6 +395,17 @@ public final class Problem implements Serializable, Comparable<Problem> {
          */
         public Type getType() {
             return type;
+        }
+        
+        /**
+         * Returns description message of this problem code.
+         * 
+         * @param arguments Attributes that will be substituted in this problem
+         *        description message.
+         * @return Description message of this problem code.
+         */
+        public String getMessage(String... arguments) {
+            return ResourceManager.formatProblemMessage(key, arguments);
         }
         
     }

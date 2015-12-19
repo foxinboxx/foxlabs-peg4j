@@ -94,7 +94,7 @@ public class GrammarProblems extends RuntimeException {
     void clear() {
         for (Problem problem : problems) {
             if (problem.getRule() != null) {
-                Rule.clearProblems(problem.getRule());
+                problem.getRule().problems.clear();
             }
         }
         

@@ -16,80 +16,105 @@
 
 package org.foxlabs.peg4j.resource;
 
-import java.net.URL;
-
-import org.foxlabs.peg4j.CommandLine;
-import org.foxlabs.peg4j.grammar.Problem;
+import java.util.Date;
 
 import org.foxlabs.util.resource.MessageBundle;
 import org.foxlabs.util.resource.ResourceHelper;
 
-public class ResourceManager {
+public abstract class ResourceManager {
     
-    private static final String RESOURCE_DIRECTORY =
-        ResourceHelper.getResourcePath(ResourceManager.class);
+    public static final String RESOURCE_DIRECTORY = ResourceHelper.getResourcePath(ResourceManager.class);
     
-    private static final MessageBundle cmdBundle;
-    private static final MessageBundle messageBundle;
-    private static final MessageBundle PROBLEM_BUNDLE;
+    private static final MessageBundle MESSAGE_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/messages");
+    private static final MessageBundle PROBLEM_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/problems");
+    private static final MessageBundle CLI_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/cli");
     
-    static {
-        cmdBundle = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/cmd");
-        messageBundle = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/messages");
-        PROBLEM_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/problems");
+    private static final String[] PRODUCT_INFO = ResourceHelper.readManifestAttributes("Peg4j-Name", "Peg4j-Version", "Peg4j-URL");
+    
+    private static String grammarTextTemplate = null;
+    private static String grammarJavaTemplate = null;
+    private static String grammarHtmlTemplate = null;
+    private static String grammarDefaultCssTheme = null;
+    private static String grammarJavascriptCode = null;
+    
+    private ResourceManager() {
+        super();
     }
     
-    private ResourceManager() {}
-    
-    public static String getMessage(String key) {
-        return messageBundle.get(key);
+    public static String getProductName() {
+        if (PRODUCT_INFO[0] == null) {
+            PRODUCT_INFO[0] = "Peg4j";
+        }
+        return PRODUCT_INFO[0];
     }
     
-    public static String getMessage(String key, Object... arguments) {
-        return messageBundle.format(key, arguments);
+    public static String getProductVersion() {
+        if (PRODUCT_INFO[1] == null) {
+            PRODUCT_INFO[1] = new Date().toString();
+        }
+        return PRODUCT_INFO[1];
     }
     
-    public static String getProblemMessage(Problem.Code code, String... attributes) {
-        return PROBLEM_BUNDLE.format(code.getType().name().toLowerCase() + "." + code.name(), (Object[]) attributes);
+    public static String getProductURL() {
+        if (PRODUCT_INFO[2] == null) {
+            PRODUCT_INFO[2] = "http://foxlabs.org/p/peg4j";
+        }
+        return PRODUCT_INFO[2];
     }
     
-    public static URL getTextTemplateURL() {
-        return ResourceHelper.getResourceURL(RESOURCE_DIRECTORY + "/text.template");
+    public static String getGrammarTextTemplate() {
+        if (grammarTextTemplate == null) {
+            grammarTextTemplate = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/text.template");
+        }
+        return grammarTextTemplate;
     }
     
-    public static URL getJavaTemplateURL() {
-        return ResourceHelper.getResourceURL(RESOURCE_DIRECTORY + "/java.template");
+    public static String getGrammarJavaTemplate() {
+        if (grammarJavaTemplate == null) {
+            grammarJavaTemplate = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/java.template");
+        }
+        return grammarJavaTemplate;
     }
     
-    public static URL getHtmlTemplateURL() {
-        return ResourceHelper.getResourceURL(RESOURCE_DIRECTORY + "/html.template");
+    public static String getGrammarHtmlTemplate() {
+        if (grammarHtmlTemplate == null) {
+            grammarHtmlTemplate = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/html.template");
+        }
+        return grammarHtmlTemplate;
     }
     
     public static String getGrammarDefaultCssTheme() {
-        return ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/grammar.css", "UTF-8");
+        if (grammarDefaultCssTheme == null) {
+            grammarDefaultCssTheme = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/grammar.css");
+        }
+        return grammarDefaultCssTheme;
     }
     
-    public static String getGrammarJsScript() {
-        return ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/grammar.js", "UTF-8");
+    public static String getGrammarJavascriptCode() {
+        if (grammarJavascriptCode == null) {
+            grammarJavascriptCode = ResourceHelper.readTextResource(RESOURCE_DIRECTORY + "/grammar.js");
+        }
+        return grammarJavascriptCode;
     }
     
-    public static String getGeneratedMessage() {
-        return getMessage("copyright.generatedMessage",
-                          CommandLine.getProductName(),
-                          CommandLine.getProductVersion());
+    public static String getMessage(String key) {
+        return MESSAGE_BUNDLE.get(key);
     }
     
-    public static String getCommandLineUsage() {
-        return cmdBundle.format("usage",
-                CommandLine.getProductName(),
-                CommandLine.getProductVersion(),
-                CommandLine.getProductURL());
+    public static String formatMessage(String key, Object... arguments) {
+        return MESSAGE_BUNDLE.format(key, arguments);
     }
     
-    // Exceptions
+    public static String formatProblemMessage(String key, String... attributes) {
+        return PROBLEM_BUNDLE.format(key, (Object[]) attributes);
+    }
     
-    public static IllegalArgumentException newCmdException(String key, Object... arguments) {
-        return new IllegalArgumentException(getMessage(key, arguments));
+    public static String formatCliMessage(String key, Object... arguments) {
+        return CLI_BUNDLE.format(key, arguments);
+    }
+    
+    public static String getCopyrightInfo() {
+        return formatMessage("copyright.generatedMessage", getProductName(), getProductVersion());
     }
     
 }

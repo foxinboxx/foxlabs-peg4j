@@ -29,7 +29,7 @@ public class SyntaxException extends RecognitionException {
     public SyntaxException(Set<Terminal> expectedSet, Location location) {
         super(expectedSet.isEmpty()
                 ? ResourceManager.getMessage("runtime.syntaxError")
-                : ResourceManager.getMessage("runtime.expectedTokens", expectedSet),
+                : ResourceManager.formatMessage("runtime.expectedTokens", expectedSet),
               location);
     }
     

@@ -16,14 +16,12 @@
 
 package org.foxlabs.peg4j.codegen;
 
-import java.net.URL;
-
 import java.util.Map;
 import java.util.StringTokenizer;
 
-
 import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
+
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 
@@ -52,8 +50,8 @@ public final class TextGenerator extends BaseGenerator {
         this.generateComments = (flags & GENERATE_COMMENTS) != 0;
     }
     
-    protected URL getTemplateURL() {
-        return ResourceManager.getTextTemplateURL();
+    protected String getTemplate() {
+        return ResourceManager.getGrammarTextTemplate();
     }
     
     static final class TextContext {

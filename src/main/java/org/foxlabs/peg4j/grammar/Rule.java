@@ -17,7 +17,6 @@
 package org.foxlabs.peg4j.grammar;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Collections;
 
@@ -27,6 +26,20 @@ import org.foxlabs.peg4j.RecognitionException;
 
 import org.foxlabs.util.Location;
 
+/**
+ * Base class for all rules.
+ * 
+ * @author Fox Mulder
+ * @see Production
+ * @see Expression
+ * @see Terminal
+ * @see Concatenation
+ * @see Alternation
+ * @see Repetition
+ * @see Exclusion
+ * @see Reference
+ * @see Action
+ */
 public abstract class Rule {
     
     /**
@@ -42,7 +55,7 @@ public abstract class Rule {
     /**
      * List of problems associated with this rule.
      */
-    List<Problem> problems = Collections.emptyList();
+    List<Problem> problems = new LinkedList<Problem>();
     
     /**
      * Constructs a new rule.
@@ -51,33 +64,71 @@ public abstract class Rule {
         super();
     }
     
+    /**
+     * Returns grammar containing this rule.
+     * 
+     * @return Grammar containing this rule.
+     */
     public abstract Grammar getGrammar();
     
+    /**
+     * Returns start location of this rule in character stream.
+     * 
+     * @return Start location of this rule in character stream.
+     */
     public final Location getStart() {
         return start;
     }
     
+    /**
+     * Returns end location of this rule in character stream.
+     * 
+     * @return End location of this rule in character stream.
+     */
     public final Location getEnd() {
         return end;
     }
     
+    /**
+     * Returns source code of this rule if any or <code>null</code> if source
+     * is not available.
+     * 
+     * @return Source code of this rule if any or <code>null</code> if source
+     *         is not available.
+     * @see Grammar#getSource(Location, Location)
+     */
     public final String getSource() {
-        return getGrammar().getSource(start, end);
+        return start.isUnknown() || end.isUnknown() ? null : getGrammar().getSource(start, end);
     }
     
+    /**
+     * Returns immutable list of problems associated with this rule.
+     * 
+     * @return Immutable list of problems associated with this rule.
+     */
     public final List<Problem> getProblems() {
         return Collections.unmodifiableList(problems);
     }
     
+    /**
+     * Returns immutable list of problems associated with this rule and all
+     * related rules.
+     * 
+     * @return Immutable list of problems associated with this rule and all
+     *         related rules.
+     */
     public final List<Problem> getAllProblems() {
-        List<Problem> problems = new ArrayList<Problem>();
-        findProblems(problems);
-        Collections.sort(problems);
-        return problems;
+        return Collections.unmodifiableList(RuleVisitor.ProblemCollector.collect(this));
     }
     
-    protected abstract void findProblems(List<Problem> foundProblems);
-    
+    /**
+     * Performs reduce operation on this rule and returns <code>true</code> if
+     * this rule matches character stream or produces semantic results.
+     * 
+     * @param context Parse context.
+     * @return <code>true</code> if this rule matches character stream or
+     *         produces semantic results; <code>false</code> otherwise.
+     */
     public abstract boolean reduce(ParseContext context) throws IOException, RecognitionException;
     
     public abstract <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E;
@@ -106,17 +157,6 @@ public abstract class Rule {
         } else {
             rule.toString(buf, debug);
         }
-    }
-    
-    static void addProblem(Rule rule, Problem problem) {
-        if (rule.problems.isEmpty()) {
-            rule.problems = new LinkedList<Problem>();
-        }
-        rule.problems.add(problem);
-    }
-    
-    static void clearProblems(Rule rule) {
-        rule.problems = Collections.emptyList();
     }
     
 }

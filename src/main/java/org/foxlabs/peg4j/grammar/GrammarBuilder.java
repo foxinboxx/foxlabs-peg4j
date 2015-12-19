@@ -69,7 +69,7 @@ public final class GrammarBuilder extends LocalStack<Expression> {
         checkProductionInitiated(false);
         currentProduction = defineProduction(name, true);
         currentProduction.index = productionIndex++;
-        currentProduction.start = start;
+        currentProduction.start = Location.resolve(start);
         return this;
     }
     
@@ -81,7 +81,7 @@ public final class GrammarBuilder extends LocalStack<Expression> {
         checkProductionInitiated(true);
         concat();
         currentProduction.expression = size() > 0 ? pop() : Terminal.nil(currentProduction);
-        currentProduction.end = end;
+        currentProduction.end = Location.resolve(end);
         currentProduction = null;
         return this;
     }
@@ -295,12 +295,12 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     }
     
     public GrammarBuilder setStart(Location start) {
-        peek().start = start;
+        peek().start = Location.resolve(start);
         return this;
     }
     
     public GrammarBuilder setEnd(Location end) {
-        peek().end = end;
+        peek().end = Location.resolve(end);
         return this;
     }
     
@@ -324,7 +324,7 @@ public final class GrammarBuilder extends LocalStack<Expression> {
     
     public void clear() {
         super.clear();
-        Arrays.fill(productions, null);
+        Arrays.fill(productions, 0, productionCount, null);
         productionMap.clear();
         currentProduction = null;
         productionCount = productionIndex = 0;

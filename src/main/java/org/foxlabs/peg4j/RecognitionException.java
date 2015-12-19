@@ -48,9 +48,11 @@ public class RecognitionException extends Exception {
     }
     
     public String getMessage() {
-        return location == Location.UNKNOWN
-            ? super.getMessage()
-            : location + ": " + super.getMessage();
+        if (location == Location.UNKNOWN) {
+            return super.getMessage();
+        } else {
+            return location + ": " + super.getMessage();
+        }
     }
     
 }

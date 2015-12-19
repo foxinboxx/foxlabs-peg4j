@@ -19,6 +19,9 @@ package org.foxlabs.peg4j;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.junit.Assert;
+
+import org.foxlabs.util.resource.ResourceHelper;
 
 /**
  * A simple test that parses Java source file.
@@ -32,10 +35,6 @@ public class JavaParserTest extends DefaultParser<Object> {
     
     private String source = null;
     
-    public void handleSource(ActionContext context) {
-        source = context.text();
-    }
-    
     @Override
     protected Transaction getTransaction() {
         return Transaction.STATELESS;
@@ -46,13 +45,17 @@ public class JavaParserTest extends DefaultParser<Object> {
         return null;
     }
     
+    public void handleSource(ActionContext context) {
+        source = context.text();
+    }
+    
     @Test
     public void testJavaGrammar() throws IOException {
         try {
             parse(getClass().getClassLoader().getResource(SOURCE_PATH));
-            System.out.println(source);
+            Assert.assertEquals(ResourceHelper.readTextResource(SOURCE_PATH), source);
         } catch (RecognitionException e) {
-            System.err.println(e.getMessage());
+            Assert.fail(e.getMessage());
         }
     }
     

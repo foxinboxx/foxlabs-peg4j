@@ -21,6 +21,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.foxlabs.util.resource.ResourceHelper;
+
 /**
  * 
  * @author Fox Mulder
@@ -33,6 +35,6 @@ public @interface GrammarDecl {
     
     String ref() default "";
     
-    String encoding() default "utf-8";
+    String encoding() default ResourceHelper.DEFAULT_ENCODING;
     
 }

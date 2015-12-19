@@ -63,8 +63,7 @@ public final class Grammar {
     }
     
     public String getFile() {
-        Production start = getStart();
-        return start == null || start.start == null ? null : start.getStart().file;
+        return getStart() == null ? null : getStart().getStart().file;
     }
     
     public boolean hasSource() {

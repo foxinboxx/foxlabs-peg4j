@@ -16,8 +16,6 @@
 
 package org.foxlabs.peg4j.grammar;
 
-import java.util.List;
-
 public abstract class Expression extends Rule {
     
     Production owner;
@@ -39,11 +37,6 @@ public abstract class Expression extends Rule {
         return parent;
     }
     
-    @Override
-    protected void findProblems(List<Problem> foundProblems) {
-        foundProblems.addAll(getProblems());
-    }
-    
     // Unary
     
     public abstract static class Unary extends Expression {
@@ -58,12 +51,6 @@ public abstract class Expression extends Rule {
         
         public final Expression getChild() {
             return child;
-        }
-        
-        @Override
-        protected void findProblems(List<Problem> foundProblems) {
-            foundProblems.addAll(getProblems());
-            child.findProblems(foundProblems);
         }
         
     }
@@ -92,14 +79,6 @@ public abstract class Expression extends Rule {
         
         public final Expression[] getChildren() {
             return children.clone();
-        }
-        
-        @Override
-        protected void findProblems(List<Problem> foundProblems) {
-            foundProblems.addAll(getProblems());
-            for (Expression child : children) {
-                child.findProblems(foundProblems);
-            }
         }
         
     }

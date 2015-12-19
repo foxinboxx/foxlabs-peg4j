@@ -18,22 +18,17 @@ package org.foxlabs.peg4j.codegen;
 
 import java.io.Writer;
 import java.io.StringReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
-
-import java.net.URL;
-
 import java.util.Map;
 import java.util.HashMap;
 
 import org.foxlabs.peg4j.BacktrackingReader;
-import org.foxlabs.peg4j.CommandLine;
 import org.foxlabs.peg4j.grammar.Grammar;
+import org.foxlabs.peg4j.resource.ResourceManager;
 
 public abstract class BaseGenerator {
     
-    protected abstract URL getTemplateURL();
+    protected abstract String getTemplate();
     
     protected abstract void defineVariables(Grammar grammar, Map<String, String> variables);
     
@@ -41,21 +36,18 @@ public abstract class BaseGenerator {
         Map<String, String> variables = new HashMap<String, String>();
         defineProductInfo(variables);
         defineVariables(grammar, variables);
-        URL templateURL = getTemplateURL();
-        generate(templateURL, variables, out);
+        generate(getTemplate(), variables, out);
     }
     
     public static void defineProductInfo(Map<String, String> variables) {
-        variables.put("product_name", CommandLine.getProductName());
-        variables.put("product_version", CommandLine.getProductVersion());
-        variables.put("product_url", CommandLine.getProductURL());
+        variables.put("product_name", ResourceManager.getProductName());
+        variables.put("product_version", ResourceManager.getProductVersion());
+        variables.put("product_url", ResourceManager.getProductURL());
     }
     
-    public static void generate(URL templateURL, Map<String, String> variables, Writer out)
-            throws IOException {
-        InputStream stream = templateURL.openStream();
+    public static void generate(String template, Map<String, String> variables, Writer out) throws IOException {
+        BacktrackingReader in = new BacktrackingReader(new StringReader(template));
         try {
-            BacktrackingReader in = new BacktrackingReader(new InputStreamReader(stream, "UTF-8"));
             for (int ch = in.read(); ch >= 0; ch = in.read()) {
                 if (ch == '$') {
                     ch = in.read();
@@ -98,7 +90,7 @@ public abstract class BaseGenerator {
                 }
             }
         } finally {
-            stream.close();
+            in.close();
         }
     }
     
@@ -110,15 +102,19 @@ public abstract class BaseGenerator {
         }
         
         BacktrackingReader in = new BacktrackingReader(new StringReader(value));
-        for (int ch = in.read(); ch >= 0; ch = in.read()) {
-            if (ch == BacktrackingReader.EOL) {
-                out.write(LINE_SEPARATOR);
-                for (int i = 0; i < ident; i++) {
-                    out.write(' ');
+        try {
+            for (int ch = in.read(); ch >= 0; ch = in.read()) {
+                if (ch == BacktrackingReader.EOL) {
+                    out.write(LINE_SEPARATOR);
+                    for (int i = 0; i < ident; i++) {
+                        out.write(' ');
+                    }
+                } else {
+                    out.write(ch);
                 }
-            } else {
-                out.write(ch);
             }
+        } finally {
+            in.close();
         }
     }
     

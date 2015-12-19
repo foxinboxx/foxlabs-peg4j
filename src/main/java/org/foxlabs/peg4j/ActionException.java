@@ -24,9 +24,7 @@ public class ActionException extends RecognitionException {
     private static final long serialVersionUID = 3405076822593101223L;
     
     public ActionException(Action action, Throwable cause, Location location) {
-        super(ResourceManager.getMessage("runtime.actionError", action.getName()),
-              cause,
-              location);
+        super(ResourceManager.formatMessage("runtime.actionError", action.getName()), cause, location);
     }
     
 }

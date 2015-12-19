@@ -25,12 +25,11 @@ import static org.foxlabs.peg4j.grammar.Problem.Code.*;
 public final class GrammarCompiler {
     
     public static final int SUPPRESS_WARNINGS = 0x01;
+    public static final int SUPPRESS_HINTS = 0x02;
     
-    public static final int SUPPRESS_HINTS    = 0x02;
-    
-    public static final int MAKE_SUGGESTIONS  = 0x04;
-    
-    private GrammarCompiler() {}
+    private GrammarCompiler() {
+        super();
+    }
     
     public static void compile(Grammar grammar) {
         compile(grammar, 0);
@@ -51,7 +50,6 @@ public final class GrammarCompiler {
                 
                 boolean sw = (flags & SUPPRESS_WARNINGS) != 0;
                 boolean sh = (flags & SUPPRESS_HINTS) != 0;
-                boolean ms = (flags & MAKE_SUGGESTIONS) != 0;
                 
                 new LocalAnalyzer(grammar).findProblems(sw, sh);
                 new RecursionFinder(grammar).findProblems();
@@ -61,7 +59,7 @@ public final class GrammarCompiler {
         }
     }
     
-    // ===== LocalAnalyzer ====================================================
+    // LocalAnalyzer
     
     static final class LocalAnalyzer implements RuleVisitor<RuntimeException> {
         
@@ -89,48 +87,50 @@ public final class GrammarCompiler {
                     grammar.getProblems().add(EMPTY_TERMINAL, rule);
                 } else if (rule instanceof Terminal.Class) {
                     Terminal.Class term = (Terminal.Class) rule;
-                    if (term.isUndefined())
-                        grammar.getProblems().add(UNSUPPORTED_CLASS,
-                                term, term.getName());
-                } else {
-                    if (!sh && rule.isInefficient())
-                        grammar.getProblems().add(INEFFICIENT_TERMINAL, rule);
+                    if (term.isUndefined()) {
+                        grammar.getProblems().add(UNSUPPORTED_CLASS, term, term.getName());
+                    }
+                } else if (!sh && rule.isInefficient()) {
+                    grammar.getProblems().add(INEFFICIENT_TERMINAL, rule);
                 }
             }
         }
         
         public void visit(Production rule) {
-            if (rule.isDuplicated())
-                grammar.getProblems().add(DUPLICATE_PRODUCTION,
-                        rule, rule.getName());
+            if (rule.isDuplicated()) {
+                grammar.getProblems().add(DUPLICATE_PRODUCTION, rule, rule.getName());
+            }
             
-            if (!sw)
-                if (rule.isStandalone() && rule != grammar.getStart())
-                    grammar.getProblems().add(UNUSED_PRODUCTION,
-                            rule, rule.getName());
+            if (!sw) {
+                if (rule.isStandalone() && rule != grammar.getStart()) {
+                    grammar.getProblems().add(UNUSED_PRODUCTION, rule, rule.getName());
+                }
+            }
             
             rule.expression.accept(this);
         }
         
         public void visit(Reference rule) {
-            if (rule.target.isUndefined())
-                grammar.getProblems().add(UNDEFINED_PRODUCTION,
-                        rule, rule.getTargetName());
+            if (rule.target.isUndefined()) {
+                grammar.getProblems().add(UNDEFINED_PRODUCTION, rule, rule.getTargetName());
+            }
         }
         
         public void visit(Action rule) {
-            if (!sw)
-                if (rule.isUndefined())
-                    grammar.getProblems().add(UNDEFINED_ACTION,
-                            rule, rule.getName());
+            if (!sw) {
+                if (rule.isUndefined()) {
+                    grammar.getProblems().add(UNDEFINED_ACTION, rule, rule.getName());
+                }
+            }
             
             rule.child.accept(this);
         }
         
         public void visit(Concatenation rule) {
             int length = rule.children.length;
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++) {
                 rule.children[i].accept(this);
+            }
             
             if (!sh) {
                 // FIXME We can find more rules and report their numbers
@@ -152,8 +152,9 @@ public final class GrammarCompiler {
         
         public void visit(Alternation rule) {
             int length = rule.children.length;
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++) {
                 rule.children[i].accept(this);
+            }
             
             if (!sh) {
                 // FIXME We can find more rules and report their numbers
@@ -183,7 +184,7 @@ public final class GrammarCompiler {
         
     }
     
-    // ===== RecursionFinder ==================================================
+    // RecursionFinder
     
     static final class RecursionFinder implements RuleVisitor<RuntimeException> {
         
@@ -231,8 +232,7 @@ public final class GrammarCompiler {
         public void visit(Reference rule) {
             if (source == rule.target) {
                 if (!consuming) {
-                    grammar.getProblems().add(LEFT_RECURSION,
-                            rule, rule.getTargetName(), referencePath.toString());
+                    grammar.getProblems().add(LEFT_RECURSION, rule, rule.getTargetName(), referencePath.toString());
                     recursion = true;
                 }
             } else if (!recursion) {
@@ -241,14 +241,16 @@ public final class GrammarCompiler {
         }
         
         public void visit(Action rule) {
-            if (!recursion)
+            if (!recursion) {
                 rule.child.accept(this);
+            }
         }
         
         public void visit(Concatenation rule) {
             int length = rule.children.length;
-            for (int i = 0; i < length && !(recursion || consuming); i++)
+            for (int i = 0; i < length && !(recursion || consuming); i++) {
                 rule.children[i].accept(this);
+            }
         }
         
         public void visit(Alternation rule) {
@@ -265,14 +267,16 @@ public final class GrammarCompiler {
         public void visit(Repetition rule) {
             if (!recursion) {
                 rule.child.accept(this);
-                if (rule.getMin() == 0)
+                if (rule.getMin() == 0) {
                     consuming = false;
+                }
             }
         }
         
         public void visit(Exclusion rule) {
-            if (!recursion)
+            if (!recursion) {
                 rule.child.accept(this);
+            }
         }
         
         public void reset(Production start) {
@@ -284,7 +288,7 @@ public final class GrammarCompiler {
         
     }
     
-    // ===== MemoInjector =====================================================
+    // MemoInjector
     
     public static void makeMemoInjections(Grammar grammar) {
         MemoInjector injector = new MemoInjector();
@@ -320,8 +324,9 @@ public final class GrammarCompiler {
             Expression operand = rule.child;
             if (operand instanceof Reference) {
                 Reference ref = (Reference) operand;
-                if (ref.getModifier() == null)
+                if (ref.getModifier() == null) {
                     rule.child = copyRef(ref);
+                }
             } else {
                 operand.accept(this);
             }
@@ -333,8 +338,9 @@ public final class GrammarCompiler {
                 Expression operand = rule.children[i];
                 if (operand instanceof Reference) {
                     Reference ref = (Reference) operand;
-                    if (ref.getModifier() == null)
+                    if (ref.getModifier() == null) {
                         rule.children[i] = copyRef(ref);
+                    }
                 } else {
                     operand.accept(this);
                 }
@@ -354,7 +360,7 @@ public final class GrammarCompiler {
         
     }
     
-    // ===== UndoInjector =====================================================
+    // UndoInjector
     
     static void makeUndoInjections(Grammar grammar) {
         (new UndoInjector(grammar)).makeInjections();
@@ -379,8 +385,9 @@ public final class GrammarCompiler {
         public void makeInjections() {
             LinkedList<Production> unresolvedList = new LinkedList<Production>();
             int count = productions.length;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++) {
                 unresolvedList.add(productions[i]);
+            }
             
             boolean resolving;
             injection = false;
@@ -398,13 +405,15 @@ public final class GrammarCompiler {
                 }
             } while (resolving && unresolvedList.size() > 0);
             
-            for (Production rule : unresolvedList)
+            for (Production rule : unresolvedList) {
                 modifyMarks[rule.index] = Boolean.FALSE;
+            }
             
             injection = true;
             for (int i = 0; i < count; i++) {
-                if (modifyMarks[i] == Boolean.TRUE)
+                if (modifyMarks[i] == Boolean.TRUE) {
                     productions[i].accept(this);
+                }
             }
         }
         
@@ -447,8 +456,9 @@ public final class GrammarCompiler {
                 rule.children[i].accept(this);
                 modify = merge(modify, currentModify);
             }
-            if (injection && modify == Boolean.TRUE)
+            if (injection && modify == Boolean.TRUE) {
                 doInject(rule);
+            }
             rule.children[lastIndex].accept(this);
             currentModify = merge(modify, currentModify);
         }
@@ -469,8 +479,9 @@ public final class GrammarCompiler {
         
         public void visit(Exclusion rule) {
             rule.child.accept(this);
-            if (injection && currentModify == Boolean.TRUE)
+            if (injection && currentModify == Boolean.TRUE) {
                 doInject(rule);
+            }
             currentModify = Boolean.FALSE;
         }
         
@@ -489,11 +500,12 @@ public final class GrammarCompiler {
                 } else if (parent instanceof Expression.Nary) {
                     Expression.Nary nary = (Expression.Nary) parent;
                     int length = nary.children.length;
-                    for (int i = 0; i < length; i++)
+                    for (int i = 0; i < length; i++) {
                         if (nary.children[i] == expr) {
                             nary.children[i] = undo;
                             break;
                         }
+                    }
                 }
             }
         }
@@ -505,247 +517,13 @@ public final class GrammarCompiler {
     }
     
     static Boolean merge(Boolean x, Boolean y) {
-        return x == Boolean.TRUE || y == Boolean.TRUE
-            ? Boolean.TRUE
-            : x == null || y == null
-                ? null
-                : Boolean.FALSE;
+        if (x == Boolean.TRUE || y == Boolean.TRUE) {
+            return Boolean.TRUE;
+        } else if (x == null || y == null) {
+            return null;
+        } else {
+            return Boolean.FALSE;
+        }
     }
     
-    
-    /*
-    static final class UndoInjectorOld implements RuleVisitor<RuntimeException> {
-        
-        final Grammar<?> grammar;
-        final UndoInfo[] undoInfos;
-        final Queue<Production> unresolvedQueue;
-        final boolean[] untestedFlags;
-        
-        final UndoInfo currentInfo;
-        boolean resolving;
-        
-        public UndoInjectorOld(Grammar<?> grammar) {
-            this.grammar = grammar;
-            this.currentInfo = new UndoInfo();
-            
-            int count = grammar.productions.length;
-            this.undoInfos = new UndoInfo[count];
-            this.untestedFlags = new boolean[count];
-            this.unresolvedQueue = new LinkedList<Production>();
-            for (int i = 0; i < count; i++) {
-                this.undoInfos[i] = new UndoInfo();
-                this.unresolvedQueue.add(grammar.productions[i]);
-            }
-        }
-        
-        // FIXME This algorithm requires optimization.
-        // After each injection Action.Undo we probably need to rebuild all
-        // depended UndoInfo.stateUnsafe flags and continue until all unsafe
-        // points will be resolved.
-        public void makeInjections() {
-            // Resolve state flags.
-            do {
-                reset();
-                Iterator<Production> i = unresolvedQueue.iterator();
-                while (i.hasNext()) {
-                    Production rule = i.next();
-                    rule.accept(this);
-                    int index = rule.getIndex();
-                    if (undoInfos[index].isResolved())
-                        i.remove();
-                }
-            } while (resolving && unresolvedQueue.size() > 0);
-            
-            // Adjust unresolved flags to FALSE.
-            for (Production rule : unresolvedQueue)
-                undoInfos[rule.getIndex()].adjust(Boolean.FALSE);
-            
-            // Make injections until all rules be safe.
-            do {
-                reset();
-                for (Production rule : grammar.productions)
-                    rule.accept(this);
-            } while (resolving);
-        }
-        
-        public void visit(Terminal rule) {
-            currentInfo.assign(Boolean.FALSE);
-        }
-        
-        public void visit(Production rule) {
-            int index = rule.getIndex();
-            UndoInfo undoInfo = undoInfos[index];
-            if (untestedFlags[index]) {
-                untestedFlags[index] = false;
-                rule.expression.accept(this);
-                resolving |= !undoInfo.equals(currentInfo);
-                undoInfo.assign(currentInfo);
-            } else {
-                currentInfo.assign(undoInfo);
-            }
-        }
-        
-        public void visit(Reference rule) {
-            rule.target.accept(this);
-        }
-        
-        public void visit(Action rule) {
-            rule.child.accept(this);
-            currentInfo.stateAccess = Boolean.TRUE;
-            currentInfo.stateModify = Boolean.TRUE;
-            currentInfo.stateUnsafe = Boolean.FALSE;
-        }
-        
-        public void visit(Concatenation rule) {
-            UndoInfo undoInfo = new UndoInfo(Boolean.FALSE);
-            int lastIndex = rule.children.length - 1;
-            for (int i = 0; i < lastIndex; i++) {
-                rule.children[i].accept(this);
-                undoInfo.merge(currentInfo);
-                undoInfo.stateUnsafe = merge0(undoInfo.stateUnsafe,
-                                              undoInfo.stateModify);
-            }
-            rule.children[lastIndex].accept(this);
-            undoInfo.merge(currentInfo);
-            currentInfo.assign(undoInfo);
-        }
-        
-        public void visit(Alternation rule) {
-            int length = rule.children.length;
-            UndoInfo undoInfo = new UndoInfo(Boolean.FALSE);
-            for (int i = 0; i < length; i++) {
-                rule.children[i].accept(this);
-                undoInfo.merge(currentInfo);
-                if (currentInfo.stateUnsafe == Boolean.TRUE) {
-                    rule.children[i] = new Action(rule.children[i].owner, rule.children[i]);
-                    resolving = true;
-                }
-            }
-            currentInfo.assign(undoInfo);
-            currentInfo.stateUnsafe = Boolean.FALSE;
-            
-            
-//            int length = rule.length();
-//            UndoInfo[] undoInfos = new UndoInfo[length];
-//            for (int i = 0; i < length; i++) {
-//                rule.getRule(i).accept(this);
-//                undoInfos[i] = new UndoInfo(currentInfo);
-//            }
-//            int lastIndex = length - 1;
-//            UndoInfo undoInfo = new UndoInfo(Boolean.FALSE);
-//            for (int i = 0; i < lastIndex; i++) {
-//                if (undoInfos[i].stateUnsafe == Boolean.TRUE)
-//                    for (int j = i + 1; j < length; j++)
-//                        if (undoInfos[j].stateAccess == Boolean.TRUE) {
-//                            rule.rules[i] = new Action.Undo(rule.rules[i]);
-//                            undoInfos[i].stateUnsafe = Boolean.FALSE;
-//                            changedFlag = true;
-//                            break;
-//                        }
-//                undoInfo.merge(undoInfos[i]);
-//            }
-//            undoInfo.merge(undoInfos[lastIndex]);
-//            currentInfo.assign(undoInfo);
-        }
-        
-        public void visit(Repetition rule) {
-            rule.child.accept(this);
-        }
-        
-        public void visit(Exclusion rule) {
-            rule.child.accept(this);
-            if (rule instanceof Exclusion.Not)
-                currentInfo.stateUnsafe = merge0(currentInfo.stateUnsafe,
-                                                 currentInfo.stateModify);
-        }
-        
-        public void reset() {
-            Arrays.fill(untestedFlags, true);
-            resolving = false;
-        }
-        
-    }
-    
-    private static final class UndoInfo {
-        
-        Boolean stateAccess = null;
-        Boolean stateModify = null;
-        Boolean stateUnsafe = null;
-        
-        UndoInfo() {}
-        
-        UndoInfo(Boolean x) {
-            assign(x);
-        }
-        
-//        UndoInfo(UndoInfo info) {
-//            assign(info);
-//        }
-        
-        public void assign(Boolean x) {
-            stateAccess = x;
-            stateModify = x;
-            stateUnsafe = x;
-        }
-        
-        public void assign(UndoInfo info) {
-            stateAccess = info.stateAccess;
-            stateModify = info.stateModify;
-            stateUnsafe = info.stateUnsafe;
-        }
-        
-        public void merge(UndoInfo info) {
-            stateAccess = merge0(stateAccess, info.stateAccess);
-            stateModify = merge0(stateModify, info.stateModify);
-            stateUnsafe = merge0(stateUnsafe, info.stateUnsafe);
-        }
-        
-        public void adjust(Boolean x) {
-            stateAccess = adjust0(stateAccess, x);
-            stateModify = adjust0(stateModify, x);
-            stateUnsafe = adjust0(stateUnsafe, x);
-        }
-        
-        public boolean equals(UndoInfo info) {
-            return stateAccess == info.stateAccess
-                && stateModify == info.stateModify
-                && stateUnsafe == info.stateUnsafe;
-        }
-        
-        public boolean isResolved() {
-            return stateAccess != null
-                && stateModify != null
-                && stateUnsafe != null;
-        }
-        
-        public String toString() {
-            StringBuilder buf = new StringBuilder();
-            buf.append('[');
-            buf.append("Access: ").append(stateAccess)
-               .append(", ")
-               .append("Modify: ").append(stateModify)
-               .append(", ")
-               .append("Unsafe: ").append(stateUnsafe);
-            buf.append(']');
-            return buf.toString();
-        }
-        
-    }
-    
-    static Boolean merge0(Boolean x, Boolean y) {
-        return x == Boolean.TRUE || y == Boolean.TRUE
-            ? Boolean.TRUE
-            : x == null || y == null
-                ? null
-                : Boolean.FALSE;
-    }
-    
-    static Boolean adjust0(Boolean x, Boolean y) {
-        return x == null ? y : x;
-    }
-    
-    static void makeUndoInjectionsOld(Grammar<?> grammar) {
-        (new UndoInjectorOld(grammar)).makeInjections();
-    }
-    */
 }

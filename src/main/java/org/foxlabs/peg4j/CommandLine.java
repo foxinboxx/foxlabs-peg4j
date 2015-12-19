@@ -19,15 +19,12 @@ package org.foxlabs.peg4j;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
-
 import java.util.Map;
 import java.util.HashMap;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import java.nio.charset.Charset;
 
 import org.foxlabs.peg4j.codegen.HtmlGenerator;
@@ -44,53 +41,10 @@ import org.foxlabs.util.PeriodCounter;
 
 public final class CommandLine {
     
-    /**
-     * Default product name to be used if no manifest entry found.
-     */
-    static final String DEFAULT_NAME = "Peg4j";
-    
-    /**
-     * Default product version to be used if no manifest entry found.
-     */
-    static final String DEFAULT_VERSION = "X.X.X";
-    
-    /**
-     * Default product URL to be used if no manifest entry found.
-     */
-    static final String DEFAULT_URL = "http://foxlabs.org/p/peg4j/";
-    
-    /**
-     * Returns product name.
-     * 
-     * @return Product name.
-     */
-    public static String getProductName() {
-        String name = CommandLine.class.getPackage().getImplementationTitle();
-        return name == null ? DEFAULT_NAME : name;
-    }
-    
-    /**
-     * Returns product version.
-     * 
-     * @return Product version.
-     */
-    public static String getProductVersion() {
-        String version = CommandLine.class.getPackage().getImplementationVersion();
-        return version == null ? DEFAULT_VERSION : version;
-    }
-    
-    /**
-     * Returns product URL.
-     * 
-     * @return Product URL.
-     */
-    public static String getProductURL() {
-        String version = getProductVersion();
-        return DEFAULT_URL + (DEFAULT_VERSION.equals(version) ? "" : version + "/");
-    }
-    
     // don't allow to create instances
-    private CommandLine() {}
+    private CommandLine() {
+        super();
+    }
     
     /**
      * Main entry point.
@@ -131,7 +85,7 @@ public final class CommandLine {
          * localized detail message.
          */
         public CommandLineException(String pattern, Object... args) {
-            super(ResourceManager.getMessage(pattern, args));
+            super(ResourceManager.formatMessage(pattern, args));
         }
         
     }
@@ -356,16 +310,6 @@ public final class CommandLine {
         // -suppresshints
         public void setSuppressHints() {
             flags |= GrammarCompiler.SUPPRESS_HINTS;
-        }
-        
-        // -ms
-        public void setMS() {
-            setMakeSuggestions();
-        }
-        
-        // -makesuggestions
-        public void setMakeSuggestions() {
-            flags |= GrammarCompiler.MAKE_SUGGESTIONS;
         }
         
         public void execute(File source) throws Throwable {
@@ -714,7 +658,7 @@ public final class CommandLine {
      * Prints localized message.
      */
     static void printPattern(String pattern, Object... args) {
-        print(ResourceManager.getMessage(pattern, args));
+        print(ResourceManager.formatMessage(pattern, args));
     }
     
     /*
@@ -741,7 +685,8 @@ public final class CommandLine {
      * Prints usage info.
      */
     static void printUsage() {
-        print(ResourceManager.getCommandLineUsage());
+        print(ResourceManager.formatCliMessage("usage", ResourceManager.getProductName(),
+                ResourceManager.getProductVersion(), ResourceManager.getProductURL()));
     }
     
     /*
