@@ -36,6 +36,7 @@ import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
 
 import org.foxlabs.util.Location;
+import org.foxlabs.util.Strings;
 import org.foxlabs.util.UnicodeSet;
 
 public final class JavaGenerator extends BaseGenerator {
@@ -246,7 +247,7 @@ public final class JavaGenerator extends BaseGenerator {
                     statements.append(".pushTokenIC(");
                 }
                 statements.append("\"");
-                statements.append(UnicodeSet.escape(term.getImage()));
+                Strings.escape(term.getImage(), statements);
                 statements.append("\")\n");
                 
                 appendStartLocation(rule);
@@ -256,9 +257,9 @@ public final class JavaGenerator extends BaseGenerator {
                 
                 statements.append(".pushInterval(");
                 statements.append("\'");
-                statements.append(UnicodeSet.escape((char) term.getMin()));
+                statements.append(Strings.escape((char) term.getMin()));
                 statements.append("\', \'");
-                statements.append(UnicodeSet.escape((char) term.getMax()));
+                statements.append(Strings.escape((char) term.getMax()));
                 statements.append("\')\n");
                 
                 appendStartLocation(rule);
@@ -270,22 +271,22 @@ public final class JavaGenerator extends BaseGenerator {
                 statements.append(".pushSet(");
                 if (term.getUnicodeSet().isElementSet()) {
                     statements.append("\'");
-                    statements.append(UnicodeSet.escape((char) intervals[0]));
+                    statements.append(Strings.escape((char) intervals[0]));
                     statements.append("\'");
                     for (int i = 2; i < intervals.length; i += 2) {
                         statements.append(", \'");
-                        statements.append(UnicodeSet.escape((char) intervals[i]));
+                        statements.append(Strings.escape((char) intervals[i]));
                         statements.append("\'");
                     }
                     statements.append(")\n");
                 } else {
                     statements.append(UnicodeSet.class.getSimpleName());
                     statements.append(".fromIntervals(new int[]{\'");
-                    statements.append(UnicodeSet.escape((char) intervals[0]));
+                    statements.append(Strings.escape((char) intervals[0]));
                     statements.append("\'");
                     for (int i = 1; i < intervals.length; i++) {
                         statements.append(", \'");
-                        statements.append(UnicodeSet.escape((char) intervals[i]));
+                        statements.append(Strings.escape((char) intervals[i]));
                         statements.append("\'");
                     }
                     statements.append("}))\n");
@@ -299,7 +300,7 @@ public final class JavaGenerator extends BaseGenerator {
                 
                 statements.append(".pushClass(");
                 statements.append("\"");
-                statements.append(UnicodeSet.escape(term.getName()));
+                Strings.escape(term.getName(), statements);
                 statements.append("\")\n");
                 
                 appendStartLocation(rule);
@@ -328,7 +329,7 @@ public final class JavaGenerator extends BaseGenerator {
             
             statements.append(".startProduction(");
             statements.append("\"");
-            statements.append(UnicodeSet.escape(rule.getName()));
+            Strings.escape(rule.getName(), statements);
             statements.append("\"");
             
             if (includeDebugInfo) {
@@ -359,7 +360,7 @@ public final class JavaGenerator extends BaseGenerator {
             statements.append(".pushReference(");
             
             statements.append("\"");
-            statements.append(UnicodeSet.escape(rule.getTargetName()));
+            Strings.escape(rule.getTargetName(), statements);
             statements.append("\"");
             
             Modifier mod = rule.getModifier();

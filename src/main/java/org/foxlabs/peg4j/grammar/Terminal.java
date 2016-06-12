@@ -19,7 +19,7 @@ package org.foxlabs.peg4j.grammar;
 import java.io.IOException;
 
 import org.foxlabs.peg4j.BacktrackingReader;
-
+import org.foxlabs.util.Strings;
 import org.foxlabs.util.UnicodeSet;
 
 public abstract class Terminal extends Expression {
@@ -229,7 +229,7 @@ public abstract class Terminal extends Expression {
         @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('\'');
-            buf.append(UnicodeSet.escape(getImage()));
+            Strings.escape(getImage(), buf);
             buf.append('\'');
         }
         
@@ -254,7 +254,7 @@ public abstract class Terminal extends Expression {
         @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('\"');
-            buf.append(UnicodeSet.escape(getImage()));
+            Strings.escape(getImage(), buf);
             buf.append('\"');
         }
         
@@ -432,11 +432,11 @@ public abstract class Terminal extends Expression {
         @Override
         public void toString(StringBuilder buf, boolean debug) {
             buf.append('\'')
-               .append(UnicodeSet.escape((char) min))
+               .append(Strings.escape((char) min))
                .append('\'');
             buf.append('-');
             buf.append('\'')
-               .append(UnicodeSet.escape((char) max))
+               .append(Strings.escape((char) max))
                .append('\'');
         }
         

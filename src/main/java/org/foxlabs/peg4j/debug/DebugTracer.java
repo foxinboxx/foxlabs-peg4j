@@ -30,8 +30,7 @@ import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Production;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.UnicodeSet;
-import org.foxlabs.util.PeriodCounter;
+import org.foxlabs.util.Strings;
 
 public class DebugTracer implements RuleTracer {
     
@@ -202,7 +201,7 @@ public class DebugTracer implements RuleTracer {
                             out.write("\"");
                         }
                         
-                        out.write(UnicodeSet.escape(text));
+                        out.write(Strings.escape(text));
                         out.write("\"\n");
                     }
                 }
@@ -229,7 +228,7 @@ public class DebugTracer implements RuleTracer {
         out.write("\n\nTRACE RESULTS:");
         
         out.write("\nTracing time: ");
-        out.write(PeriodCounter.encodeDuration(System.currentTimeMillis() - startTime));
+        out.write(((System.currentTimeMillis() - startTime) / 1000L) + "s");
         
         out.write("\nRule invocations: ");
         out.write(Integer.toString(ruleCount));

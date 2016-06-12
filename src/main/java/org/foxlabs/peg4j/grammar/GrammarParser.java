@@ -25,6 +25,7 @@ import org.foxlabs.peg4j.Transaction;
 import org.foxlabs.peg4j.LocalStack;
 
 import org.foxlabs.util.Location;
+import org.foxlabs.util.Strings;
 import org.foxlabs.util.UnicodeSet;
 
 import static org.foxlabs.peg4j.grammar.Problem.Code.*;
@@ -176,7 +177,7 @@ public final class GrammarParser extends Parser<Grammar> {
     }
     
     private boolean handleDecode(ActionContext context) {
-        symbolStack.push(UnicodeSet.unescape(context.text()));
+        symbolStack.push(Strings.unescape(context.text()));
         return true;
     }
     
