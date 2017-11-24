@@ -93,8 +93,8 @@ public abstract class DefaultParser<T> extends Parser<T> {
      * is used to load grammar source and the {@link #getActionBindings()}
      * method provides action bindings.
      * 
-     * This method could be overriden in subclasses to provide another logic
-     * for loading grammar.
+     * <p> This method could be overriden in subclasses to provide another logic
+     * for grammar loading. </p>
      * 
      * @return Grammar for this parser.
      * @throws Peg4jException if an error occurs while loading the grammar.

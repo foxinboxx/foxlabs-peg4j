@@ -38,6 +38,11 @@ public final class Problem implements Serializable, Comparable<Problem> {
     private static final long serialVersionUID = -4976957943431107554L;
     
     /**
+     * Empty attributes.
+     */
+    private static final String[] EMPTY_ATTRIBUTES = new String[0];
+    
+    /**
      * Code of this problem.
      */
     private final Code code;
@@ -70,7 +75,7 @@ public final class Problem implements Serializable, Comparable<Problem> {
      * @param end End location of this problem in character stream.
      */
     Problem(Code code, Location start, Location end) {
-        this(code, start, end, null, (String[]) null);
+        this(code, start, end, null, EMPTY_ATTRIBUTES);
     }
     
     /**
@@ -94,7 +99,7 @@ public final class Problem implements Serializable, Comparable<Problem> {
      * @param rule Rule that is the cause of this problem.
      */
     Problem(Code code, Rule rule) {
-        this(code, rule.getStart(), rule.getEnd(), rule, (String[]) null);
+        this(code, rule.getStart(), rule.getEnd(), rule, EMPTY_ATTRIBUTES);
     }
     
     /**
