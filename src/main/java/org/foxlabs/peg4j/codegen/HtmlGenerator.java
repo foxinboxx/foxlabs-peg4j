@@ -27,7 +27,7 @@ import java.util.HashSet;
 import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
 
-import org.foxlabs.util.UnicodeSet;
+import org.foxlabs.util.Strings;
 
 public final class HtmlGenerator extends BaseGenerator {
     
@@ -537,7 +537,7 @@ public final class HtmlGenerator extends BaseGenerator {
         }
         
         private void appendString(String text, String quote) {
-            appendText(quote + UnicodeSet.escape(text) + quote, null, "gx-string");
+            appendText(quote + Strings.escape(text) + quote, null, "gx-string");
         }
         
         private void appendInteger(int value) {

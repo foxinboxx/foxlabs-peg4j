@@ -67,26 +67,29 @@ public final class Action extends Expression.Unary {
     
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.tracer().onTrace(this);
+        context.tracer().onRuleTrace(this);
         context.stream().mark();
         context.transaction().begin();
         if (child.reduce(context)) {
             if (handleAction(context)) {
                 context.transaction().commit();
                 context.stream().release();
-                context.tracer().onBacktrace(this, true);
+                context.tracer().onRuleBacktrace(this, true);
                 return true;
             }
         }
         context.transaction().rollback();
         context.stream().reset();
-        context.tracer().onBacktrace(this, false);
+        context.tracer().onRuleBacktrace(this, false);
         return false;
     }
     
-    private boolean handleAction(ParseContext context) throws RecognitionException {
+    private boolean handleAction(ParseContext context) throws IOException, RecognitionException {
         try {
-            return Types.<ActionHandler<Parser<?>>>cast(handler).handle(context.parser(), context);
+            context.tracer().onBeforeAction(this);
+            boolean result = Types.<ActionHandler<Parser<?>>>cast(handler).handle(context.parser(), context);
+            context.tracer().onAfterAction(this, result);
+            return result;
         } catch (Throwable e) {
             throw new ActionException(this, e, context.end());
         }
@@ -98,12 +101,12 @@ public final class Action extends Expression.Unary {
     }
     
     @Override
-    public void toString(StringBuilder buf, boolean debug) {
+    public StringBuilder toString(StringBuilder buf, boolean debug) {
         if (debug || !injected) {
             buf.append('$').append(name);
-            toString(child, buf, true, debug);
+            return toString(child, buf, true, debug);
         } else {
-            toString(child, buf, child instanceof Expression.Nary, debug);
+            return toString(child, buf, child instanceof Expression.Nary, debug);
         }
     }
     

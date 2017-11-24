@@ -23,7 +23,7 @@ import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.UnicodeSet;
+import org.foxlabs.util.Strings;
 
 public final class TextGenerator extends BaseGenerator {
     
@@ -115,19 +115,19 @@ public final class TextGenerator extends BaseGenerator {
                 Terminal.Token term = (Terminal.Token) rule;
                 if (term.isCaseSensitive()) {
                     statements.append('\'');
-                    UnicodeSet.escape(term.getImage(), statements);
+                    Strings.escape(term.getImage(), statements);
                     statements.append('\'');
                 } else {
                     statements.append('\"');
-                    UnicodeSet.escape(term.getImage(), statements);
+                    Strings.escape(term.getImage(), statements);
                     statements.append('\"');
                 }
             } else if (rule instanceof Terminal.Interval) {
                 Terminal.Interval term = (Terminal.Interval) rule;
                 statements.append('\'');
-                statements.append(UnicodeSet.escape((char) term.getMin()));
+                statements.append(Strings.escape((char) term.getMin()));
                 statements.append("\'-\'");
-                statements.append(UnicodeSet.escape((char) term.getMax()));
+                statements.append(Strings.escape((char) term.getMax()));
                 statements.append('\'');
             } else if (rule instanceof Terminal.Set) {
                 Terminal.Set term = (Terminal.Set) rule;
@@ -137,12 +137,12 @@ public final class TextGenerator extends BaseGenerator {
                     char min = (char) intervals[i++];
                     char max = (char) intervals[i++];
                     statements.append('\'');
-                    statements.append(UnicodeSet.escape(min));
+                    statements.append(Strings.escape(min));
                     statements.append('\'');
                     if (min < max) {
                         statements.append('-');
                         statements.append('\'');
-                        statements.append(UnicodeSet.escape(max));
+                        statements.append(Strings.escape(max));
                         statements.append('\'');
                     }
                     if (i < intervals.length) {

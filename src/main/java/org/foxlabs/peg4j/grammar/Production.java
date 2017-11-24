@@ -85,13 +85,13 @@ public final class Production extends Rule implements Comparable<Production> {
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
         context.stream().mark();
-        context.tracer().onTrace(this);
+        context.tracer().onRuleTrace(this);
         if (expression.reduce(context)) {
-            context.tracer().onBacktrace(this, true);
+            context.tracer().onRuleBacktrace(this, true);
             context.stream().release();
             return true;
         }
-        context.tracer().onBacktrace(this, false);
+        context.tracer().onRuleBacktrace(this, false);
         context.stream().reset();
         return false;
     }
@@ -107,10 +107,8 @@ public final class Production extends Rule implements Comparable<Production> {
     }
     
     @Override
-    public void toString(StringBuilder buf, boolean debug) {
-        buf.append(name);
-        buf.append(" : ");
-        expression.toString(buf, debug);
+    public StringBuilder toString(StringBuilder buf, boolean debug) {
+        return expression.toString(buf.append(name).append(" : "), debug);
     }
     
 }

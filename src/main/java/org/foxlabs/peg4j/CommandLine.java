@@ -37,7 +37,7 @@ import org.foxlabs.peg4j.grammar.GrammarCompiler;
 import org.foxlabs.peg4j.grammar.GrammarParser;
 import org.foxlabs.peg4j.resource.ResourceManager;
 
-import org.foxlabs.util.PeriodCounter;
+import org.foxlabs.util.counter.Counters;
 
 public final class CommandLine {
     
@@ -693,7 +693,7 @@ public final class CommandLine {
      * Prints took time.
      */
     static void printTook() {
-        print(PeriodCounter.encodeDuration(System.currentTimeMillis() - STARTUP));
+        print(Counters.formatLatency(System.currentTimeMillis() - STARTUP));
     }
     
     /*

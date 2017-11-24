@@ -30,10 +30,9 @@ import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Production;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.UnicodeSet;
-import org.foxlabs.util.PeriodCounter;
+import org.foxlabs.util.Strings;
 
-public class DebugTracer implements RuleTracer {
+public class DebugTracer extends StatisticsTracer {
     
     protected File file;
     protected Writer out;
@@ -44,8 +43,6 @@ public class DebugTracer implements RuleTracer {
     protected int maxDepthLevel = 0;
     protected int maxTextSize = 80;
     protected int identSize = 2;
-    
-    protected long startTime;
     
     protected int ruleCount;
     protected int terminalCount;
@@ -77,10 +74,6 @@ public class DebugTracer implements RuleTracer {
     
     public void setTraceLevel(TraceLevel level) {
         this.traceLevel = level;
-    }
-    
-    public int getMaxDepthLevel() {
-        return maxDepthLevel;
     }
     
     public void setMaxDepthLevel(int level) {
@@ -125,8 +118,6 @@ public class DebugTracer implements RuleTracer {
         
         this.stream = stream;
         
-        startTime = System.currentTimeMillis();
-        
         ruleCount = 0;
         terminalCount = 0;
         productionCount = 0;
@@ -140,7 +131,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void onTrace(Rule rule) throws IOException {
+    public void onRuleTrace(Rule rule) throws IOException {
         if (rule instanceof Terminal) {
             terminalCount++;
         } else if (rule instanceof Production) {
@@ -172,7 +163,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void onBacktrace(Rule rule, boolean success) throws IOException {
+    public void onRuleBacktrace(Rule rule, boolean success) throws IOException {
         depthLevel--;
         if (traceLevel.compareTo(TraceLevel.forRule(rule)) >= 0) {
             if (maxDepthLevel == 0 || depthLevel < maxDepthLevel) {
@@ -202,7 +193,7 @@ public class DebugTracer implements RuleTracer {
                             out.write("\"");
                         }
                         
-                        out.write(UnicodeSet.escape(text));
+                        out.write(Strings.escape(text));
                         out.write("\"\n");
                     }
                 }
@@ -211,7 +202,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void onLookup(Reference reference, boolean hit) throws IOException {
+    public void onCacheGet(Reference reference, boolean hit) throws IOException {
         if (hit) {
             memoCacheHitCount++;
         } else {
@@ -220,7 +211,7 @@ public class DebugTracer implements RuleTracer {
     }
     
     @Override
-    public void onCache(Reference reference) throws IOException {
+    public void onCachePut(Reference reference) throws IOException {
         memoCacheSize++;
     }
     
@@ -229,7 +220,7 @@ public class DebugTracer implements RuleTracer {
         out.write("\n\nTRACE RESULTS:");
         
         out.write("\nTracing time: ");
-        out.write(PeriodCounter.encodeDuration(System.currentTimeMillis() - startTime));
+        out.write(totalRuleCounter.toString());
         
         out.write("\nRule invocations: ");
         out.write(Integer.toString(ruleCount));
@@ -257,13 +248,13 @@ public class DebugTracer implements RuleTracer {
     
     protected void writeIdent() throws IOException {
         for (int i = ident * identSize; i > 0; i--) {
-            out.write("\u0020");
+            out.write(' ');
         }
     }
     
     protected void writeLocation(Location location) throws IOException {
         out.write(Integer.toString(location.line));
-        out.write(":");
+        out.write(':');
         out.write(Integer.toString(location.column));
     }
     

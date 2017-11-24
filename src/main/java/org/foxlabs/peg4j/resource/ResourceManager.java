@@ -30,6 +30,7 @@ public abstract class ResourceManager {
     private static final MessageBundle PROBLEM_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/problem-messages");
     private static final MessageBundle CLI_BUNDLE = MessageBundle.getInstance(RESOURCE_DIRECTORY + "/cli-messages");
     
+    private static String statisticsTemplate = null;
     private static String grammarTextTemplate = null;
     private static String grammarJavaTemplate = null;
     private static String grammarHtmlTemplate = null;
@@ -57,6 +58,14 @@ public abstract class ResourceManager {
             PRODUCT_INFO[2] = "http://foxlabs.org/p/peg4j";
         }
         return PRODUCT_INFO[2];
+    }
+    
+    public static String getStatisticsTemplate() {
+        if (statisticsTemplate == null) {
+            statisticsTemplate = ResourceHelper.readTextResource(
+                    RESOURCE_DIRECTORY + "/template/statistics-template.txt");
+        }
+        return statisticsTemplate;
     }
     
     public static String getGrammarTextTemplate() {

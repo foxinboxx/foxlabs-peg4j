@@ -68,8 +68,8 @@ public abstract class DefaultParser<T> extends Parser<T> {
     
     /**
      * Returns grammar for this parser. If grammar for this parser class
-     * was already loaded then it will be returned from the cache,
-     * {@link #loadGrammar()} will be called otherwise.
+     * was already loaded then it will be returned from the cache, the
+     * {@link #loadGrammar()} method will be invoked otherwise.
      * 
      * @return Grammar for this parser.
      * @throws Peg4jException if an error occurs while loading the grammar.
@@ -254,8 +254,7 @@ public abstract class DefaultParser<T> extends Parser<T> {
     protected ActionHandler<?> createHandler(final Method m) {
         return new ActionHandler<DefaultParser<?>>() {
             final MethodInvoker invoker = MethodInvoker.newInvoker(m);
-            public boolean handle(DefaultParser<?> parser, ActionContext context)
-                    throws Throwable {
+            public boolean handle(DefaultParser<?> parser, ActionContext context) throws Throwable {
                 Object result = invoker.invoke(parser, context);
                 return result instanceof Boolean ? (Boolean) result : true;
             }

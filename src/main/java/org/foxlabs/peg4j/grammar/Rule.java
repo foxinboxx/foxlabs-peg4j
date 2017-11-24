@@ -133,30 +133,22 @@ public abstract class Rule {
     
     public abstract <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E;
     
-    public final String toString() {
+    public String toString() {
         return toString(false);
     }
     
-    public final String toString(boolean debug) {
-        StringBuilder buf = new StringBuilder();
-        toString(buf, debug);
-        return buf.toString();
+    public String toString(boolean debug) {
+        return toString(new StringBuilder(), debug).toString();
     }
     
-    public final void toString(StringBuilder buf) {
-        toString(buf, false);
+    public StringBuilder toString(StringBuilder buf) {
+        return toString(buf, false);
     }
     
-    public abstract void toString(StringBuilder buf, boolean debug);
+    public abstract StringBuilder toString(StringBuilder buf, boolean debug);
     
-    static void toString(Rule rule, StringBuilder buf, boolean parenthesize, boolean debug) {
-        if (parenthesize) {
-            buf.append('(');
-            rule.toString(buf, debug);
-            buf.append(')');
-        } else {
-            rule.toString(buf, debug);
-        }
+    static StringBuilder toString(Rule rule, StringBuilder buf, boolean parenthesize, boolean debug) {
+        return parenthesize ? rule.toString(buf.append('('), debug).append(')') : rule.toString(buf, debug);
     }
     
 }

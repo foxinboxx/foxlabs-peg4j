@@ -29,15 +29,15 @@ public final class Concatenation extends Expression.Nary implements Operator {
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
         context.stream().mark();
-        context.tracer().onTrace(this);
+        context.tracer().onRuleTrace(this);
         for (int i = 0; i < children.length; i++) {
             if (!children[i].reduce(context)) {
-                context.tracer().onBacktrace(this, false);
+                context.tracer().onRuleBacktrace(this, false);
                 context.stream().reset();
                 return false;
             }
         }
-        context.tracer().onBacktrace(this, true);
+        context.tracer().onRuleBacktrace(this, true);
         context.stream().release();
         return true;
     }
@@ -48,12 +48,12 @@ public final class Concatenation extends Expression.Nary implements Operator {
     }
     
     @Override
-    public void toString(StringBuilder buf, boolean debug) {
+    public StringBuilder toString(StringBuilder buf, boolean debug) {
         toString(children[0], buf, children[0] instanceof Expression.Nary, debug);
         for (int i = 1; i < children.length; i++) {
-            buf.append(" ");
-            toString(children[i], buf, children[i] instanceof Expression.Nary, debug);
+            toString(children[i], buf.append(" "), children[i] instanceof Expression.Nary, debug);
         }
+        return buf;
     }
     
 }

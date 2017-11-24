@@ -1,0 +1,7 @@
+MEMOIZATION TOTALS :
+Cache hits : ${memoCacheHitCount}
+Cache misses : ${memoCacheMissCount}
+Max cache size : ${memoCacheMaxSize}
+
+MEMOIZATION TABLE:
+${memoTable}

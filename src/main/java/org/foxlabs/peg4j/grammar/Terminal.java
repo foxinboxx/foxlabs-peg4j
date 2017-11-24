@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.foxlabs.peg4j.BacktrackingReader;
 
+import org.foxlabs.util.Strings;
 import org.foxlabs.util.UnicodeSet;
 
 public abstract class Terminal extends Expression {
@@ -57,8 +58,8 @@ public abstract class Terminal extends Expression {
      * Determines whether or not this terminal can be replaced by another
      * terminal, that is more efficient to match character stream.
      * 
-     * For example, <pre>'a'-'a'</pre> can be replaced by <pre>'a'</pre>, that
-     * is more efficient to match character 'a'.
+     * For example, <code>'a'-'a'</code> can be replaced by <code>'a'</code>,
+     * that is more efficient to match character 'a'.
      * 
      * @return <code>true</code> if this terminal is inefficient;
      *         <code>false</code> otherwise.
@@ -67,12 +68,12 @@ public abstract class Terminal extends Expression {
     
     @Override
     public boolean reduce(ParseContext context) throws IOException {
-        context.tracer().onTrace(this);
+        context.tracer().onRuleTrace(this);
         if (match(context.stream())) {
-            context.tracer().onBacktrace(this, true);
+            context.tracer().onRuleBacktrace(this, true);
             return true;
         }
-        context.tracer().onBacktrace(this, false);
+        context.tracer().onRuleBacktrace(this, false);
         return false;
     }
     
@@ -119,8 +120,23 @@ public abstract class Terminal extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            // Empty
+        public String toString() {
+            return "";
+        }
+        
+        @Override
+        public String toString(boolean debug) {
+            return "";
+        }
+        
+        @Override
+        public StringBuilder toString(StringBuilder buf) {
+            return buf;
+        }
+        
+        @Override
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return buf;
         }
         
     }
@@ -158,8 +174,23 @@ public abstract class Terminal extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            buf.append('.');
+        public String toString() {
+            return ".";
+        }
+        
+        @Override
+        public String toString(boolean debug) {
+            return ".";
+        }
+        
+        @Override
+        public StringBuilder toString(StringBuilder buf) {
+            return buf.append('.');
+        }
+        
+        @Override
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return buf.append('.');
         }
         
     }
@@ -227,10 +258,8 @@ public abstract class Terminal extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            buf.append('\'');
-            buf.append(UnicodeSet.escape(getImage()));
-            buf.append('\'');
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return Strings.escape(getImage(), buf.append('\'')).append('\'');
         }
         
     }
@@ -252,10 +281,8 @@ public abstract class Terminal extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            buf.append('\"');
-            buf.append(UnicodeSet.escape(getImage()));
-            buf.append('\"');
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return Strings.escape(getImage(), buf.append('\"')).append('\"');
         }
         
     }
@@ -430,14 +457,14 @@ public abstract class Terminal extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            buf.append('\'')
-               .append(UnicodeSet.escape((char) min))
-               .append('\'');
-            buf.append('-');
-            buf.append('\'')
-               .append(UnicodeSet.escape((char) max))
-               .append('\'');
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return buf.append('\'')
+                      .append(Strings.escape((char) min))
+                      .append('\'')
+                      .append('-')
+                      .append('\'')
+                      .append(Strings.escape((char) max))
+                      .append('\'');
         }
         
     }
@@ -496,8 +523,8 @@ public abstract class Terminal extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            uset.toString(buf);
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return uset.toString(buf);
         }
         
     }
@@ -575,10 +602,8 @@ public abstract class Terminal extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            buf.append('<')
-               .append(name)
-               .append('>');
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return buf.append('<').append(name).append('>');
         }
         
     }

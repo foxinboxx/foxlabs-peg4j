@@ -45,15 +45,15 @@ public class Reference extends Expression {
     
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.tracer().onTrace(this);
+        context.tracer().onRuleTrace(this);
         context.stream().mark();
         if (target.reduce(context)) {
             context.stream().release();
-            context.tracer().onBacktrace(this, true);
+            context.tracer().onRuleBacktrace(this, true);
             return true;
         }
         context.stream().reset();
-        context.tracer().onBacktrace(this, false);
+        context.tracer().onRuleBacktrace(this, false);
         return false;
     }
     
@@ -63,8 +63,8 @@ public class Reference extends Expression {
     }
     
     @Override
-    public void toString(StringBuilder buf, boolean debug) {
-        buf.append(target.getName());
+    public StringBuilder toString(StringBuilder buf, boolean debug) {
+        return buf.append(target.getName());
     }
     
     // Memo
@@ -83,29 +83,29 @@ public class Reference extends Expression {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             if (context.parser().isMemoable()) {
-                context.tracer().onTrace(this);
+                context.tracer().onRuleTrace(this);
                 context.stream().mark();
                 if (context.transaction().load()) {
-                    context.tracer().onLookup(this, true);
+                    context.tracer().onCacheGet(this, true);
                     context.stream().release();
-                    context.tracer().onBacktrace(this, true);
+                    context.tracer().onRuleBacktrace(this, true);
                     return true;
                 } else {
-                    context.tracer().onLookup(this, false);
+                    context.tracer().onCacheGet(this, false);
                 }
                 context.transaction().begin();
                 if (target.reduce(context)) {
                     if (context.transaction().save() != null) {
-                        context.tracer().onCache(this);
+                        context.tracer().onCachePut(this);
                     }
                     context.transaction().commit();
                     context.stream().release();
-                    context.tracer().onBacktrace(this, true);
+                    context.tracer().onRuleBacktrace(this, true);
                     return true;
                 }
                 context.transaction().rollback();
                 context.stream().reset();
-                context.tracer().onBacktrace(this, false);
+                context.tracer().onRuleBacktrace(this, false);
                 return false;
             } else {
                 return super.reduce(context);
@@ -113,8 +113,8 @@ public class Reference extends Expression {
         }
         
         @Override
-        public void toString(StringBuilder buf, boolean debug) {
-            buf.append(getModifier()).append(target.getName());
+        public StringBuilder toString(StringBuilder buf, boolean debug) {
+            return buf.append(getModifier()).append(target.getName());
         }
         
     }

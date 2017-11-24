@@ -34,9 +34,8 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
     }
     
     @Override
-    public void toString(StringBuilder buf, boolean debug) {
-        buf.append(getPredicate());
-        toString(child, buf, child instanceof Operator, debug);
+    public StringBuilder toString(StringBuilder buf, boolean debug) {
+        return toString(child, buf.append(getPredicate()), child instanceof Operator, debug);
     }
     
     // Not
@@ -55,13 +54,13 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
-            context.tracer().onTrace(this);
+            context.tracer().onRuleTrace(this);
             if (child.reduce(context)) {
-                context.tracer().onBacktrace(this, false);
+                context.tracer().onRuleBacktrace(this, false);
                 context.stream().reset();
                 return false;
             }
-            context.tracer().onBacktrace(this, true);
+            context.tracer().onRuleBacktrace(this, true);
             context.stream().reset();
             return true;
         }
@@ -84,13 +83,13 @@ public abstract class Exclusion extends Expression.Unary implements Operator {
         @Override
         public boolean reduce(ParseContext context) throws IOException, RecognitionException {
             context.stream().mark();
-            context.tracer().onTrace(this);
+            context.tracer().onRuleTrace(this);
             if (child.reduce(context)) {
-                context.tracer().onBacktrace(this, true);
+                context.tracer().onRuleBacktrace(this, true);
                 context.stream().reset();
                 return true;
             }
-            context.tracer().onBacktrace(this, false);
+            context.tracer().onRuleBacktrace(this, false);
             context.stream().reset();
             return false;
         }
