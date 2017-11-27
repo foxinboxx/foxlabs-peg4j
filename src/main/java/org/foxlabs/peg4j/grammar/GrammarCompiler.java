@@ -107,7 +107,9 @@ public final class GrammarCompiler {
                 }
             }
             
-            rule.expression.accept(this);
+            if (rule.expression != null) {
+                rule.expression.accept(this);
+            }
         }
         
         public void visit(Reference rule) {

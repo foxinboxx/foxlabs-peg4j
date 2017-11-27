@@ -19,6 +19,7 @@ package org.foxlabs.peg4j;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -33,7 +34,7 @@ import org.foxlabs.util.counter.HitLatencyCounter;
  * 
  * @author Fox Mulder
  */
-@GrammarDecl(ref = "classpath:java16.peg4j")
+@GrammarDecl(ref = "classpath:java18.peg4j")
 public class JavaParserPerformanceTest extends DefaultParser<Object> {
     
     /**
@@ -57,13 +58,6 @@ public class JavaParserPerformanceTest extends DefaultParser<Object> {
     }
     
     /**
-     * Does nothing.
-     */
-    public void handleSource(ActionContext context) {
-        // Do nothing
-    }
-    
-    /**
      * Parses JDK sources and prints statistics.
      */
     @Test
@@ -75,6 +69,7 @@ public class JavaParserPerformanceTest extends DefaultParser<Object> {
         
         // Read all zip entries and parse Java sources
         final ZipFile zipFile = new ZipFile(JAVA_SRC_FILE);
+        final StringBuilder failures = new StringBuilder();
         final HitLatencyCounter counter = Counters.defaultHitLatencyCounter();
         try {
             final Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -90,7 +85,8 @@ public class JavaParserPerformanceTest extends DefaultParser<Object> {
                         System.out.print("\tSUCCESS");
                     } catch (RecognitionException e) {
                         counter.stop(false);
-                        System.out.print("\t" + e.getMessage());
+                        System.out.print("\tFAILURE");
+                        failures.append(entry.getName()).append(": ").append(e.getMessage()).append("\n");
                     }
                     System.out.println("\t" + Counters.formatLatency(System.currentTimeMillis() - start) + "s");
                 }
@@ -101,6 +97,9 @@ public class JavaParserPerformanceTest extends DefaultParser<Object> {
         
         // Print total results
         System.out.println("\nPARSE RESULTS: " + counter);
+        if (failures.length() > 0) {
+            System.out.println("\nFAILURES:\n" + failures);
+        }
     }
     
     // JAVA_HOME directory

@@ -42,7 +42,6 @@ public final class GrammarParser extends Parser<Grammar> {
     private final Tx transaction = new Tx();
     
     private String source = null;
-    private Location errorLocation = null;
     private Location eofLocation = null;
     
     private int compilationFlags = 0;
@@ -95,7 +94,6 @@ public final class GrammarParser extends Parser<Grammar> {
         usetStack.clear();
         problemStack.clear();
         source = null;
-        errorLocation = null;
         eofLocation = null;
     }
     
@@ -313,7 +311,6 @@ public final class GrammarParser extends Parser<Grammar> {
     }
     
     private boolean handleErrorStart(ActionContext context) {
-        errorLocation = context.start();
         return true;
     }
     

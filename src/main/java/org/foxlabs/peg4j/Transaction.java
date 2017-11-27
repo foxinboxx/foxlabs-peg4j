@@ -21,11 +21,12 @@ package org.foxlabs.peg4j;
  * {@link Parser#getTransaction()} method that should return current
  * transaction instance.
  * 
- * Because of the nature of backtracking parsers there is a need to keep track
- * of parser state and undo changes in case of backtracking. Also memoization
- * feature can be used to store snapshot of changes that may occur a number of
- * times for the same offset in character stream. In other words, parser may
- * produce the same state for the same character input in different rules.
+ * <p> Because of the nature of backtracking parsers there is a need to keep
+ * track of parser state and undo changes in case of backtracking. Also
+ * memoization feature can be used to store snapshot of changes that may occur
+ * a number of times for the same offset in character stream. In other words,
+ * parser may produce the same state for the same character input in different
+ * rules. </p>
  * 
  * @author Fox Mulder
  * @see Parser
