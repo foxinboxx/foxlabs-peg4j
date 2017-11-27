@@ -235,17 +235,17 @@ IntegerLiteral
 
 DecimalNumeral
     = '0'
-    / ['1'-'9'] ('_'* ['0'-'9'])*
+    / '1'-'9' ('_'* '0'-'9')*
     ;
 
 HexNumeral
     = '0' "x" HexDigits ;
 
 OctalNumeral
-    = '0' ('_'* ['0'-'7'])+ ;
+    = '0' ('_'* '0'-'7')+ ;
 
 BinaryNumeral
-    = '0' "b" ['0', '1'] ('_'* ['0', '1'])* ;
+    = '0' "b" '0'-'1' ('_'* '0'-'1')* ;
 
 //-------------------------------------------------------------------------
 //  JLS 3.10.2  Floatng-point Literals
@@ -285,7 +285,7 @@ BinaryExponent
     = "p" ['+', '-']? Digits ;
 
 Digits
-    = ['0'-'9'] ('_'* ['0'-'9'])* ;
+    = '0'-'9' ('_'* '0'-'9')* ;
 
 //-------------------------------------------------------------------------
 //  JLS 3.10.3  Boolean Literals
@@ -317,9 +317,9 @@ Escape
     ;
 
 OctalEscape
-    = ['0'-'3'] ['0'-'7'] ['0'-'7']
-    / ['0'-'7'] ['0'-'7']
-    / ['0'-'7']
+    = '0'-'3' '0'-'7' '0'-'7'
+    / '0'-'7' '0'-'7'
+    / '0'-'7'
     ;
 
 UnicodeEscape
@@ -370,13 +370,13 @@ DIVEQU          =   '/='                    Spacing ;
 EQU             =   '=' !'='                Spacing ;
 EQUAL           =   '=='                    Spacing ;
 GE              =   '>='                    Spacing ;
-GT              =   '>' !['=', '>']         Spacing ;
+GT              =   '>' !'='-'>'            Spacing ;
 HAT             =   '^' !'='                Spacing ;
 HATEQU          =   '^='                    Spacing ;
 INC             =   '++'                    Spacing ;
 LE              =   '<='                    Spacing ;
 LPOINT          =   '<'                     Spacing ;
-LT              =   '<' !['=', '<']         Spacing ;
+LT              =   '<' !'<'-'='            Spacing ;
 MINUS           =   '-' !['=', '-', '>']    Spacing ;
 MINUSEQU        =   '-='                    Spacing ;
 MOD             =   '%' !'='                Spacing ;
@@ -391,7 +391,7 @@ QUERY           =   '?'                     Spacing ;
 RPOINT          =   '>'                     Spacing ;
 SL              =   '<<' !'='               Spacing ;
 SLEQU           =   '<<='                   Spacing ;
-SR              =   '>>' !['=', '>']        Spacing ;
+SR              =   '>>' !'='-'>'           Spacing ;
 SREQU           =   '>>='                   Spacing ;
 STAR            =   '*' !'='                Spacing ;
 STAREQU         =   '*='                    Spacing ;
