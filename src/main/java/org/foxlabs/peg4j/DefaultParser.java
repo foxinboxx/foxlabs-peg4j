@@ -38,7 +38,32 @@ import org.foxlabs.util.reflect.MethodInvoker;
 import org.foxlabs.util.resource.ResourceHelper;
 
 /**
+ * Abstract base class for parsers with grammar loading capability.
+ * Grammar source may be defined using {@link Peg4jGrammar} annotation or may
+ * be stored in resources available at classpath. Once grammar is loaded it
+ * will be cached and other instances of the same parser class will use cached
+ * instance. Also this implementation allows to bind methods of subclasses to
+ * grammar semantic actions. If you need to customize grammar loading features
+ * then you may override required <code>protected</code> methods of this class.
  * 
+ * <p> The algorithm of grammar loading is as follows:
+ * <ul>
+ *   <li>Look for {@link Peg4jGrammar} annotation defined on parser class.</li>
+ *   <li>If annotation is present then use grammar definition from it.</li>
+ *   <li>If annotation is not present then try to find classpath resource in
+ *       the same package and with the same name as parser class and with
+ *       <code>.peg4j</code> extension.
+ *   <li>If parser class has no annotation and there is no such resource on the
+ *       classpath then algorithm will be repeated for parser subclasses.</li>
+ *   <li>Collect semantic action methods that are not <code>abstract</code> or
+ *       <code>static</code>, return <code>void</code> or <code>boolean</code>
+ *       and accept one argument of the {@link ActionContext} type. Names of
+ *       semantic action methods should be the same as they defined in the
+ *       grammar.</li>
+ *   <li>Compile grammar using grammar definition and semantic action methods
+ *       resolved at previous steps and store it in the cache.</li>
+ * </ul>
+ * </p>
  * 
  * @author Fox Mulder
  * @see Parser
@@ -50,7 +75,7 @@ public abstract class DefaultParser<T> extends Parser<T> {
     /**
      * Cache for parser grammars.
      */
-    private static final ConcurrentMap<Class<?>, Grammar> grammarCache =
+    private static final ConcurrentMap<Class<?>, Grammar> GRAMMAR_CACHE =
             new ConcurrentHashMap<Class<?>, Grammar>();
     
     /**
@@ -79,10 +104,10 @@ public abstract class DefaultParser<T> extends Parser<T> {
     @Override
     public final Grammar getGrammar() {
         if (grammar == null) {
-            Grammar grammar = grammarCache.get(getClass());
+            Grammar grammar = GRAMMAR_CACHE.get(getClass());
             if (grammar == null) {
                 grammar = loadGrammar();
-                grammarCache.put(getClass(), grammar);
+                GRAMMAR_CACHE.put(getClass(), grammar);
             }
             return grammar;
         }
@@ -107,15 +132,15 @@ public abstract class DefaultParser<T> extends Parser<T> {
         try {
             stream = getGrammarStream();
             if (stream == null) {
-                throw new Peg4jException("Can't find grammar for parser " +
-                        getClass().getName());
+                throw new Peg4jException("Can't find grammar for " +
+                        getClass().getName() + " parser");
             }
             
             GrammarParser parser = new GrammarParser(getActionBindings());
             Grammar grammar = parser.parse(stream);
             if (grammar.hasErrors()) {
-                throw new Peg4jException("Error compiling grammar for parser " +
-                        getClass().getName() + ":\n" + grammar.getProblems());
+                throw new Peg4jException("Error compiling grammar for " +
+                        getClass().getName() + " parser:\n" + grammar.getProblems());
             }
             
             return grammar;
@@ -130,7 +155,8 @@ public abstract class DefaultParser<T> extends Parser<T> {
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    // Ignore it   
+                    throw new Peg4jException("Error closing grammar stream for " +
+                            getClass().getName() + " parser", e);
                 }
             }
         }

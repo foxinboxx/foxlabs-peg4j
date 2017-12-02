@@ -42,10 +42,10 @@ public class RecognitionException extends Exception {
     }
     
     /**
-     * Constructs a new recognition exception with the specified detail message
-     * and location.
+     * Constructs a new recognition exception with the specified problem
+     * description and location.
      * 
-     * @param message Detail message.
+     * @param message Problem description.
      * @param location Location of a problem in character stream.
      */
     public RecognitionException(String message, Location location) {
@@ -54,10 +54,10 @@ public class RecognitionException extends Exception {
     }
     
     /**
-     * Constructs a new recognition exception with the specified detail message,
-     * cause and location.
+     * Constructs a new recognition exception with the specified problem
+     * description, cause and location.
      * 
-     * @param message Detail message.
+     * @param message Problem description.
      * @param cause Problem cause.
      * @param location Location of a problem in character stream.
      */
@@ -88,9 +88,9 @@ public class RecognitionException extends Exception {
     }
     
     /**
-     * Returns detail message.
+     * Returns problem description including location.
      * 
-     * @return Detail message.
+     * @return Problem description including location.
      */
     public String getMessage() {
         return location.isUnknown() ? super.getMessage() : location + ": " + super.getMessage();
