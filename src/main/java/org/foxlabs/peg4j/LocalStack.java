@@ -20,6 +20,9 @@ import java.util.Arrays;
 
 import org.foxlabs.util.reflect.Types;
 
+/**
+ * @author Fox Mulder
+ */
 public class LocalStack<E> {
     
     private Object[] elements;

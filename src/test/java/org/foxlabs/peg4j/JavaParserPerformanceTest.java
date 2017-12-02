@@ -34,7 +34,7 @@ import org.foxlabs.util.counter.HitLatencyCounter;
  * 
  * @author Fox Mulder
  */
-@GrammarDecl(ref = "classpath:java18.peg4j")
+@Peg4jGrammar(ref = "classpath:java18.peg4j")
 public class JavaParserPerformanceTest extends DefaultParser<Object> {
     
     /**

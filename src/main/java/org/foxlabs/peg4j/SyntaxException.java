@@ -23,13 +23,30 @@ import org.foxlabs.peg4j.resource.ResourceManager;
 
 import org.foxlabs.util.Location;
 
+/**
+ * Thrown to indicate syntax error in recognition of character stream.
+ * 
+ * @author Fox Mulder
+ */
 public class SyntaxException extends RecognitionException {
     private static final long serialVersionUID = -7679475223946902663L;
     
+    /**
+     * Constructs a new syntax exception with the specified location.
+     * 
+     * @param location Location of syntax error in character stream.
+     */
     public SyntaxException(Location location) {
         super(ResourceManager.formatRuntimeMessage("runtime.syntaxError"), location);
     }
     
+    /**
+     * Constructs a new syntax exception with the specified set of expected
+     * terminals and location.
+     * 
+     * @param expectedSet Set of expected terminals at error location.
+     * @param location Location of syntax error in character stream.
+     */
     public SyntaxException(Set<Terminal> expectedSet, Location location) {
         super(ResourceManager.formatRuntimeMessage("runtime.expectedTokens", expectedSet), location);
     }

@@ -43,6 +43,7 @@ import org.foxlabs.util.resource.ResourceHelper;
  * @author Fox Mulder
  * @see Parser
  * @see Grammar
+ * @see Peg4jGrammar
  */
 public abstract class DefaultParser<T> extends Parser<T> {
     
@@ -137,7 +138,7 @@ public abstract class DefaultParser<T> extends Parser<T> {
     
     /**
      * Returns {@link BacktrackingReader} character stream initialized to load
-     * grammar source. This method looks up for the {@link GrammarDecl}
+     * grammar source. This method looks up for the {@link Peg4jGrammar}
      * annotation first. If annotation is not present then it will try to find
      * classpath resource in the same package and with the same name as this
      * parser class and with <code>.peg4j</code> extension. If this class has
@@ -154,22 +155,21 @@ public abstract class DefaultParser<T> extends Parser<T> {
         
         for (Class<?> c = getClass(); c != DefaultParser.class; c = c.getSuperclass()) {
             // Lookup for annotation
-            GrammarDecl decl = c.getAnnotation(GrammarDecl.class);
-            if (decl != null) {
-                if (decl.value().trim().length() > 0) {
-                    return new BacktrackingReader(new StringReader(decl.value()), c.getName());
+            Peg4jGrammar pg = c.getAnnotation(Peg4jGrammar.class);
+            if (pg != null) {
+                if (pg.value().trim().length() > 0) {
+                    return new BacktrackingReader(new StringReader(pg.value()), c.getName());
                 }
                 
-                InputStream stream = decl.ref().toLowerCase().startsWith("classpath:")
-                    ? cl.getResourceAsStream(decl.ref().substring(10))
-                    : new URL(decl.ref()).openStream();
+                InputStream stream = pg.ref().toLowerCase().startsWith("classpath:")
+                    ? cl.getResourceAsStream(pg.ref().substring(10))
+                    : new URL(pg.ref()).openStream();
                 if (stream == null) {
-                    throw new IOException("Can't find grammar declaration: " +
-                            decl.ref());
+                    throw new IOException("Can't find grammar declaration: " + pg.ref());
                 }
                 
                 return new BacktrackingReader(new InputStreamReader(stream,
-                        decl.encoding()), decl.ref());
+                        pg.encoding()), pg.ref());
             }
             
             // Lookup for classpath resource

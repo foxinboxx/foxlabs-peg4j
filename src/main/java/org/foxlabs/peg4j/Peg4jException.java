@@ -17,20 +17,38 @@
 package org.foxlabs.peg4j;
 
 /**
+ * Peg4j internal exception.
  * 
  * @author Fox Mulder
  */
 public class Peg4jException extends RuntimeException {
     private static final long serialVersionUID = -8265299201575047725L;
     
+    /**
+     * Constructs a new Peg4j exception with the specified detail message.
+     * 
+     * @param message Detail message.
+     */
     public Peg4jException(String message) {
         super(message);
     }
     
+    /**
+     * Constructs a new Peg4j exception with the specified detail message and
+     * cause.
+     * 
+     * @param message Detail message.
+     * @param cause Exception cause.
+     */
     public Peg4jException(String message, Throwable cause) {
         super(message, cause);
     }
     
+    /**
+     * Constructs a new Peg4j exception with the specified cause.
+     * 
+     * @param cause Exception cause.
+     */
     public Peg4jException(Throwable cause) {
         super(cause);
     }
