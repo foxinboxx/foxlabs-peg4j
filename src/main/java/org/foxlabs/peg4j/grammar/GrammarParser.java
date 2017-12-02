@@ -22,7 +22,7 @@ import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.ActionContext;
 import org.foxlabs.peg4j.Transaction;
-import org.foxlabs.peg4j.LocalStack;
+import org.foxlabs.peg4j.util.BacktrackingStack;
 
 import org.foxlabs.util.Location;
 import org.foxlabs.util.Strings;
@@ -34,10 +34,10 @@ public final class GrammarParser extends Parser<Grammar> {
     
     private final GrammarBuilder builder;
     
-    private final LocalStack<String> symbolStack = new LocalStack<String>();
-    private final LocalStack<Integer> intStack = new LocalStack<Integer>();
-    private final LocalStack<UnicodeSet> usetStack = new LocalStack<UnicodeSet>();
-    private final LocalStack<Problem> problemStack = new LocalStack<Problem>();
+    private final BacktrackingStack<String> symbolStack = new BacktrackingStack<String>();
+    private final BacktrackingStack<Integer> intStack = new BacktrackingStack<Integer>();
+    private final BacktrackingStack<UnicodeSet> usetStack = new BacktrackingStack<UnicodeSet>();
+    private final BacktrackingStack<Problem> problemStack = new BacktrackingStack<Problem>();
     
     private final Tx transaction = new Tx();
     

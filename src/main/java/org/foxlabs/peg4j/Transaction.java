@@ -16,6 +16,8 @@
 
 package org.foxlabs.peg4j;
 
+import org.foxlabs.peg4j.util.BacktrackingStack;
+
 /**
  * Defines transaction interface for parsers. Each parser should override the
  * {@link Parser#getTransaction()} method that should return current
@@ -30,7 +32,7 @@ package org.foxlabs.peg4j;
  * 
  * @author Fox Mulder
  * @see Parser
- * @see LocalStack
+ * @see BacktrackingStack
  */
 public interface Transaction {
     

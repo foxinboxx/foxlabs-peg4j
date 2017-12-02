@@ -31,7 +31,7 @@ import org.foxlabs.util.Location;
  * Method {@link #release()} releases previous mark meaning that marker is
  * deleted. Method {@link #reset()} resets current position in character stream
  * to previously marked position allowing to start reading from saved point.
- * Depth of markers is not limited. </p> 
+ * Depth of markers is not limited. </p>
  * 
  * <p> Note that this reader implementation is not thread-safe. Also this
  * reader skips <code>\r</code> characters. </p>

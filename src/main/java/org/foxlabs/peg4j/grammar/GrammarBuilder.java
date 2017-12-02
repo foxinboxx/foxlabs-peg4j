@@ -21,11 +21,12 @@ import java.util.HashMap;
 import java.util.Arrays;
 
 import org.foxlabs.peg4j.ActionHandler;
-import org.foxlabs.peg4j.LocalStack;
+import org.foxlabs.peg4j.util.BacktrackingStack;
+
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 
-public final class GrammarBuilder extends LocalStack<Expression> {
+public final class GrammarBuilder extends BacktrackingStack<Expression> {
     
     private final Map<String, Production> productionMap = new HashMap<String, Production>();
     private Production[] productions = new Production[64];
