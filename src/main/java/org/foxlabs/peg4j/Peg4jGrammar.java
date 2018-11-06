@@ -31,10 +31,10 @@ import org.foxlabs.util.resource.ResourceHelper;
  * Source code:
  * <pre>
  * &#x0040;Peg4jGrammar(
- *     "Expr : Sum ;" +
+ *     "Expr : Sum !. ;" +
  *     "Sum : Product (('+' / '-') Product)* ;" +
  *     "Product : Value (('*' / '/') Value)* ;" +
- *     "Value : ['0'-'9']+ / '(' Expr ')' ;"
+ *     "Value : '0'-'9'+ / '(' Expr ')' ;"
  * )
  * public class MyParser extends DefaultParser&lt;Integer&gt; {
  *     ...

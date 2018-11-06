@@ -39,10 +39,10 @@ import org.foxlabs.peg4j.resource.ResourceManager;
 
 import org.foxlabs.util.counter.Counters;
 
-public final class CommandLine {
+public final class Peg4jCommandLine {
     
     // don't allow to create instances
-    private CommandLine() {
+    private Peg4jCommandLine() {
         super();
     }
     
@@ -97,7 +97,7 @@ public final class CommandLine {
      */
     static Command createCommand(String cmd) throws Throwable {
         // search for Command subclass
-        for (Class<?> cc : CommandLine.class.getDeclaredClasses()) {
+        for (Class<?> cc : Peg4jCommandLine.class.getDeclaredClasses()) {
             if (cc.getSimpleName().equalsIgnoreCase(cmd)) {
                 if (Command.class.isAssignableFrom(cc)) {
                     int mod = cc.getModifiers();

@@ -26,6 +26,12 @@ import org.foxlabs.peg4j.util.BacktrackingStack;
 import org.foxlabs.util.Location;
 import org.foxlabs.util.UnicodeSet;
 
+// FIXME Refactor with ProductionBuilder, ... remove mark(), reset(), release()
+// builder.production("sum")
+//            .concat()
+//                .tokenCS('a')
+//                .any()
+//            .choice()
 public final class GrammarBuilder extends BacktrackingStack<Expression> {
     
     private final Map<String, Production> productionMap = new HashMap<String, Production>();
@@ -62,10 +68,12 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder production(String name)
     public GrammarBuilder startProduction(String name) {
         return startProduction(name, Location.UNKNOWN);
     }
     
+    // FIXME public ProductionBuilder production(String name, Location start)
     public GrammarBuilder startProduction(String name, Location start) {
         checkProductionInitiated(false);
         currentProduction = defineProduction(name, true);
@@ -115,53 +123,65 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
     }
     
     private void checkProductionInitiated(boolean init) {
+        // FIXME This check can be avoided by ProductionBuilder class created
+        // in startProduction() method
         if (currentProduction == null == init) {
             throw new IllegalStateException();
         }
     }
     
+    // FIXME public ProductionBuilder any()
     public GrammarBuilder pushAny() {
         checkProductionInitiated(true);
         push(Terminal.any(currentProduction));
         return this;
     }
     
+    // FIXME public ProductionBuilder tokenCS(char value)
     public GrammarBuilder pushTokenCS(char value) {
         return pushToken(value, true);
     }
     
+    // FIXME public ProductionBuilder tokenIC(char value)
     public GrammarBuilder pushTokenIC(char value) {
         return pushToken(value, false);
     }
     
+    // FIXME public ProductionBuilder token(char value, boolean cs)
     public GrammarBuilder pushToken(char value, boolean cs) {
         checkProductionInitiated(true);
         push(Terminal.tokenOf(currentProduction, value, cs));
         return this;
     }
     
+    // FIXME public ProductionBuilder tokenCS(String value)
     public GrammarBuilder pushTokenCS(String value) {
         return pushToken(value, true);
     }
     
+    // FIXME public ProductionBuilder tokenIC(String value)
     public GrammarBuilder pushTokenIC(String value) {
         return pushToken(value, false);
     }
     
+    // FIXME public ProductionBuilder token(String value, boolean cs)
     public GrammarBuilder pushToken(String value, boolean cs) {
         checkProductionInitiated(true);
         push(Terminal.tokenOf(currentProduction, value, cs));
         return this;
     }
     
+    // FIXME public ProductionBuilder tokensCS(String value)
     public GrammarBuilder pushTokensCS(String value) {
         return pushTokens(value, true);
     }
     
+    // FIXME public ProductionBuilder tokensIC(String value)
     public GrammarBuilder pushTokensIC(String value) {
         return pushTokens(value, false);
     }
     
+    // FIXME public ProductionBuilder tokens(String value, boolean cs)
     public GrammarBuilder pushTokens(String value, boolean cs) {
         checkProductionInitiated(true);
         int length = value.length();
@@ -171,34 +191,40 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder interval(char min, char max)
     public GrammarBuilder pushInterval(char min, char max) {
         checkProductionInitiated(true);
         push(Terminal.intervalOf(currentProduction, min, max));
         return this;
     }
     
+    // FIXME public ProductionBuilder set(char... values)
     public GrammarBuilder pushSet(char... values) {
         checkProductionInitiated(true);
         push(Terminal.setOf(currentProduction, values));
         return this;
     }
     
+    // FIXME public ProductionBuilder set(UnicodeSet uset)
     public GrammarBuilder pushSet(UnicodeSet uset) {
         checkProductionInitiated(true);
         push(Terminal.setOf(currentProduction, uset));
         return this;
     }
     
+    // FIXME public ProductionBuilder clazz(String name)
     public GrammarBuilder pushClass(String name) {
         checkProductionInitiated(true);
         push(Terminal.classOf(currentProduction, name));
         return this;
     }
     
+    // FIXME public ProductionBuilder reference(String name)
     public GrammarBuilder pushReference(String name) {
         return pushReference(name, null);
     }
     
+    // FIXME public ProductionBuilder clazz(String name, Modifier mod)
     public GrammarBuilder pushReference(String name, Modifier mod) {
         checkProductionInitiated(true);
         Production target = defineProduction(name, false);
@@ -214,6 +240,7 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder concat()
     public GrammarBuilder concat() {
         checkProductionInitiated(true);
         int size = size();
@@ -223,6 +250,7 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder choice()
     public GrammarBuilder choice() {
         checkProductionInitiated(true);
         int size = size();
@@ -232,10 +260,12 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder repeat(int count)
     public GrammarBuilder repeat(int count) {
         return repeat(count, count);
     }
     
+    // FIXME public ProductionBuilder repeat(int min, int max)
     public GrammarBuilder repeat(int min, int max) {
         checkProductionInitiated(true);
         if (max < min || min < 0 || max == 0) {
@@ -253,6 +283,7 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder repeat(Quantifier quant)
     public GrammarBuilder repeat(Quantifier quant) {
         checkProductionInitiated(true);
         switch (quant) {
@@ -269,6 +300,7 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder except(Predicate pred)
     public GrammarBuilder except(Predicate pred) {
         checkProductionInitiated(true);
         switch (pred) {
@@ -282,10 +314,12 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder action(String name)
     public GrammarBuilder action(String name) {
         return action(name, defaultHandlers == null ? null : defaultHandlers.get(name));
     }
     
+    // FIXME public ProductionBuilder action(String name, ActionHandler<?> handler)
     public GrammarBuilder action(String name, ActionHandler<?> handler) {
         checkProductionInitiated(true);
         if (isEmpty()) {
@@ -295,11 +329,13 @@ public final class GrammarBuilder extends BacktrackingStack<Expression> {
         return this;
     }
     
+    // FIXME public ProductionBuilder start(Location start)
     public GrammarBuilder setStart(Location start) {
         peek().start = Location.resolve(start);
         return this;
     }
     
+    // FIXME public ProductionBuilder end(Location end)
     public GrammarBuilder setEnd(Location end) {
         peek().end = Location.resolve(end);
         return this;
