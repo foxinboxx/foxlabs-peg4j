@@ -55,10 +55,10 @@ public interface RuleTracer {
         public void onRuleBacktrace(Rule rule, boolean success) throws IOException {}
         
         @Override
-        public void onBeforeAction(Action action) throws IOException {};
+        public void onBeforeAction(Action action) throws IOException {}
         
         @Override
-        public void onAfterAction(Action action, boolean success) throws IOException {};
+        public void onAfterAction(Action action, boolean success) throws IOException {}
         
         @Override
         public void onCacheGet(Reference reference, boolean hit) throws IOException {}
