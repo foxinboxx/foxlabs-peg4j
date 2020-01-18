@@ -32,148 +32,152 @@ import org.foxlabs.peg4j.grammar.Production;
 import org.foxlabs.util.Location;
 
 public class ErrorTracer extends RuleTracer.Adapter {
-    
-    private BacktrackingReader charStream;
-    
-    private int errorOffset;
-    private int errorLine;
-    private int errorColumn;
-    private int predicateLevel;
-    
-    private ReferenceNode referenceHead = null;
-    
-    private final Set<Terminal> expectedSet = new HashSet<Terminal>();
-    
-    public Production getCurrentReference() {
-        return referenceHead == null ? null : referenceHead.reference.getTarget();
+
+  private BacktrackingReader charStream;
+
+  private int errorOffset;
+
+  private int errorLine;
+
+  private int errorColumn;
+
+  private int predicateLevel;
+
+  private ReferenceNode referenceHead = null;
+
+  private final Set<Terminal> expectedSet = new HashSet<Terminal>();
+
+  public Production getCurrentReference() {
+    return referenceHead == null ? null : referenceHead.reference.getTarget();
+  }
+
+  public Location getErrorLocation() {
+    return Location.valueOf(charStream.getFile(), errorLine, errorColumn);
+  }
+
+  public Set<Terminal> getExpectedSet() {
+    return expectedSet;
+  }
+
+  public SyntaxException newSyntaxException() {
+    if (expectedSet.isEmpty()) {
+      return new SyntaxException(getErrorLocation());
+    } else {
+      return new SyntaxException(expectedSet, getErrorLocation());
     }
-    
-    public Location getErrorLocation() {
-        return Location.valueOf(charStream.getFile(), errorLine, errorColumn);
+  }
+
+  @Override
+  public void open(BacktrackingReader stream) throws IOException {
+    charStream = stream;
+    errorOffset = 0;
+    errorLine = 0;
+    errorColumn = 0;
+    predicateLevel = 0;
+    referenceHead = null;
+    expectedSet.clear();
+  }
+
+  @Override
+  public void onRuleTrace(Rule rule) throws IOException {
+    if (rule instanceof Reference) {
+      referenceHead = new ReferenceNode((Reference) rule, referenceHead);
+    } else if (rule instanceof Exclusion) {
+      predicateLevel++;
     }
-    
-    public Set<Terminal> getExpectedSet() {
-        return expectedSet;
-    }
-    
-    public SyntaxException newSyntaxException() {
-        if (expectedSet.isEmpty()) {
-            return new SyntaxException(getErrorLocation());
-        } else {
-            return new SyntaxException(expectedSet, getErrorLocation());
+  }
+
+  @Override
+  public void onRuleBacktrace(Rule rule, boolean success) throws IOException {
+    if (rule instanceof Reference) {
+      referenceHead = referenceHead.next;
+    } else if (rule instanceof Exclusion) {
+      predicateLevel--;
+    } else if (rule instanceof Terminal && predicateLevel == 0 && !success) {
+      int offset = charStream.getStartOffset();
+      if (offset >= errorOffset) {
+        if (offset > errorOffset) {
+          expectedSet.clear();
         }
+        errorOffset = offset;
+        errorLine = charStream.getStartLine();
+        errorColumn = charStream.getStartColumn();
+        expectedSet.add((Terminal) rule);
+      }
     }
-    
+  }
+
+  // ReferenceNode
+
+  private static class ReferenceNode {
+
+    private final Reference reference;
+
+    private final ReferenceNode next;
+
+    private ReferenceNode(Reference reference, ReferenceNode next) {
+      this.reference = reference;
+      this.next = next;
+    }
+
+  }
+
+  // Wrapper
+
+  private static class Wrapper extends ErrorTracer {
+
+    private final RuleTracer tracer;
+
+    private Wrapper(RuleTracer tracer) {
+      this.tracer = tracer;
+    }
+
     @Override
     public void open(BacktrackingReader stream) throws IOException {
-        charStream = stream;
-        errorOffset = 0;
-        errorLine = 0;
-        errorColumn = 0;
-        predicateLevel = 0;
-        referenceHead = null;
-        expectedSet.clear();
+      super.open(stream);
+      tracer.open(stream);
     }
-    
+
     @Override
     public void onRuleTrace(Rule rule) throws IOException {
-        if (rule instanceof Reference) {
-            referenceHead = new ReferenceNode((Reference) rule, referenceHead);
-        } else if (rule instanceof Exclusion) {
-            predicateLevel++;
-        }
+      super.onRuleTrace(rule);
+      tracer.onRuleTrace(rule);
     }
-    
+
     @Override
     public void onRuleBacktrace(Rule rule, boolean success) throws IOException {
-        if (rule instanceof Reference) {
-            referenceHead = referenceHead.next;
-        } else if (rule instanceof Exclusion) {
-            predicateLevel--;
-        } else if (rule instanceof Terminal && predicateLevel == 0 && !success) {
-            int offset = charStream.getStartOffset();
-            if (offset >= errorOffset) {
-                if (offset > errorOffset) {
-                    expectedSet.clear();
-                }
-                errorOffset = offset;
-                errorLine = charStream.getStartLine();
-                errorColumn = charStream.getStartColumn();
-                expectedSet.add((Terminal) rule);
-            }
-        }
+      super.onRuleBacktrace(rule, success);
+      tracer.onRuleBacktrace(rule, success);
     }
-    
-    // ReferenceNode
-    
-    private static class ReferenceNode {
-        
-        private final Reference reference;
-        private final ReferenceNode next;
-        
-        private ReferenceNode(Reference reference, ReferenceNode next) {
-            this.reference = reference;
-            this.next = next;
-        }
-        
-    }
-    
-    // Wrapper
-    
-    private static class Wrapper extends ErrorTracer {
-        
-        private final RuleTracer tracer;
-        
-        private Wrapper(RuleTracer tracer) {
-            this.tracer = tracer;
-        }
-        
-        @Override
-        public void open(BacktrackingReader stream) throws IOException {
-            super.open(stream);
-            tracer.open(stream);
-        }
-        
-        @Override
-        public void onRuleTrace(Rule rule) throws IOException {
-            super.onRuleTrace(rule);
-            tracer.onRuleTrace(rule);
-        }
-        
-        @Override
-        public void onRuleBacktrace(Rule rule, boolean success) throws IOException {
-            super.onRuleBacktrace(rule, success);
-            tracer.onRuleBacktrace(rule, success);
-        }
-        
-        @Override
-        public void onCacheGet(Reference reference, boolean hit) throws IOException {
-            super.onCacheGet(reference, hit);
-            tracer.onCacheGet(reference, hit);
-        }
 
-        @Override
-        public void onCachePut(Reference reference) throws IOException {
-            super.onCachePut(reference);
-            tracer.onCachePut(reference);
-        }
-        
-        @Override
-        public void close(boolean result) throws IOException {
-            super.close(result);
-            tracer.close(result);
-        }
-        
+    @Override
+    public void onCacheGet(Reference reference, boolean hit) throws IOException {
+      super.onCacheGet(reference, hit);
+      tracer.onCacheGet(reference, hit);
     }
-    
-    public static ErrorTracer newTracer(RuleTracer tracer) {
-        if (tracer == null) {
-            return new ErrorTracer();
-        } else if (tracer instanceof ErrorTracer) {
-            return (ErrorTracer) tracer;
-        } else {
-            return new ErrorTracer.Wrapper(tracer);
-        }
+
+    @Override
+    public void onCachePut(Reference reference) throws IOException {
+      super.onCachePut(reference);
+      tracer.onCachePut(reference);
     }
-    
+
+    @Override
+    public void close(boolean result) throws IOException {
+      super.close(result);
+      tracer.close(result);
+    }
+
+  }
+
+  public static ErrorTracer newTracer(RuleTracer tracer) {
+    if (tracer == null) {
+      return new ErrorTracer();
+    } else if (tracer instanceof ErrorTracer) {
+      return (ErrorTracer) tracer;
+    } else {
+      return new ErrorTracer.Wrapper(tracer);
+    }
+  }
+
 }

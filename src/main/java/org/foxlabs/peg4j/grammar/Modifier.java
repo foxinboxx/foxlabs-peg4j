@@ -17,21 +17,21 @@
 package org.foxlabs.peg4j.grammar;
 
 public enum Modifier {
-    
-    MEMO("@");
-    
-    private final String symbol;
-    
-    private Modifier(String symbol) {
-        this.symbol = symbol;
-    }
-    
-    public String toString() {
-        return symbol;
-    }
-    
-    public static Modifier modifierOf(String symbol) {
-        return MEMO.symbol.equals(symbol) ? MEMO : null;
-    }
-    
+
+  MEMO("@");
+
+  private final String symbol;
+
+  private Modifier(String symbol) {
+    this.symbol = symbol;
+  }
+
+  public String toString() {
+    return symbol;
+  }
+
+  public static Modifier modifierOf(String symbol) {
+    return MEMO.symbol.equals(symbol) ? MEMO : null;
+  }
+
 }

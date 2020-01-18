@@ -21,102 +21,102 @@ import java.io.IOException;
 import org.foxlabs.peg4j.RecognitionException;
 
 public class Reference extends Expression {
-    
-    Production target;
-    
-    Reference(Production owner, Production target) {
-        super(owner);
-        this.target = target;
-        owner.references.add(this);
-        target.referencedBy.add(owner);
+
+  Production target;
+
+  Reference(Production owner, Production target) {
+    super(owner);
+    this.target = target;
+    owner.references.add(this);
+    target.referencedBy.add(owner);
+  }
+
+  public final Production getTarget() {
+    return target;
+  }
+
+  public final String getTargetName() {
+    return target.getName();
+  }
+
+  public Modifier getModifier() {
+    return null;
+  }
+
+  @Override
+  public boolean reduce(ParseContext context) throws IOException, RecognitionException {
+    context.tracer().onRuleTrace(this);
+    context.stream().mark();
+    if (target.reduce(context)) {
+      context.stream().release();
+      context.tracer().onRuleBacktrace(this, true);
+      return true;
     }
-    
-    public final Production getTarget() {
-        return target;
+    context.stream().reset();
+    context.tracer().onRuleBacktrace(this, false);
+    return false;
+  }
+
+  @Override
+  public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
+    visitor.visit(this);
+  }
+
+  @Override
+  public StringBuilder toString(StringBuilder buf, boolean debug) {
+    return buf.append(target.getName());
+  }
+
+  // Memo
+
+  public static final class Memo extends Reference {
+
+    Memo(Production owner, Production target) {
+      super(owner, target);
     }
-    
-    public final String getTargetName() {
-        return target.getName();
-    }
-    
+
+    @Override
     public Modifier getModifier() {
-        return null;
+      return Modifier.MEMO;
     }
-    
+
     @Override
     public boolean reduce(ParseContext context) throws IOException, RecognitionException {
+      if (context.parser().isMemoable()) {
         context.tracer().onRuleTrace(this);
         context.stream().mark();
-        if (target.reduce(context)) {
-            context.stream().release();
-            context.tracer().onRuleBacktrace(this, true);
-            return true;
+        if (context.transaction().load()) {
+          context.tracer().onCacheGet(this, true);
+          context.stream().release();
+          context.tracer().onRuleBacktrace(this, true);
+          return true;
+        } else {
+          context.tracer().onCacheGet(this, false);
         }
+        context.transaction().begin();
+        if (target.reduce(context)) {
+          if (context.transaction().save() != null) {
+            context.tracer().onCachePut(this);
+          }
+          context.transaction().commit();
+          context.stream().release();
+          context.tracer().onRuleBacktrace(this, true);
+          return true;
+        }
+        context.transaction().rollback();
         context.stream().reset();
         context.tracer().onRuleBacktrace(this, false);
         return false;
+      } else {
+        return super.reduce(context);
+      }
     }
-    
-    @Override
-    public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
-        visitor.visit(this);
-    }
-    
+
     @Override
     public StringBuilder toString(StringBuilder buf, boolean debug) {
-        return buf.append(target.getName());
+      return buf.append(getModifier()).append(target.getName());
     }
-    
-    // Memo
-    
-    public static final class Memo extends Reference {
-        
-        Memo(Production owner, Production target) {
-            super(owner, target);
-        }
-        
-        @Override
-        public Modifier getModifier() {
-            return Modifier.MEMO;
-        }
-        
-        @Override
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            if (context.parser().isMemoable()) {
-                context.tracer().onRuleTrace(this);
-                context.stream().mark();
-                if (context.transaction().load()) {
-                    context.tracer().onCacheGet(this, true);
-                    context.stream().release();
-                    context.tracer().onRuleBacktrace(this, true);
-                    return true;
-                } else {
-                    context.tracer().onCacheGet(this, false);
-                }
-                context.transaction().begin();
-                if (target.reduce(context)) {
-                    if (context.transaction().save() != null) {
-                        context.tracer().onCachePut(this);
-                    }
-                    context.transaction().commit();
-                    context.stream().release();
-                    context.tracer().onRuleBacktrace(this, true);
-                    return true;
-                }
-                context.transaction().rollback();
-                context.stream().reset();
-                context.tracer().onRuleBacktrace(this, false);
-                return false;
-            } else {
-                return super.reduce(context);
-            }
-        }
-        
-        @Override
-        public StringBuilder toString(StringBuilder buf, boolean debug) {
-            return buf.append(getModifier()).append(target.getName());
-        }
-        
-    }
-    
+
+  }
+
 }

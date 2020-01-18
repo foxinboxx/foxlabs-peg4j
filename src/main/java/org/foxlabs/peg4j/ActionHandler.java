@@ -23,13 +23,13 @@ import org.foxlabs.peg4j.grammar.GrammarParser;
  * An action handler that should be implemented by parser and will be invoked
  * each time when specific semantic action takes place in recognition process.
  * 
- * <p> Each semantic action should be uniquely defined by name within grammar
- * and correspondng action handler should be associated with it. </p>
+ * <p>Each semantic action should be uniquely defined by name within grammar
+ * and correspondng action handler should be associated with it.</p>
  * 
- * <p> Such bindings may be provided to constructor of the  {@link GrammarBuilder}
+ * <p>Such bindings may be provided to constructor of the {@link GrammarBuilder}
  * or {@link GrammarParser}. Also you can override {@link DefaultParser} that
  * creates those bindings automatically according to method signatures defined
- * on parser class. </p>
+ * on parser class.</p>
  * 
  * @author Fox Mulder
  * @see ActionContext
@@ -39,27 +39,27 @@ import org.foxlabs.peg4j.grammar.GrammarParser;
  * @see GrammarParser
  */
 public interface ActionHandler<P extends Parser<?>> {
-    
-    /**
-     * Handles specific semantic action and returns <code>true</code> if action
-     * was successfully handled; <code>false</code> otherwise.
-     * 
-     * @param parser Parser instance.
-     * @param context Action context.
-     * @return <code>true</code> if semantic action was successfully handled;
-     *         <code>false</code> otherwise.
-     * @throws Throwable if error occurred and further recoginition of
-     *         character stream is not possible.
-     */
-    boolean handle(P parser, ActionContext context) throws Throwable;
-    
-    /**
-     * Action handler that does nothing.
-     */
-    ActionHandler<?> NOP = new ActionHandler<Parser<?>>() {
-        public boolean handle(Parser<?> parser, ActionContext context) {
-            return true;
-        }
-    };
-    
+
+  /**
+   * Handles specific semantic action and returns <code>true</code> if action
+   * was successfully handled; <code>false</code> otherwise.
+   * 
+   * @param parser Parser instance.
+   * @param context Action context.
+   * @return <code>true</code> if semantic action was successfully handled;
+   *         <code>false</code> otherwise.
+   * @throws Throwable if error occurred and further recoginition of character
+   *         stream is not possible.
+   */
+  boolean handle(P parser, ActionContext context) throws Throwable;
+
+  /**
+   * Action handler that does nothing.
+   */
+  ActionHandler<?> NOP = new ActionHandler<Parser<?>>() {
+    @Override public boolean handle(Parser<?> parser, ActionContext context) {
+      return true;
+    }
+  };
+
 }

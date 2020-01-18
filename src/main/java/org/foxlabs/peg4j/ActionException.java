@@ -22,24 +22,25 @@ import org.foxlabs.peg4j.resource.ResourceManager;
 import org.foxlabs.util.Location;
 
 /**
- * Wrapper for exceptions thrown by semantic actions during recognition of
- * input character stream.
+ * Wrapper for exceptions thrown by semantic actions during recognition of input
+ * character stream.
  * 
  * @author Fox Mulder
  */
 public class ActionException extends RecognitionException {
-    private static final long serialVersionUID = -914099915000589698L;
-    
-    /**
-     * Constructs a new <code>ActionException</code> with the specified action,
-     * cause and location in input character stream.
-     * 
-     * @param action Semantic action.
-     * @param cause Exception thrown by semantic action.
-     * @param location Error location in input character stream.
-     */
-    public ActionException(Action action, Throwable cause, Location location) {
-        super(ResourceManager.formatRuntimeMessage("runtime.actionError", action.getName()), cause, location);
-    }
-    
+  private static final long serialVersionUID = -914099915000589698L;
+
+  /**
+   * Constructs a new <code>ActionException</code> with the specified action,
+   * cause and location in input character stream.
+   * 
+   * @param action Semantic action.
+   * @param cause Exception thrown by semantic action.
+   * @param location Error location in input character stream.
+   */
+  public ActionException(Action action, Throwable cause, Location location) {
+    super(ResourceManager.formatRuntimeMessage("runtime.actionError",
+        action.getName()), cause, location);
+  }
+
 }

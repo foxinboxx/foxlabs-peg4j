@@ -21,41 +21,41 @@ import java.io.IOException;
 import org.foxlabs.peg4j.RecognitionException;
 
 public final class Alternation extends Expression.Nary implements Operator {
-    
-    Alternation(Production owner, Expression[] children) {
-        super(owner, children);
-    }
-    
-    @Override
-    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-        context.tracer().onRuleTrace(this);
-        context.stream().mark();
-        for (int i = 0; i < children.length; i++) {
-            if (children[i].reduce(context)) {
-                context.stream().release();
-                context.tracer().onRuleBacktrace(this, true);
-                return true;
-            }
-            context.stream().reset();
-            context.stream().mark();
-        }
+
+  Alternation(Production owner, Expression[] children) {
+    super(owner, children);
+  }
+
+  @Override
+  public boolean reduce(ParseContext context) throws IOException, RecognitionException {
+    context.tracer().onRuleTrace(this);
+    context.stream().mark();
+    for (int i = 0; i < children.length; i++) {
+      if (children[i].reduce(context)) {
         context.stream().release();
-        context.tracer().onRuleBacktrace(this, false);
-        return false;
+        context.tracer().onRuleBacktrace(this, true);
+        return true;
+      }
+      context.stream().reset();
+      context.stream().mark();
     }
-    
-    @Override
-    public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
-        visitor.visit(this);
+    context.stream().release();
+    context.tracer().onRuleBacktrace(this, false);
+    return false;
+  }
+
+  @Override
+  public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
+    visitor.visit(this);
+  }
+
+  @Override
+  public StringBuilder toString(StringBuilder buf, boolean debug) {
+    toString(children[0], buf, children[0] instanceof Expression.Nary, debug);
+    for (int i = 1; i < children.length; i++) {
+      toString(children[i], buf.append(" / "), children[i] instanceof Expression.Nary, debug);
     }
-    
-    @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
-        toString(children[0], buf, children[0] instanceof Expression.Nary, debug);
-        for (int i = 1; i < children.length; i++) {
-            toString(children[i], buf.append(" / "), children[i] instanceof Expression.Nary, debug);
-        }
-        return buf;
-    }
-    
+    return buf;
+  }
+
 }

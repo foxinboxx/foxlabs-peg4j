@@ -24,28 +24,30 @@ import java.lang.annotation.RetentionPolicy;
 import org.foxlabs.util.resource.ResourceHelper;
 
 /**
- * This annotation allows to declare grammars for parsers either as source
- * code or as reference to a resource.
+ * This annotation allows to declare grammars for parsers either as source code
+ * or as reference to a resource.
  * 
  * <p>
  * Source code:
+ * 
  * <pre>
  * &#x0040;Peg4jGrammar(
- *     "Expr : Sum !. ;" +
- *     "Sum : Product (('+' / '-') Product)* ;" +
- *     "Product : Value (('*' / '/') Value)* ;" +
- *     "Value : '0'-'9'+ / '(' Expr ')' ;"
+ *   "Expr : Sum !. ;" +
+ *   "Sum : Product (('+' / '-') Product)* ;" +
+ *   "Product : Value (('*' / '/') Value)* ;" +
+ *   "Value : '0'-'9'+ / '(' Expr ')' ;"
  * )
  * public class MyParser extends DefaultParser&lt;Integer&gt; {
- *     ...
+ *   ...
  * }
  * </pre>
  * 
  * Reference to a classpath resource:
+ * 
  * <pre>
  * &#x0040;Peg4jGrammar(ref = "classpath:expr.peg4j")
  * public class MyParser extends DefaultParser&lt;Integer&gt; {
- *     ...
+ *   ...
  * }
  * </pre>
  * </p>
@@ -56,21 +58,22 @@ import org.foxlabs.util.resource.ResourceHelper;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Peg4jGrammar {
-    
-    /**
-     * Grammar source code.
-     */
-    String value() default "";
-    
-    /**
-     * Reference to grammar resource. You may use <code>classpath:path/to/grammar</code>
-     * if grammar resource is available at classpath.
-     */
-    String ref() default "";
-    
-    /**
-     * Grammar enconding. Default is UTF-8.
-     */
-    String encoding() default ResourceHelper.DEFAULT_ENCODING;
-    
+
+  /**
+   * Grammar source code.
+   */
+  String value() default "";
+
+  /**
+   * Reference to grammar resource. You may use
+   * <code>classpath:path/to/grammar</code> if grammar resource is available at
+   * classpath.
+   */
+  String ref() default "";
+
+  /**
+   * Grammar enconding. Default is UTF-8.
+   */
+  String encoding() default ResourceHelper.DEFAULT_ENCODING;
+
 }

@@ -17,28 +17,27 @@
 package org.foxlabs.peg4j.grammar;
 
 public enum Predicate {
-    
-    NOT("!"),
-    AND("&");
-    
-    private final String symbol;
-    
-    private Predicate(String symbol) {
-        this.symbol = symbol;
+
+  NOT("!"), AND("&");
+
+  private final String symbol;
+
+  private Predicate(String symbol) {
+    this.symbol = symbol;
+  }
+
+  public String toString() {
+    return symbol;
+  }
+
+  public static Predicate predicateOf(String symbol) {
+    if (NOT.symbol.equals(symbol)) {
+      return NOT;
+    } else if (AND.symbol.equals(symbol)) {
+      return AND;
+    } else {
+      return null;
     }
-    
-    public String toString() {
-        return symbol;
-    }
-    
-    public static Predicate predicateOf(String symbol) {
-        if (NOT.symbol.equals(symbol)) {
-            return NOT;
-        } else if (AND.symbol.equals(symbol)) {
-            return AND;
-        } else {
-            return null;
-        }
-    }
-    
+  }
+
 }

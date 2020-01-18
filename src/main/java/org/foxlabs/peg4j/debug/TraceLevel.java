@@ -22,17 +22,17 @@ import org.foxlabs.peg4j.grammar.Reference;
 import org.foxlabs.peg4j.grammar.Production;
 
 public enum TraceLevel {
-    
-    HIGH, MEDIUM, LOW;
-    
-    public static TraceLevel forRule(Rule rule) {
-        if (rule instanceof Production) {
-            return HIGH;
-        } else if (rule instanceof Reference || rule instanceof Action) {
-            return MEDIUM;
-        } else {
-            return LOW;
-        }
+
+  HIGH, MEDIUM, LOW;
+
+  public static TraceLevel forRule(Rule rule) {
+    if (rule instanceof Production) {
+      return HIGH;
+    } else if (rule instanceof Reference || rule instanceof Action) {
+      return MEDIUM;
+    } else {
+      return LOW;
     }
-    
+  }
+
 }

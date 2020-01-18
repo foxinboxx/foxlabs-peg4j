@@ -21,79 +21,79 @@ import java.io.IOException;
 import org.foxlabs.peg4j.RecognitionException;
 
 public abstract class Exclusion extends Expression.Unary implements Operator {
-    
-    private Exclusion(Production owner, Expression child) {
-        super(owner, child);
+
+  private Exclusion(Production owner, Expression child) {
+    super(owner, child);
+  }
+
+  public abstract Predicate getPredicate();
+
+  @Override
+  public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
+    visitor.visit(this);
+  }
+
+  @Override
+  public StringBuilder toString(StringBuilder buf, boolean debug) {
+    return toString(child, buf.append(getPredicate()), child instanceof Operator, debug);
+  }
+
+  // Not
+
+  public static final class Not extends Exclusion {
+
+    Not(Production owner, Expression child) {
+      super(owner, child);
     }
-    
-    public abstract Predicate getPredicate();
-    
+
     @Override
-    public <E extends Throwable> void accept(RuleVisitor<E> visitor) throws E {
-        visitor.visit(this);
+    public Predicate getPredicate() {
+      return Predicate.NOT;
     }
-    
+
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
-        return toString(child, buf.append(getPredicate()), child instanceof Operator, debug);
+    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
+      context.stream().mark();
+      context.tracer().onRuleTrace(this);
+      if (child.reduce(context)) {
+        context.tracer().onRuleBacktrace(this, false);
+        context.stream().reset();
+        return false;
+      }
+      context.tracer().onRuleBacktrace(this, true);
+      context.stream().reset();
+      return true;
     }
-    
-    // Not
-    
-    public static final class Not extends Exclusion {
-        
-        Not(Production owner, Expression child) {
-            super(owner, child);
-        }
-        
-        @Override
-        public Predicate getPredicate() {
-            return Predicate.NOT;
-        }
-        
-        @Override
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.stream().mark();
-            context.tracer().onRuleTrace(this);
-            if (child.reduce(context)) {
-                context.tracer().onRuleBacktrace(this, false);
-                context.stream().reset();
-                return false;
-            }
-            context.tracer().onRuleBacktrace(this, true);
-            context.stream().reset();
-            return true;
-        }
-        
+
+  }
+
+  // And
+
+  public static final class And extends Exclusion {
+
+    And(Production owner, Expression child) {
+      super(owner, child);
     }
-    
-    // And
-    
-    public static final class And extends Exclusion {
-        
-        And(Production owner, Expression child) {
-            super(owner, child);
-        }
-        
-        @Override
-        public Predicate getPredicate() {
-            return Predicate.AND;
-        }
-        
-        @Override
-        public boolean reduce(ParseContext context) throws IOException, RecognitionException {
-            context.stream().mark();
-            context.tracer().onRuleTrace(this);
-            if (child.reduce(context)) {
-                context.tracer().onRuleBacktrace(this, true);
-                context.stream().reset();
-                return true;
-            }
-            context.tracer().onRuleBacktrace(this, false);
-            context.stream().reset();
-            return false;
-        }
-        
+
+    @Override
+    public Predicate getPredicate() {
+      return Predicate.AND;
     }
-    
+
+    @Override
+    public boolean reduce(ParseContext context) throws IOException, RecognitionException {
+      context.stream().mark();
+      context.tracer().onRuleTrace(this);
+      if (child.reduce(context)) {
+        context.tracer().onRuleBacktrace(this, true);
+        context.stream().reset();
+        return true;
+      }
+      context.tracer().onRuleBacktrace(this, false);
+      context.stream().reset();
+      return false;
+    }
+
+  }
+
 }

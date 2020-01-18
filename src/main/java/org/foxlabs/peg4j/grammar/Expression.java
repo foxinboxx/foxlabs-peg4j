@@ -17,70 +17,71 @@
 package org.foxlabs.peg4j.grammar;
 
 public abstract class Expression extends Rule {
-    
-    Production owner;
-    Expression parent;
-    
-    Expression(Production owner) {
-        this.owner = owner;
+
+  Production owner;
+
+  Expression parent;
+
+  Expression(Production owner) {
+    this.owner = owner;
+  }
+
+  public final Grammar getGrammar() {
+    return owner.getGrammar();
+  }
+
+  public final Production getOwner() {
+    return owner;
+  }
+
+  public final Expression getParent() {
+    return parent;
+  }
+
+  // Unary
+
+  public abstract static class Unary extends Expression {
+
+    Expression child;
+
+    Unary(Production owner, Expression child) {
+      super(owner);
+      this.child = child;
+      child.parent = this;
     }
-    
-    public final Grammar getGrammar() {
-        return owner.getGrammar();
+
+    public final Expression getChild() {
+      return child;
     }
-    
-    public final Production getOwner() {
-        return owner;
+
+  }
+
+  // Nary
+
+  public abstract static class Nary extends Expression {
+
+    Expression[] children;
+
+    Nary(Production owner, Expression[] children) {
+      super(owner);
+      this.children = children;
+      for (int i = 0; i < children.length; i++) {
+        children[i].parent = this;
+      }
     }
-    
-    public final Expression getParent() {
-        return parent;
+
+    public final int length() {
+      return children.length;
     }
-    
-    // Unary
-    
-    public abstract static class Unary extends Expression {
-        
-        Expression child;
-        
-        Unary(Production owner, Expression child) {
-            super(owner);
-            this.child = child;
-            child.parent = this;
-        }
-        
-        public final Expression getChild() {
-            return child;
-        }
-        
+
+    public final Expression getChild(int index) {
+      return children[index];
     }
-    
-    // Nary
-    
-    public abstract static class Nary extends Expression {
-        
-        Expression[] children;
-        
-        Nary(Production owner, Expression[] children) {
-            super(owner);
-            this.children = children;
-            for (int i = 0; i < children.length; i++) {
-                children[i].parent = this;
-            }
-        }
-        
-        public final int length() {
-            return children.length;
-        }
-        
-        public final Expression getChild(int index) {
-            return children[index];
-        }
-        
-        public final Expression[] getChildren() {
-            return children.clone();
-        }
-        
+
+    public final Expression[] getChildren() {
+      return children.clone();
     }
-    
+
+  }
+
 }

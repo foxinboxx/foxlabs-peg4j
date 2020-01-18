@@ -17,31 +17,31 @@
 package org.foxlabs.peg4j.grammar;
 
 public enum Quantifier {
-    
-    ONCEORNONE("?"),
-    ZEROORMORE("*"),
-    ONCEORMORE("+");
-    
-    private final String symbol;
-    
-    private Quantifier(String symbol) {
-        this.symbol = symbol;
+
+  ONCEORNONE("?"),
+  ZEROORMORE("*"),
+  ONCEORMORE("+");
+
+  private final String symbol;
+
+  private Quantifier(String symbol) {
+    this.symbol = symbol;
+  }
+
+  public String toString() {
+    return symbol;
+  }
+
+  public static Quantifier quantifierOf(String symbol) {
+    if (ONCEORNONE.symbol.equals(symbol)) {
+      return ONCEORNONE;
+    } else if (ZEROORMORE.symbol.equals(symbol)) {
+      return ZEROORMORE;
+    } else if (ONCEORMORE.symbol.equals(symbol)) {
+      return ONCEORMORE;
+    } else {
+      return null;
     }
-    
-    public String toString() {
-        return symbol;
-    }
-    
-    public static Quantifier quantifierOf(String symbol) {
-        if (ONCEORNONE.symbol.equals(symbol)) {
-            return ONCEORNONE;
-        } else if (ZEROORMORE.symbol.equals(symbol)) {
-            return ZEROORMORE;
-        } else if (ONCEORMORE.symbol.equals(symbol)) {
-            return ONCEORMORE;
-        } else {
-            return null;
-        }
-    }
-    
+  }
+
 }
