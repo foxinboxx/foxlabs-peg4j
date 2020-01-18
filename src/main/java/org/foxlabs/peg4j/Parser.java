@@ -40,7 +40,7 @@ import org.foxlabs.util.Location;
  * 
  * <p> This class provides basic interface and methods required for parsing of
  * character stream. Subclasses should override {@link Parser#getGrammar()},
- * {@link Parser#getTransaction() and {@link Parser#buildResult()} methods.
+ * {@link Parser#getTransaction()} and {@link Parser#buildResult()} methods.
  * Memoization feature is supported and can be enabled or disabled using the
  * {@link Parser#setMemoable(boolean)} method. Also if there is a need to keep
  * track of parsing process then necessary rule tracer can be attached using

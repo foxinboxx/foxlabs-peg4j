@@ -160,6 +160,7 @@ public class BacktrackingStack<E> {
      * 
      * @param elements Array of elements to push.
      */
+    @SuppressWarnings("unchecked")
     public void pushAll(E... elements) {
         ensureCapacity(elements.length);
         System.arraycopy(elements, 0, this.elements, size, elements.length);

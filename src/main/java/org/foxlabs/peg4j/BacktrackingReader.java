@@ -154,7 +154,7 @@ public class BacktrackingReader extends Reader {
      * 
      * @param in Underlying character stream.
      * @param line Start line.
-     * @param line Start column.
+     * @param column Start column.
      */
     public BacktrackingReader(Reader in, int line, int column) {
         this(in, null, line, column);
@@ -167,7 +167,7 @@ public class BacktrackingReader extends Reader {
      * @param in Underlying character stream.
      * @param file Name of the file associated with this character stream.
      * @param line Start line.
-     * @param line Start column.
+     * @param column Start column.
      */
     public BacktrackingReader(Reader in, String file, int line, int column) {
         this.in = in;

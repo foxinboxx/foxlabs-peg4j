@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.Assert;
 
 import org.foxlabs.util.counter.Counters;
+import org.foxlabs.util.counter.LatencyCounter;
 import org.foxlabs.util.counter.HitLatencyCounter;
 
 /**
@@ -36,75 +37,79 @@ import org.foxlabs.util.counter.HitLatencyCounter;
  */
 @Peg4jGrammar(ref = "classpath:java18.peg4j")
 public class JavaParserPerformanceTest extends DefaultParser<Object> {
-    
-    /**
-     * Returns {@link Transaction#STATELESS}.
-     * 
-     * @return {@link Transaction#STATELESS}.
-     */
-    @Override
-    protected Transaction getTransaction() {
-        return Transaction.STATELESS;
-    }
-    
-    /**
-     * Returns <code>null</code>.
-     * 
-     * @return <code>null</code>.
-     */
-    @Override
-    protected Object buildResult() {
-        return null;
-    }
-    
-    /**
-     * Parses JDK sources and prints statistics.
-     */
-    @Test
-    public void testJavaParser() throws IOException {
-        // JDK sources are not loaded yet
-        // Check that src.zip file exists
-        Assert.assertTrue("Environment variable JAVA_HOME should be set.", JAVA_HOME_DIR.isDirectory());
-        Assert.assertTrue("JDK is not installed or sources are not included.", JAVA_SRC_FILE.isFile());
-        
-        // Read all zip entries and parse Java sources
-        final ZipFile zipFile = new ZipFile(JAVA_SRC_FILE);
-        final StringBuilder failures = new StringBuilder();
-        final HitLatencyCounter counter = Counters.defaultHitLatencyCounter();
-        try {
-            final Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                final ZipEntry entry = entries.nextElement();
-                if (!entry.isDirectory() && entry.getName().endsWith(".java")) {
-                    System.out.print(entry.getName());
-                    counter.start();
-                    final long start = System.currentTimeMillis();
-                    try {
-                        parse(zipFile.getInputStream(entry));
-                        counter.stop(true);
-                        System.out.print("\tSUCCESS");
-                    } catch (RecognitionException e) {
-                        counter.stop(false);
-                        System.out.print("\tFAILURE");
-                        failures.append(entry.getName()).append(": ").append(e.getMessage()).append("\n");
-                    }
-                    System.out.println("\t" + Counters.formatLatency(System.currentTimeMillis() - start) + "s");
-                }
-            }
-        } finally {
-            zipFile.close();
+
+  /**
+   * Returns {@link Transaction#STATELESS}.
+   * 
+   * @return {@link Transaction#STATELESS}.
+   */
+  @Override
+  protected Transaction getTransaction() {
+    return Transaction.STATELESS;
+  }
+
+  /**
+   * Returns <code>null</code>.
+   * 
+   * @return <code>null</code>.
+   */
+  @Override
+  protected Object buildResult() {
+    return null;
+  }
+
+  /**
+   * Parses JDK sources and prints statistics.
+   */
+  @Test
+  public void testJavaParser() throws IOException {
+    // JDK sources are not loaded yet
+    // Check that src.zip file exists
+    Assert.assertTrue("Environment variable JAVA_HOME should be set.", JAVA_HOME_DIR.isDirectory());
+    Assert.assertTrue("JDK is not installed or sources are not included.", JAVA_SRC_FILE.isFile());
+
+    // Read all zip entries and parse Java sources
+    final StringBuilder failures = new StringBuilder();
+    final HitLatencyCounter totalCounter = Counters.defaultHitLatencyCounter();
+    final LatencyCounter counter = Counters.defaultLatencyCounter();
+    try (final ZipFile zipFile = new ZipFile(JAVA_SRC_FILE)) {
+      final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+      while (entries.hasMoreElements()) {
+        final ZipEntry entry = entries.nextElement();
+        if (!entry.isDirectory() && entry.getName().endsWith(".java")) {
+          System.out.print(entry.getName());
+          RecognitionException failure = null;
+          counter.reset();
+          totalCounter.start();
+          counter.start();
+          try {
+            parse(zipFile.getInputStream(entry));
+          } catch (RecognitionException e) {
+            failure = e;
+          } finally {
+            counter.stop();
+            totalCounter.stop(true);
+          }
+          System.out.println(": " + (failure == null ? "SUCCESS" : "FAILURE") +
+              " " + Counters.formatLatency(counter.getTotalLatency()) + "s");
+          if (failure != null) {
+            failures.append(entry.getName()).append(": ").append(failure.getMessage()).append("\n");
+          }
         }
-        
-        // Print total results
-        System.out.println("\nPARSE RESULTS: " + counter);
-        if (failures.length() > 0) {
-            System.out.println("\nFAILURES:\n" + failures);
-        }
+      }
     }
-    
-    // JAVA_HOME directory
-    private static final File JAVA_HOME_DIR = new File(System.getenv("JAVA_HOME"));
-    // JAVA_HOME/src.zip file
-    private static final File JAVA_SRC_FILE = new File(JAVA_HOME_DIR, "src.zip");
-    
+
+    // Print total results
+    System.out.println("\nPARSE RESULTS: " + totalCounter);
+    if (failures.length() > 0) {
+      System.out.println("\nFAILURES:\n" + failures);
+    }
+  }
+
+  // JAVA_HOME directory
+  private static final File JAVA_HOME_DIR = new File(System.getenv("JAVA_HOME"));
+
+  // JAVA_HOME/src.zip file
+  private static final File JAVA_SRC_FILE = new File(JAVA_HOME_DIR, "src.zip");
+
 }
