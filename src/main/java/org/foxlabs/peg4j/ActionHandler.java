@@ -38,6 +38,7 @@ import org.foxlabs.peg4j.grammar.GrammarParser;
  * @see GrammarBuilder
  * @see GrammarParser
  */
+@FunctionalInterface
 public interface ActionHandler<P extends Parser<?>> {
 
   /**

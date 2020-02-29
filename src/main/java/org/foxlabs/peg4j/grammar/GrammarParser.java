@@ -363,11 +363,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .pushReference("Spacing")
       .pushReference("Garbage")
-      .action("startError", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorStart(context);
-        }
-      })
+      .action("startError",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorStart(context))
       .mark()
       .pushReference("Production", Modifier.MEMO)
       .except(Predicate.NOT)
@@ -375,11 +372,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .concat().release()
       .repeat(Quantifier.ZEROORMORE)
       .mark()
-      .action("endError", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleEndError(context);
-        }
-      })
+      .action("endError",
+          (GrammarParser parser, ActionContext context) -> parser.handleEndError(context))
       .release()
       .concat().release()
       .choice().release()
@@ -387,17 +381,11 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushReference("Spacing")
       .pushAny()
       .except(Predicate.NOT)
-      .action("eof", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleEof(context);
-        }
-      })
+      .action("eof",
+          (GrammarParser parser, ActionContext context) -> parser.handleEof(context))
       .concat().release()
-      .action("source", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSource(context);
-        }
-      })
+      .action("source",
+          (GrammarParser parser, ActionContext context) -> parser.handleSource(context))
       .endProduction()
       // Garbage
       .startProduction("Garbage")
@@ -423,11 +411,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushTokenCS("::=")
       .choice().release()
       .concat().release()
-      .action("startProduction", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleProductionStart(context);
-        }
-      })
+      .action("startProduction",
+          (GrammarParser parser, ActionContext context) -> parser.handleProductionStart(context))
       .pushReference("Spacing")
       .mark()
       .mark()
@@ -446,11 +431,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushSet(UnicodeSet.fromIntervals(new int[]{'\u0000', ':', '<', '\uffff'}))
       .concat().release()
       .repeat(Quantifier.ONCEORMORE)
-      .action("invalidExpression", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleInvalidExpression(context);
-        }
-      })
+      .action("invalidExpression",
+          (GrammarParser parser, ActionContext context) -> parser.handleInvalidExpression(context))
       .pushReference("Expression", Modifier.MEMO)
       .pushReference("Comment", Modifier.MEMO)
       .pushReference("Space", Modifier.MEMO)
@@ -459,20 +441,14 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .pushTokenCS(";")
       .mark()
-      .action("missingSemi", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleMissingSemi(context);
-        }
-      })
+      .action("missingSemi",
+          (GrammarParser parser, ActionContext context) -> parser.handleMissingSemi(context))
       .release()
       .choice().release()
       .concat().release()
       .choice().release()
-      .action("endProduction", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleProductionEnd(context);
-        }
-      })
+      .action("endProduction",
+          (GrammarParser parser, ActionContext context) -> parser.handleProductionEnd(context))
       .concat().release()
       .endProduction()
       // Expression
@@ -490,21 +466,15 @@ public final class GrammarParser extends Parser<Grammar> {
       .concat().release()
       .repeat(Quantifier.ZEROORMORE)
       .concat().release()
-      .action("ruleChoice", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleRuleChoice(context);
-        }
-      })
+      .action("ruleChoice",
+          (GrammarParser parser, ActionContext context) -> parser.handleRuleChoice(context))
       .endProduction()
       // ConcatenationExpression
       .startProduction("ConcatenationExpression")
       .pushReference("RepetitionExpression")
       .repeat(Quantifier.ONCEORMORE)
-      .action("ruleConcat", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleRuleConcat(context);
-        }
-      })
+      .action("ruleConcat",
+          (GrammarParser parser, ActionContext context) -> parser.handleRuleConcat(context))
       .endProduction()
       // RepetitionExpression
       .startProduction("RepetitionExpression")
@@ -513,11 +483,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .mark()
       .pushSet(UnicodeSet.fromIntervals(new int[]{'*', '+', '?', '?'}))
-      .action("symbol", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSymbol(context);
-        }
-      })
+      .action("symbol",
+          (GrammarParser parser, ActionContext context) -> parser.handleSymbol(context))
       .mark()
       .pushTokenCS('{')
       .pushReference("Spacing")
@@ -528,11 +495,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .pushReference("Integer")
       .mark()
-      .action("unlimited", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleUnlimited();
-        }
-      })
+      .action("unlimited",
+          (GrammarParser parser, ActionContext context) -> parser.handleUnlimited())
       .release()
       .choice().release()
       .concat().release()
@@ -544,11 +508,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .concat().release()
       .repeat(Quantifier.ONCEORNONE)
       .concat().release()
-      .action("ruleRepeat", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleRuleRepeat(context);
-        }
-      })
+      .action("ruleRepeat",
+          (GrammarParser parser, ActionContext context) -> parser.handleRuleRepeat(context))
       .endProduction()
       // ExclusionExpression
       .startProduction("ExclusionExpression")
@@ -558,21 +519,15 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushTokenCS(Predicate.NOT.toString())
       .pushTokenCS(Predicate.AND.toString())
       .choice().release()
-      .action("symbol", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSymbol(context);
-        }
-      })
+      .action("symbol",
+          (GrammarParser parser, ActionContext context) -> parser.handleSymbol(context))
       .pushReference("Spacing")
       .concat().release()
       .repeat(Quantifier.ONCEORNONE)
       .pushReference("OperandExpression")
       .concat().release()
-      .action("ruleExcept", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleRuleExcept(context);
-        }
-      })
+      .action("ruleExcept",
+          (GrammarParser parser, ActionContext context) -> parser.handleRuleExcept(context))
       .endProduction()
       // OperandExpression
       .startProduction("OperandExpression")
@@ -589,19 +544,13 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .pushTokenCS(Modifier.MEMO.toString())
       .choice().release()
-      .action("symbol", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSymbol(context);
-        }
-      })
+      .action("symbol",
+          (GrammarParser parser, ActionContext context) -> parser.handleSymbol(context))
       .repeat(Quantifier.ONCEORNONE)
       .pushReference("Identifier")
       .concat().release()
-      .action("ruleReference", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleRuleReference(context);
-        }
-      })
+      .action("ruleReference",
+          (GrammarParser parser, ActionContext context) -> parser.handleRuleReference(context))
       .endProduction()
       // GroupingExpression
       .startProduction("GroupingExpression")
@@ -612,11 +561,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .pushTokenCS(")")
       .mark()
-      .action("missingClosingParenthesize", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorMissingClosingParenthesize(context);
-        }
-      })
+      .action("missingClosingParenthesize",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorMissingClosingParenthesize(context))
       .release()
       .choice().release()
       .concat().release()
@@ -633,11 +579,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .repeat(Quantifier.ONCEORNONE)
       .pushTokenCS(")")
       .concat().release()
-      .action("ruleAction", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleRuleAction(context);
-        }
-      })
+      .action("ruleAction",
+          (GrammarParser parser, ActionContext context) -> parser.handleRuleAction(context))
       .pushReference("Spacing")
       .endProduction()
       // TerminalExpression
@@ -653,11 +596,8 @@ public final class GrammarParser extends Parser<Grammar> {
       // IntervalExpression
       .startProduction("IntervalExpression")
       .pushReference("IntervalElement")
-      .action("terminalInterval", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleTerminalInterval(context);
-        }
-      })
+      .action("terminalInterval",
+          (GrammarParser parser, ActionContext context) -> parser.handleTerminalInterval(context))
       .endProduction()
       // TokenExpression
       .startProduction("TokenExpression")
@@ -667,11 +607,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushTokenCS("\'")
       .pushReference("Character")
       .repeat(Quantifier.ONCEORMORE)
-      .action("decode", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleDecode(context);
-        }
-      })
+      .action("decode",
+          (GrammarParser parser, ActionContext context) -> parser.handleDecode(context))
       .mark()
       .pushTokenCS("\'")
       .mark()
@@ -681,20 +618,14 @@ public final class GrammarParser extends Parser<Grammar> {
       .except(Predicate.NOT)
       .choice().release()
       .mark()
-      .action("unterminatedString", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorUnterminatedString(context);
-        }
-      })
+      .action("unterminatedString",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorUnterminatedString(context))
       .release()
       .concat().release()
       .choice().release()
       .concat().release()
-      .action("terminalTokenCS", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleTerminalTokenCS(context);
-        }
-      })
+      .action("terminalTokenCS",
+          (GrammarParser parser, ActionContext context) -> parser.handleTerminalTokenCS(context))
       .pushReference("Spacing")
       .concat().release()
       .mark()
@@ -702,11 +633,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushTokenCS("\"")
       .pushReference("Character")
       .repeat(Quantifier.ONCEORMORE)
-      .action("decode", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleDecode(context);
-        }
-      })
+      .action("decode",
+          (GrammarParser parser, ActionContext context) -> parser.handleDecode(context))
       .mark()
       .pushTokenCS("\"")
       .mark()
@@ -716,20 +644,14 @@ public final class GrammarParser extends Parser<Grammar> {
       .except(Predicate.NOT)
       .choice().release()
       .mark()
-      .action("unterminatedString", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorUnterminatedString(context);
-        }
-      })
+      .action("unterminatedString",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorUnterminatedString(context))
       .release()
       .concat().release()
       .choice().release()
       .concat().release()
-      .action("terminalTokenIC", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleTerminalTokenIC(context);
-        }
-      })
+      .action("terminalTokenIC",
+          (GrammarParser parser, ActionContext context) -> parser.handleTerminalTokenIC(context))
       .pushReference("Spacing")
       .concat().release()
       .choice().release()
@@ -737,11 +659,8 @@ public final class GrammarParser extends Parser<Grammar> {
       // SetExpression
       .startProduction("SetExpression")
       .pushReference("SetElement")
-      .action("terminalSet", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleTerminalSet(context);
-        }
-      })
+      .action("terminalSet",
+          (GrammarParser parser, ActionContext context) -> parser.handleTerminalSet(context))
       .endProduction()
       // ClassExpression
       .startProduction("ClassExpression")
@@ -751,50 +670,32 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushReference("Identifier")
       .pushTokenCS(">")
       .concat().release()
-      .action("terminalClass", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleTerminalClass(context);
-        }
-      })
+      .action("terminalClass",
+          (GrammarParser parser, ActionContext context) -> parser.handleTerminalClass(context))
       .pushReference("Spacing")
       .endProduction()
       // AnyExpression
       .startProduction("AnyExpression")
       .pushTokenCS(".")
-      .action("terminalAny", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleTerminalAny(context);
-        }
-      })
+      .action("terminalAny",
+          (GrammarParser parser, ActionContext context) -> parser.handleTerminalAny(context))
       .pushReference("Spacing")
       .endProduction()
       // SetElement
       .startProduction("SetElement")
       .mark()
       .pushReference("InverseSetElement")
-      .action("setInverse", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSetInverse();
-        }
-      })
+      .action("setInverse",
+          (GrammarParser parser, ActionContext context) -> parser.handleSetInverse())
       .pushReference("IntervalElement")
-      .action("setInterval", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSetInterval();
-        }
-      })
+      .action("setInterval",
+          (GrammarParser parser, ActionContext context) -> parser.handleSetInterval())
       .pushReference("CharacterElement")
-      .action("setElement", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSetElement();
-        }
-      })
+      .action("setElement",
+          (GrammarParser parser, ActionContext context) -> parser.handleSetElement())
       .pushReference("NestedSetElement")
-      .action("setUnion", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSetUnion();
-        }
-      })
+      .action("setUnion",
+          (GrammarParser parser, ActionContext context) -> parser.handleSetUnion())
       .choice().release()
       .endProduction()
       // InverseSetElement
@@ -817,11 +718,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .pushTokenCS("\'")
       .pushReference("Character")
-      .action("decode", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleDecode(context);
-        }
-      })
+      .action("decode",
+          (GrammarParser parser, ActionContext context) -> parser.handleDecode(context))
       .pushTokenCS("\'")
       .concat().release()
       .pushReference("Spacing")
@@ -847,11 +745,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .startProduction("Integer")
       .pushInterval('0', '9')
       .repeat(Quantifier.ONCEORMORE)
-      .action("int", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleInt(context);
-        }
-      })
+      .action("int",
+          (GrammarParser parser, ActionContext context) -> parser.handleInt(context))
       .pushReference("Spacing")
       .endProduction()
       // String
@@ -870,11 +765,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .except(Predicate.NOT)
       .choice().release()
       .mark()
-      .action("unterminatedString", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorUnterminatedString(context);
-        }
-      })
+      .action("unterminatedString",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorUnterminatedString(context))
       .release()
       .concat().release()
       .choice().release()
@@ -892,11 +784,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .except(Predicate.NOT)
       .choice().release()
       .mark()
-      .action("unterminatedString", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorUnterminatedString(context);
-        }
-      })
+      .action("unterminatedString",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorUnterminatedString(context))
       .release()
       .concat().release()
       .choice().release()
@@ -919,11 +808,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushReference("UnicodeCharacter")
       .choice().release()
       .mark()
-      .action("invalidEscapeSequence", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorInvalidEscapeSequence(context);
-        }
-      })
+      .action("invalidEscapeSequence",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorInvalidEscapeSequence(context))
       .release()
       .choice().release()
       .endProduction()
@@ -935,11 +821,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .pushReference("HexDigit")
       .repeat(4).release()
       .mark()
-      .action("invalidUnicodeCharacter", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorInvalidUnicodeCharacter(context);
-        }
-      })
+      .action("invalidUnicodeCharacter",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorInvalidUnicodeCharacter(context))
       .release()
       .choice().release()
       .endProduction()
@@ -960,11 +843,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .choice().release()
       .repeat(Quantifier.ZEROORMORE)
       .concat().release()
-      .action("symbol", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleSymbol(context);
-        }
-      })
+      .action("symbol",
+          (GrammarParser parser, ActionContext context) -> parser.handleSymbol(context))
       .pushReference("Spacing")
       .endProduction()
       // Comment
@@ -993,11 +873,8 @@ public final class GrammarParser extends Parser<Grammar> {
       .mark()
       .pushTokenCS("*/")
       .mark()
-      .action("unterminatedBlockComment", new ActionHandler<GrammarParser>() {
-        @Override public boolean handle(GrammarParser parser, ActionContext context) {
-          return parser.handleErrorUnterminatedBlockComment(context);
-        }
-      })
+      .action("unterminatedBlockComment",
+          (GrammarParser parser, ActionContext context) -> parser.handleErrorUnterminatedBlockComment(context))
       .release()
       .choice().release()
       .concat().release()
