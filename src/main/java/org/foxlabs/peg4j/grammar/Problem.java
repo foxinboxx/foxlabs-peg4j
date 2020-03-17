@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright (C) 2014 FoxLabs
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,11 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.Serializable;
 
-import org.foxlabs.peg4j.resource.ResourceManager;
-
+import org.foxlabs.common.function.ToString;
+import org.foxlabs.common.text.CharBuffer;
 import org.foxlabs.util.Location;
-import org.foxlabs.util.ToString;
+
+import org.foxlabs.peg4j.resource.ResourceManager;
 
 /**
  * Defines a problem in a grammar. There are four types of problems defined
@@ -29,7 +30,7 @@ import org.foxlabs.util.ToString;
  * <code>HINT</code>). Also each problem has associated code, location in
  * character stream and rule if rule is the cause of the problem. All possible
  * problem codes are listed in the {@link Problem.Code} enumeration.
- * 
+ *
  * @author Fox Mulder
  * @see GrammarProblems
  * @see GrammarCompiler
@@ -70,7 +71,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Constructs a new problem with the specified code and source location.
-   * 
+   *
    * @param code Code of this problem.
    * @param start Start location of this problem in character stream.
    * @param end End location of this problem in character stream.
@@ -82,7 +83,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
   /**
    * Constructs a new problem with the specified code, source location and
    * attributes.
-   * 
+   *
    * @param code Code of this problem.
    * @param start Start location of this problem in character stream.
    * @param end End location of this problem in character stream.
@@ -95,7 +96,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Constructs a new problem with the specified code and rule.
-   * 
+   *
    * @param code Code of this problem.
    * @param rule Rule that is the cause of this problem.
    */
@@ -105,7 +106,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Constructs a new problem with the specified code, rule and attributes.
-   * 
+   *
    * @param code Code of this problem.
    * @param rule Rule that is the cause of this problem.
    * @param attributes Attributes that will be substituted in this problem
@@ -118,7 +119,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
   /**
    * Constructs a new problem with the specified code, source location, rule and
    * attributes.
-   * 
+   *
    * @param code Code of this problem.
    * @param start Start location of this problem in character stream.
    * @param end End location of this problem in character stream.
@@ -138,7 +139,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Returns type of this problem.
-   * 
+   *
    * @return Type of this problem.
    */
   public Type getType() {
@@ -147,7 +148,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Returns code of this problem.
-   * 
+   *
    * @return Code of this problem.
    */
   public Code getCode() {
@@ -156,7 +157,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Returns start location of this problem in character stream.
-   * 
+   *
    * @return Start location of this problem in character stream.
    */
   public Location getStart() {
@@ -165,7 +166,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Returns end location of this problem in character stream.
-   * 
+   *
    * @return End location of this problem in character stream.
    */
   public Location getEnd() {
@@ -174,7 +175,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Returns rule that is the cause of this problem.
-   * 
+   *
    * @return Rule that is the cause of this problem or <code>null</code> if this
    *         problem is not related to any grammar rule.
    */
@@ -184,7 +185,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Returns source of this problem if available.
-   * 
+   *
    * @return Source of this problem or <code>null</code> if source is not
    *         available.
    */
@@ -198,7 +199,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Returns description message of this problem.
-   * 
+   *
    * @return Description message of this problem.
    */
   public String getMessage() {
@@ -207,7 +208,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Compares this problem with another one for order.
-   * 
+   *
    * @return A negative integer, zero, or a positive integer as this problem has
    *         less order, equal order, or greater order than the specified
    *         problem.
@@ -220,20 +221,20 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Appends string representation of this problem to the specified buffer.
-   * 
+   *
    * @param buf Buffer to append.
    */
   @Override
-  public StringBuilder toString(StringBuilder buf) {
+  public CharBuffer toString(CharBuffer buf) {
     getStart().toString(buf);
-    return buf.append("\n").append(getType()).append(": ").append(getMessage()).append("\n");
+    return buf.append("\n").appendEnum(getType()).append(": ").append(getMessage()).append("\n");
   }
 
   // Type
 
   /**
    * Enumeration of possible problem types.
-   * 
+   *
    * @author Fox Mulder
    */
   public enum Type {
@@ -246,7 +247,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
   /**
    * Enumeration of possible problem codes.
-   * 
+   *
    * @author Fox Mulder
    */
   public enum Code {
@@ -368,7 +369,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
     /**
      * Constructs a new problem code with the specified type and message key.
-     * 
+     *
      * @param type Type of the problem.
      * @param key Key of the problem description in resource bundle.
      */
@@ -379,7 +380,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
     /**
      * Returns type of the problem.
-     * 
+     *
      * @return Type of the problem.
      */
     public Type getType() {
@@ -388,7 +389,7 @@ public final class Problem extends ToString.Adapter implements Serializable, Com
 
     /**
      * Returns description message of this problem code.
-     * 
+     *
      * @param arguments Attributes that will be substituted in this problem
      *        description message.
      * @return Description message of this problem code.

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.foxlabs</groupId>
     <artifactId>foxlabs-peg4j</artifactId>
-    <version>0.9.6</version>
+    <version>0.9.7</version>
     <packaging>jar</packaging>
     <name>Peg4j</name>
     <description>Parsing Expression Grammars for Java.</description>

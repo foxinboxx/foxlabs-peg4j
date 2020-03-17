@@ -22,6 +22,7 @@ import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 
+import org.foxlabs.common.Strings;
 import org.foxlabs.peg4j.BacktrackingReader;
 import org.foxlabs.peg4j.grammar.Reference;
 import org.foxlabs.peg4j.grammar.Rule;
@@ -30,7 +31,6 @@ import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Production;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.Strings;
 
 public class DebugTracer extends StatisticsTracer {
 

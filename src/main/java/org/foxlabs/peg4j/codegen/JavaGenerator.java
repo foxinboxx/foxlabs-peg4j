@@ -30,13 +30,13 @@ import java.util.StringTokenizer;
 
 import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.Transaction;
+import org.foxlabs.common.Strings;
 import org.foxlabs.peg4j.ActionContext;
 import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.Strings;
 import org.foxlabs.util.UnicodeSet;
 
 public final class JavaGenerator extends BaseGenerator {

@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright (C) 2014 FoxLabs
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,12 +18,14 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
+import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.util.reflect.Types;
+
 import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.ActionHandler;
 import org.foxlabs.peg4j.ActionException;
 import org.foxlabs.peg4j.RecognitionException;
 
-import org.foxlabs.util.reflect.Types;
 
 public final class Action extends Expression.Unary {
 
@@ -102,7 +104,7 @@ public final class Action extends Expression.Unary {
   }
 
   @Override
-  public StringBuilder toString(StringBuilder buf, boolean debug) {
+  public CharBuffer toString(CharBuffer buf, boolean debug) {
     if (debug || !injected) {
       buf.append('$').append(name);
       return toString(child, buf, true, debug);

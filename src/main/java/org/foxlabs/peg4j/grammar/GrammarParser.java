@@ -20,12 +20,12 @@ import java.util.Map;
 
 import org.foxlabs.peg4j.Parser;
 import org.foxlabs.peg4j.ActionHandler;
+import org.foxlabs.common.Strings;
 import org.foxlabs.peg4j.ActionContext;
 import org.foxlabs.peg4j.Transaction;
 import org.foxlabs.peg4j.util.BacktrackingStack;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.Strings;
 import org.foxlabs.util.UnicodeSet;
 
 import static org.foxlabs.peg4j.grammar.Problem.Code.*;

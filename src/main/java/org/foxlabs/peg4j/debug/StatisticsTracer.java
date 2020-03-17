@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright (C) 2015 FoxLabs
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,10 @@ import java.io.Writer;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 
+import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.util.counter.HitCounter;
+import org.foxlabs.util.counter.HitLatencyCounter;
+
 import org.foxlabs.peg4j.BacktrackingReader;
 import org.foxlabs.peg4j.grammar.Rule;
 import org.foxlabs.peg4j.grammar.Action;
@@ -32,13 +36,10 @@ import org.foxlabs.peg4j.grammar.Terminal;
 import org.foxlabs.peg4j.grammar.Production;
 import org.foxlabs.peg4j.grammar.Reference;
 
-import org.foxlabs.util.counter.HitCounter;
-import org.foxlabs.util.counter.HitLatencyCounter;
-
 import static org.foxlabs.util.counter.Counters.*;
 
 /**
- * 
+ *
  * @author Fox Mulder
  */
 public class StatisticsTracer implements RuleTracer {
@@ -179,10 +180,10 @@ public class StatisticsTracer implements RuleTracer {
   }
 
   public void print(Writer out) throws IOException {
-    StringBuilder terminalStatisticsBuf = new StringBuilder();
-    StringBuilder productionStatisticsBuf = new StringBuilder();
-    StringBuilder actionStatisticsBuf = new StringBuilder();
-    StringBuilder memoStatisticsBuf = new StringBuilder();
+    CharBuffer terminalStatisticsBuf = new CharBuffer();
+    CharBuffer productionStatisticsBuf = new CharBuffer();
+    CharBuffer actionStatisticsBuf = new CharBuffer();
+    CharBuffer memoStatisticsBuf = new CharBuffer();
 
     for (Map.Entry<String, HitLatencyCounter> entry : terminalStatisticsTable.entrySet()) {
       terminalStatisticsBuf.append(entry.getKey()).append(" : ");

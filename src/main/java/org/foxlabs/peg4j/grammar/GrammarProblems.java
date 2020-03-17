@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright (C) 2014 FoxLabs
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.foxlabs.common.function.ToString;
+import org.foxlabs.common.text.CharBuffer;
 import org.foxlabs.util.Location;
 
-public class GrammarProblems extends RuntimeException {
+public class GrammarProblems extends RuntimeException implements ToString {
 
   private static final long serialVersionUID = -2577809311036208714L;
 
@@ -157,12 +159,11 @@ public class GrammarProblems extends RuntimeException {
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder();
-    toString(buf);
-    return buf.toString();
+    return toString(new CharBuffer()).toString();
   }
 
-  public void toString(StringBuilder buf) {
+  @Override
+  public CharBuffer toString(CharBuffer buf) {
     if (problems.size() > 0) {
       for (Problem problem : problems) {
         problem.toString(buf);
@@ -174,9 +175,10 @@ public class GrammarProblems extends RuntimeException {
       toCountString(buf, Problem.Type.WARNING, warnings.size());
       toCountString(buf, Problem.Type.HINT, hints.size());
     }
+    return buf;
   }
 
-  private static void toCountString(StringBuilder buf, Problem.Type type, int count) {
+  private static void toCountString(CharBuffer buf, Problem.Type type, int count) {
     if (count > 0) {
       buf.append(count).append(" ").append(type.name().toLowerCase());
       if (count > 1) {

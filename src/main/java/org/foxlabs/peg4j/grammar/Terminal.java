@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright (C) 2014 FoxLabs
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,16 +18,17 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
-import org.foxlabs.peg4j.BacktrackingReader;
-
-import org.foxlabs.util.Strings;
+import org.foxlabs.common.function.CharEncoder;
+import org.foxlabs.common.text.CharBuffer;
 import org.foxlabs.util.UnicodeSet;
+
+import org.foxlabs.peg4j.BacktrackingReader;
 
 public abstract class Terminal extends Expression {
 
   /**
    * Constructs a new terminal.
-   * 
+   *
    * @param owner Owner production.
    */
   private Terminal(Production owner) {
@@ -38,7 +39,7 @@ public abstract class Terminal extends Expression {
    * Determines whether or not this terminal matches any characters. All valid
    * terminals (except <code>Terminal.Nil</code>) must match one or more
    * characters.
-   * 
+   *
    * @return <code>true</code> if this terminal doesn't match any characters;
    *         <code>false</code> otherwise;
    */
@@ -48,7 +49,7 @@ public abstract class Terminal extends Expression {
    * Determines whether or not this terminal can match only one concrete
    * character. Only the <code>Terminal.Token</code> can match more than one
    * character.
-   * 
+   *
    * @return <code>true</code> if this terminal can match only one concrete
    *         character; <code>false</code> otherwise.
    */
@@ -59,7 +60,7 @@ public abstract class Terminal extends Expression {
    * terminal, that is more efficient to match character stream. For example,
    * <code>'a'-'a'</code> can be replaced by <code>'a'</code>, that is more
    * efficient to match character 'a'.
-   * 
+   *
    * @return <code>true</code> if this terminal is inefficient;
    *         <code>false</code> otherwise.
    */
@@ -78,7 +79,7 @@ public abstract class Terminal extends Expression {
 
   /**
    * Attempts to match the given character stream.
-   * 
+   *
    * @param stream Character stream.
    * @return <code>true</code> if this terminal matches character stream;
    *         <code>false</code> otherwise.
@@ -129,12 +130,12 @@ public abstract class Terminal extends Expression {
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf) {
+    public CharBuffer toString(CharBuffer buf) {
       return buf;
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
+    public CharBuffer toString(CharBuffer buf, boolean debug) {
       return buf;
     }
 
@@ -183,12 +184,12 @@ public abstract class Terminal extends Expression {
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf) {
+    public CharBuffer toString(CharBuffer buf) {
       return buf.append('.');
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
+    public CharBuffer toString(CharBuffer buf, boolean debug) {
       return buf.append('.');
     }
 
@@ -259,8 +260,8 @@ public abstract class Terminal extends Expression {
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
-      return Strings.escape(getImage(), buf.append('\'')).append('\'');
+    public CharBuffer toString(CharBuffer buf, boolean debug) {
+      return CharEncoder.JAVA.encode(getImage(), buf.append('\'')).append('\'');
     }
 
   }
@@ -282,8 +283,8 @@ public abstract class Terminal extends Expression {
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
-      return Strings.escape(getImage(), buf.append('\"')).append('\"');
+    public CharBuffer toString(CharBuffer buf, boolean debug) {
+      return CharEncoder.JAVA.encode(getImage(), buf.append('\"')).append('\"');
     }
 
   }
@@ -461,9 +462,11 @@ public abstract class Terminal extends Expression {
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
-      return buf.append('\'').append(Strings.escape((char) min)).append('\'').append('-').append('\'')
-          .append(Strings.escape((char) max)).append('\'');
+    public CharBuffer toString(CharBuffer buf, boolean debug) {
+      CharEncoder.JAVA.encode(min, buf.append('\'')).append('\'');
+      buf.append('-');
+      CharEncoder.JAVA.encode(max, buf.append('\'')).append('\'');
+      return buf;
     }
 
   }
@@ -524,7 +527,7 @@ public abstract class Terminal extends Expression {
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
+    public CharBuffer toString(CharBuffer buf, boolean debug) {
       return uset.toString(buf);
     }
 
@@ -604,7 +607,7 @@ public abstract class Terminal extends Expression {
     }
 
     @Override
-    public StringBuilder toString(StringBuilder buf, boolean debug) {
+    public CharBuffer toString(CharBuffer buf, boolean debug) {
       return buf.append('<').append(name).append('>');
     }
 
@@ -721,7 +724,7 @@ public abstract class Terminal extends Expression {
 
   /**
    * Returns all supported character class names.
-   * 
+   *
    * @return Array of the supported character class names.
    */
   public static String[] getClassNames() {

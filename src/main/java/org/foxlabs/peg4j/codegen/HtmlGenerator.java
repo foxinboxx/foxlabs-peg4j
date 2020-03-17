@@ -24,10 +24,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
+import org.foxlabs.common.Strings;
 import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
-
-import org.foxlabs.util.Strings;
 
 public final class HtmlGenerator extends BaseGenerator {
 

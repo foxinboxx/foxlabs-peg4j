@@ -19,11 +19,11 @@ package org.foxlabs.peg4j.codegen;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.foxlabs.common.Strings;
 import org.foxlabs.peg4j.grammar.*;
 import org.foxlabs.peg4j.resource.ResourceManager;
 
 import org.foxlabs.util.Location;
-import org.foxlabs.util.Strings;
 
 public final class TextGenerator extends BaseGenerator {
 
