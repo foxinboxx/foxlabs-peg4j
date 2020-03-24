@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.io.IOException;
 
 import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.common.text.SimpleCharBuffer;
+
 import org.foxlabs.util.Location;
 
 import org.foxlabs.peg4j.RecognitionException;
@@ -140,7 +142,7 @@ public abstract class Rule {
   }
 
   public String toString(boolean debug) {
-    return toString(new CharBuffer(), debug).toString();
+    return toString(new SimpleCharBuffer(), debug).toString();
   }
 
   public CharBuffer toString(CharBuffer buf) {

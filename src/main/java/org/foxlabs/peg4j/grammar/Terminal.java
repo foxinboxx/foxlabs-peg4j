@@ -18,8 +18,8 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.IOException;
 
-import org.foxlabs.common.function.CharEncoder;
 import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.common.text.CharEncoder;
 import org.foxlabs.util.UnicodeSet;
 
 import org.foxlabs.peg4j.BacktrackingReader;
@@ -261,7 +261,7 @@ public abstract class Terminal extends Expression {
 
     @Override
     public CharBuffer toString(CharBuffer buf, boolean debug) {
-      return CharEncoder.JAVA.encode(getImage(), buf.append('\'')).append('\'');
+      return buf.append('\'').appendEncoded(getImage(), CharEncoder.JAVA).append('\'');
     }
 
   }
@@ -284,7 +284,7 @@ public abstract class Terminal extends Expression {
 
     @Override
     public CharBuffer toString(CharBuffer buf, boolean debug) {
-      return CharEncoder.JAVA.encode(getImage(), buf.append('\"')).append('\"');
+      return buf.append('\"').appendEncoded(getImage(), CharEncoder.JAVA).append('\"');
     }
 
   }
@@ -463,9 +463,11 @@ public abstract class Terminal extends Expression {
 
     @Override
     public CharBuffer toString(CharBuffer buf, boolean debug) {
-      CharEncoder.JAVA.encode(min, buf.append('\'')).append('\'');
-      buf.append('-');
-      CharEncoder.JAVA.encode(max, buf.append('\'')).append('\'');
+      buf.append('\'');
+      CharEncoder.JAVA.encode(min, buf);
+      buf.append('\'').append('-').append('\'');
+      CharEncoder.JAVA.encode(max, buf);
+      buf.append('\'');
       return buf;
     }
 

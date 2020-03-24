@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.foxlabs.common.function.ToString;
 import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.common.text.SimpleCharBuffer;
+import org.foxlabs.common.text.ToString;
+
 import org.foxlabs.util.Location;
 
 public class GrammarProblems extends RuntimeException implements ToString {
@@ -159,7 +161,7 @@ public class GrammarProblems extends RuntimeException implements ToString {
 
   @Override
   public String toString() {
-    return toString(new CharBuffer()).toString();
+    return toString(new SimpleCharBuffer()).toString();
   }
 
   @Override

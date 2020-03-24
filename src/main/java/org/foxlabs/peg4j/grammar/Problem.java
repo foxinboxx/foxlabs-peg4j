@@ -18,8 +18,8 @@ package org.foxlabs.peg4j.grammar;
 
 import java.io.Serializable;
 
-import org.foxlabs.common.function.ToString;
 import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.common.text.ToString;
 import org.foxlabs.util.Location;
 
 import org.foxlabs.peg4j.resource.ResourceManager;

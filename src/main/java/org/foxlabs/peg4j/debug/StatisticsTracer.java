@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.IOException;
 
 import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.common.text.SimpleCharBuffer;
 import org.foxlabs.util.counter.HitCounter;
 import org.foxlabs.util.counter.HitLatencyCounter;
 
@@ -180,10 +181,10 @@ public class StatisticsTracer implements RuleTracer {
   }
 
   public void print(Writer out) throws IOException {
-    CharBuffer terminalStatisticsBuf = new CharBuffer();
-    CharBuffer productionStatisticsBuf = new CharBuffer();
-    CharBuffer actionStatisticsBuf = new CharBuffer();
-    CharBuffer memoStatisticsBuf = new CharBuffer();
+    CharBuffer terminalStatisticsBuf = new SimpleCharBuffer();
+    CharBuffer productionStatisticsBuf = new SimpleCharBuffer();
+    CharBuffer actionStatisticsBuf = new SimpleCharBuffer();
+    CharBuffer memoStatisticsBuf = new SimpleCharBuffer();
 
     for (Map.Entry<String, HitLatencyCounter> entry : terminalStatisticsTable.entrySet()) {
       terminalStatisticsBuf.append(entry.getKey()).append(" : ");

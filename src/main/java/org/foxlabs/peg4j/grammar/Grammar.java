@@ -19,6 +19,8 @@ package org.foxlabs.peg4j.grammar;
 import java.util.Arrays;
 
 import org.foxlabs.common.text.CharBuffer;
+import org.foxlabs.common.text.SimpleCharBuffer;
+
 import org.foxlabs.util.Location;
 
 public final class Grammar {
@@ -154,7 +156,7 @@ public final class Grammar {
   }
 
   public String toString(boolean debug) {
-    CharBuffer buf = new CharBuffer();
+    CharBuffer buf = new SimpleCharBuffer();
 
     for (Production rule : productions) {
       if (!(rule.getExpression() instanceof Terminal.Nil)) {
